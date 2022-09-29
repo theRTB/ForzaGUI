@@ -19,6 +19,7 @@ Examples of telemetry displayed, derived numbers and graphs:
 - torque-per-gear graph: after collecting a full rpm sweep at moderate speed with per-gear ratio
 
 Basic steps for torque graph:
+- Note that the GUI only updates after Collect Data or F10 is pressed
 - Collect gear ratios with F9
 - F9 again to stop updating ratios during data collection for torque
 - set car to a drag strip and select gear for several seconds of data collection (3rd or 4th is usually fine)
