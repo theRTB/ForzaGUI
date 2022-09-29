@@ -30,3 +30,6 @@ Basic steps for torque graph:
 As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
 
 Original code by https://github.com/Juice-XIJ/forza_auto_gear
+
+![example GUI](example.png)
+![example torque graph per gear](example_AcuraNSX_stock.png)
