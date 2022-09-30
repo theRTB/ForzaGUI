@@ -49,7 +49,7 @@ class GUILed:
         self.bottomled = None
         self.ledcolor = 'red'
         
-        self.led_canvas = None
+        self.frame = None
         
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
@@ -108,32 +108,32 @@ class GUILed:
     def update_leds(self):
         for i in range(15):
             if self.ledstatus[i]:
-                self.led_canvas.itemconfig(self.ledbar[i], fill=self.ledcolor)
+                self.frame.itemconfig(self.ledbar[i], fill=self.ledcolor)
             else:
-                self.led_canvas.itemconfig(self.ledbar[i], fill='black')
-        self.led_canvas.itemconfig(self.topled, fill=self.ledcolor)
-        self.led_canvas.itemconfig(self.bottomled, fill=self.ledcolor)
+                self.frame.itemconfig(self.ledbar[i], fill='black')
+        self.frame.itemconfig(self.topled, fill=self.ledcolor)
+        self.frame.itemconfig(self.bottomled, fill=self.ledcolor)
     
     def set_canvas(self, frame):
-        self.led_canvas = tkinter.Canvas(frame, border=0, bg=constants.background_color, relief="groove",
+        self.frame = tkinter.Canvas(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
-        self.led_canvas.place(relx=0.0, rely=0.55,
+        self.frame.place(relx=0.0, rely=0.55,
                                 width=500, height=90,
                                 anchor=tkinter.W)
-        tkinter.Label(self.led_canvas, text="LED gearshifts", bg=constants.background_color, fg=constants.text_color,
+        tkinter.Label(self.frame, text="LED gearshifts", bg=constants.background_color, fg=constants.text_color,
                       font=('Helvetica 15 bold')).place(relx=0.5, rely=0.2, anchor=tkinter.CENTER)
         
         for i in range(15):
-            self.ledbar[i] = self.led_canvas.create_rectangle(10+30* i, 40,10+30+30* i,40+30, fill='black', outline='white')
-        self.topled =        self.led_canvas.create_rectangle(10+30*11, 30,10+30+30*12, 30+10, fill='red',   outline='white')
-        self.bottomled =     self.led_canvas.create_rectangle(10+30*11, 70,10+30+30*12,70+10, fill='red',   outline='white')
+            self.ledbar[i] = self.frame.create_rectangle(10+30* i, 40,10+30+30* i,40+30, fill='black', outline='white')
+        self.topled =        self.frame.create_rectangle(10+30*11, 30,10+30+30*12, 30+10, fill='red',   outline='white')
+        self.bottomled =     self.frame.create_rectangle(10+30*11, 70,10+30+30*12,70+10, fill='red',   outline='white')
         
-       # self.led_canvas.create_line(0,0, 500-1,0, 500-1,200-1, 0,200-1, 0,0, fill='white')
+       # self.frame.create_line(0,0, 500-1,0, 500-1,200-1, 0,200-1, 0,0, fill='white')
     
     def reset(self):
         for i in range(15):
             self.ledstatus[i] = False
-            self.led_canvas.itemconfig(self.ledbar[i], fill='black')
+            self.frame.itemconfig(self.ledbar[i], fill='black')
             
-        self.led_canvas.itemconfig(self.topled, fill='red')
-        self.led_canvas.itemconfig(self.bottomled, fill='red')
+        self.frame.itemconfig(self.topled, fill='red')
+        self.frame.itemconfig(self.bottomled, fill='red')
