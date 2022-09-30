@@ -39,12 +39,12 @@ from logger import Logger, TextHandler
 
 #map xor (suspension or led)
 MAP = False
-LED = False
+LED = True
 WHEELSIZE = False
 LAPTIMES = False
 
 SUSPENSION = True
-CARINFO = True
+CARINFO = False
 LATERALG = True
 BRAKETEST = True
 LAUNCHTEST = True
@@ -362,7 +362,6 @@ class MainWindow:
                       fg=constants.text_color, font=('Helvetica 30 bold italic')).pack()
                                              
         self.map.set_canvas(self.car_perf_frame)
-        self.ledbar.set_canvas(self.car_perf_frame)
         self.suspension.set_canvas(self.car_perf_frame)
         self.wheelsize.set_canvas(self.car_perf_frame)
         self.laptimes.set_canvas(self.car_perf_frame)
@@ -370,14 +369,16 @@ class MainWindow:
         self.lateralg.set_canvas(self.car_perf_frame)
         self.braketest.set_canvas(self.car_perf_frame)
         self.launchtest.set_canvas(self.car_perf_frame)
+        self.ledbar.set_canvas(self.car_perf_frame)
         
-        self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
+        #self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
         self.frame_basic.place(         anchor=tkinter.NW,  relx=0.0 ,  rely=0.0) 
         self.launchtest.frame.place(    anchor=tkinter.W,   relx=0.0 ,  rely=0.64)
         self.braketest.frame.place(     anchor=tkinter.E,   relx=1.00,  rely=0.63) 
         self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
         self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
         self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
+        self.ledbar.frame.place(        anchor=tkinter.S,   relx=0.5,   rely=1.00, width=500, height=90)
                                                                                        
     def set_shift_point_frame(self):
         """set shift point frame
