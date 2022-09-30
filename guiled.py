@@ -117,9 +117,7 @@ class GUILed:
     def set_canvas(self, frame):
         self.frame = tkinter.Canvas(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
-        self.frame.place(relx=0.0, rely=0.55,
-                                width=500, height=90,
-                                anchor=tkinter.W)
+
         tkinter.Label(self.frame, text="LED gearshifts", bg=constants.background_color, fg=constants.text_color,
                       font=('Helvetica 15 bold')).place(relx=0.5, rely=0.2, anchor=tkinter.CENTER)
         
