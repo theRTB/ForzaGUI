@@ -6,7 +6,7 @@ This was a project never originally intended for public view, a hobby project fo
 
 There are various 'plugins' that offer telemetry readouts or derivations but may not be readily enabled unless the code responsible for placing the frames is updated. The plugins that are not currently active may not function or cause performance degradation.
 
-Current focus is on making an accurate shiftled display. Work has been put into deriving information for an accurate progression of speed over time per gear, this will be used to derive more accurate triggers on rpm values to progress LED states. See dragderivation.py for various methods to derive top speeds, speed over time, and the impact of drag on modifified engine torque. This applies to the torque value after multiplying with the gear ratio and multiplying the speed to match the ratio.
+Current focus is on making an accurate shiftled display. Work has been put into deriving information for an accurate progression of speed over time per gear, this will be used to derive more accurate triggers on rpm values to progress LED states. See dragderivation.py for various methods to derive top speeds, speed over time, and the impact of drag on modified engine torque. This applies to the torque value after multiplying with the gear ratio and multiplying the speed to match the ratio.
 
 Examples of telemetry displayed, derived numbers and graphs:
 - acceleration, brake, steering input
