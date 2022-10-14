@@ -33,7 +33,7 @@ RED   = '#FF8088'
 BLUE  = '#8080FF'
 
 ILLUMINATION_INTERVAL = int(1.0*60) #1.0 seconds
-REACTION_TIME = 5 #83 milliseconds
+REACTION_TIME = 10 #166 milliseconds
 DISTANCE_FROM_REVLIMIT_MS = 5 #83 milliseconds
 DISTANCE_FROM_REVLIMIT_ABS = .992 #99.2% of rev limit
 
@@ -75,6 +75,7 @@ class GUILed:
         
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
+        self.unhappy_rpm = [7000 for x in range(11)]
         
         self.step = [(self.shiftrpm[x] - self.lower_bound[x])/4 for x in range(11)]
         
@@ -118,12 +119,17 @@ class GUILed:
             
             self.logger.info(f"gear {gear} rpm {rpm}")
             
-            #if at rev limit within 83 milliseconds, shift optimal shift point state to be 83 milliseconds away
+            #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
             adjusted_rpmlimit_ms = self.timeadjusted_rpm(DISTANCE_FROM_REVLIMIT_MS, revlimit, geardata[gear]['rpm'])
             adjusted_rpmlimit_abs = int(revlimit*DISTANCE_FROM_REVLIMIT_ABS)
             self.logger.info(f"adjusted rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
             rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
+            
+            #at optimal shift rpm, we change state to 'past optimal' because humans have reaction time
+            self.unhappy_rpm[gear] = rpm
+            rpm = self.timeadjusted_rpm(REACTION_TIME, rpm, geardata[gear]['rpm'])
+            self.logger.info(f"adjusted for reaction time {rpm}")
             
             for j, x in enumerate(geardata[gear]['rpm']):
                 if x >= rpm:
@@ -139,6 +145,9 @@ class GUILed:
         
     def update (self, fdp):
         state = math.ceil((fdp.current_engine_rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
+        if fdp.current_engine_rpm > self.unhappy_rpm[fdp.gear]:
+            state = 6
+        
         if state < 0:
             state = 0
         if state > 6:
