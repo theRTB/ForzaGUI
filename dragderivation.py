@@ -97,7 +97,7 @@ class Trace():
         self.accel  = np.array([x[4] for x in array])
     
     #TODO: update this when adding write to file function
-    def readfromfile(self, filename=DEFAULTFILENAME): #Trace.DEFAULTFILENAME
+    def readfromfile(self, filename=DEFAULTFILENAME):
         array = []
         with open(filename) as raw:
             array = raw.read().split("), (")
