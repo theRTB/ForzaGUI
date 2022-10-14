@@ -97,7 +97,7 @@ class Trace():
         self.accel  = np.array([x[4] for x in array])
     
     #TODO: update this when adding write to file function
-    def readfromfile(self, filename): #Trace.DEFAULTFILENAME
+    def readfromfile(self, filename=DEFAULTFILENAME): #Trace.DEFAULTFILENAME
         array = []
         with open(filename) as raw:
             array = raw.read().split("), (")
@@ -110,6 +110,17 @@ class Trace():
         
         #convert all data to float
         self.array = [[float(p) for p in point] for point in array]
+        
+    #TODO: rewrite read and write from file to use csv
+    def writetofile(self, filename=DEFAULTFILENAME):
+        array = zip(self.rpm, 
+                    self.torque, 
+                    self.power/Trace.factor_power, 
+                    self.speed/Trace.factor_speed,
+                    [0]*len(self.rpm)) #boost, unused
+        with open(filename, "w") as file:
+             file.write(str(array))
+    
         
 #from https://stackoverflow.com/questions/46909373/how-to-find-the-exact-intersection-of-a-curve-as-np-array-with-y-0/46911822#46911822
 def find_roots(x,y):
