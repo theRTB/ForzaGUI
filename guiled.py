@@ -32,7 +32,7 @@ AMBER = '#FFBF7F'
 RED   = '#FF8088'
 BLUE  = '#8080FF'
 
-ILLUMINATION_INTERVAL = int(1.6*60) #1.6 seconds
+ILLUMINATION_INTERVAL = int(1.0*60) #1.0 seconds
 REACTION_TIME = 5 #83 milliseconds
 DISTANCE_FROM_REVLIMIT = 5 #83 milliseconds
 
@@ -99,27 +99,40 @@ class GUILed:
 
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} collectedingear {collectedingear}")
+        
+        drag = DragDerivation(gears, final_drive=1, trace=trace)
+        geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
+        
+        lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
+        rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
+        gearratio_collected = gears[collectedingear-1]
+        
+        #data['rpm'] is the drag corrected rpm over time per gear
+        for data, gearratio in zip(geardata[1:], gears):
+            data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
+        
         for gear, rpm in enumerate(rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
                 continue
             
             self.logger.info(f"gear {gear} rpm {rpm}")
             
-            scalar = gears[gear-1] / gears[collectedingear-1]
-            self.logger.info(f"scalar is {scalar}")
+            #scalar = gears[gear-1] / gears[collectedingear-1]
+            #self.logger.info(f"scalar is {scalar}")
             
             #if at rev limit within 80 milliseconds, shift optimal shift point state to be 80 milliseconds away
             #scale this to include scalar variable
-            effective_frames_to_revlimit = math.ceil(DISTANCE_FROM_REVLIMIT*scalar)
-            adjusted_rpmlimit = int(self.timeadjusted_rpm(effective_frames_to_revlimit, revlimit, rpmvalues))
+            #effective_frames_to_revlimit = math.ceil(DISTANCE_FROM_REVLIMIT*scalar)
+            #adjusted_rpmlimit = int(self.timeadjusted_rpm(effective_frames_to_revlimit, revlimit, rpmvalues))
+            adjusted_rpmlimit = self.timeadjusted_rpm(DISTANCE_FROM_REVLIMIT, revlimit, geardata[gear]['rpm'])
             self.logger.info(f"adjusted rpmlimit {adjusted_rpmlimit}")
             
             rpm = min(rpm, adjusted_rpmlimit)
             
-            for j, x in enumerate(rpmvalues):
+            for j, x in enumerate(geardata[gear]['rpm']):
                 if x >= rpm:
-                    offset = int(max(j - scalar*ILLUMINATION_INTERVAL, 0))
-                    self.lower_bound[gear] = int(rpmvalues[offset])
+                    offset = int(max(j - ILLUMINATION_INTERVAL, 0))
+                    self.lower_bound[gear] = int(geardata[gear]['rpm'][offset])
                     #print(f"j {j} val {rpmvalues[j]} offset {offset}")
                     break
                 
