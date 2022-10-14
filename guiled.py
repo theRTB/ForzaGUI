@@ -34,7 +34,8 @@ BLUE  = '#8080FF'
 
 ILLUMINATION_INTERVAL = int(1.0*60) #1.0 seconds
 REACTION_TIME = 5 #83 milliseconds
-DISTANCE_FROM_REVLIMIT = 5 #83 milliseconds
+DISTANCE_FROM_REVLIMIT_MS = 5 #83 milliseconds
+DISTANCE_FROM_REVLIMIT_ABS = .992 #99.2% of rev limit
 
 STATES = [
     [BLACK]*10,
@@ -117,17 +118,12 @@ class GUILed:
             
             self.logger.info(f"gear {gear} rpm {rpm}")
             
-            #scalar = gears[gear-1] / gears[collectedingear-1]
-            #self.logger.info(f"scalar is {scalar}")
+            #if at rev limit within 83 milliseconds, shift optimal shift point state to be 83 milliseconds away
+            adjusted_rpmlimit_ms = self.timeadjusted_rpm(DISTANCE_FROM_REVLIMIT_MS, revlimit, geardata[gear]['rpm'])
+            adjusted_rpmlimit_abs = int(revlimit*DISTANCE_FROM_REVLIMIT_ABS)
+            self.logger.info(f"adjusted rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
-            #if at rev limit within 80 milliseconds, shift optimal shift point state to be 80 milliseconds away
-            #scale this to include scalar variable
-            #effective_frames_to_revlimit = math.ceil(DISTANCE_FROM_REVLIMIT*scalar)
-            #adjusted_rpmlimit = int(self.timeadjusted_rpm(effective_frames_to_revlimit, revlimit, rpmvalues))
-            adjusted_rpmlimit = self.timeadjusted_rpm(DISTANCE_FROM_REVLIMIT, revlimit, geardata[gear]['rpm'])
-            self.logger.info(f"adjusted rpmlimit {adjusted_rpmlimit}")
-            
-            rpm = min(rpm, adjusted_rpmlimit)
+            rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
             
             for j, x in enumerate(geardata[gear]['rpm']):
                 if x >= rpm:
