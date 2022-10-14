@@ -113,11 +113,11 @@ class Trace():
         
     #TODO: rewrite read and write from file to use csv
     def writetofile(self, filename=DEFAULTFILENAME):
-        array = zip(self.rpm, 
+        array = list(zip(self.rpm, 
                     self.torque, 
                     self.power/Trace.factor_power, 
                     self.speed/Trace.factor_speed,
-                    self.accel) #boost, unused
+                    self.accel))
         with open(filename, "w") as file:
              file.write(str(array))
     
