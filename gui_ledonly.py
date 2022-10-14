@@ -565,7 +565,7 @@ class MainWindow:
         plt.show()
 
         self.logger.info(list(enumerate(self.rpmtable)))
-        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear)
+        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear, self.trace)
         self.gearstats.set_rpmtable(self.rpmtable)
 
     def gatherratios_handler(self, event):

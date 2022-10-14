@@ -15,6 +15,8 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+from dragderivation import Trace, DragDerivation
+
 tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 
@@ -47,7 +49,7 @@ class GUILedDummy:
     def __init__(self, logger):
         pass
         
-    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear):
+    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         pass
         
     def update (self, fdp):
@@ -95,7 +97,7 @@ class GUILed:
                 #print(f"j {j} val {rpmvalues[j]} offset {offset}")
         return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
-    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear):
+    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} collectedingear {collectedingear}")
         for gear, rpm in enumerate(rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
