@@ -54,18 +54,31 @@ from pprint import pprint
 def main():
     global gears, drag
   #  gears = [12.506, 7.437, 4.847, 3.7] #datsun 510, collected 2, final_drive 1
-    gears = [13.89, 8.794, 6.425, 5.164, 4.373, 3.751, 3.184, 2.7, 2.295] #nsx acura stock, collected 4, final drive 1
-    drag = DragDerivation(gears, final_drive=1, trace=None, gear_collected=4, filename='rpmtorqueraw.txt')
+  #  gears = [13.89, 8.794, 6.425, 5.164, 4.373, 3.751, 3.184, 2.7, 2.295] #nsx acura stock, collected 4, final drive 1
+    gears = [8.027, 5.605, 4.239, 3.55, 2.716, 2.24] #dodge srt viper gts 2013, collected 3, final drive 1
+    drag = DragDerivation(gears, final_drive=1, trace=None, gear_collected=3, filename='rpmtorqueraw.txt')
     
 #    geardata = DragDerivation.derive_timespeed_all_gears(drag.torque, drag.torque_adj, drag.speed, 
 #                               drag.speed_gradient, drag.gears, drag.gearratio_collected, drag.C)
     drag.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
-    
     DragDerivation.draw_timespeed_graphs(drag.gears, drag.geardata)
-    
+        
     drag.draw_torquegraph(drag.torque, drag.torque_adj, drag.speed, 
-                          drag.speed_gradient, drag.gears, drag.gearratio_collected, 
-                          drag.initial_ratio, drag.C, drag.CUT)
+                            drag.speed_gradient, drag.gears, drag.gearratio_collected,
+                            drag.initial_ratio, drag.C, drag.CUT)
+    
+    draw_rpm_time(drag, 3, gears, drag.geardata)
+
+def draw_rpm_time(trace, collectedingear, gears, geardata):
+    lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
+    rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
+    gearratio_collected = gears[collectedingear-1]
+    
+    #data['rpm'] is the drag corrected rpm over time per gear
+    fig, ax = plt.subplots(1)
+    for data, gearratio in zip(geardata[1:], gears):
+        data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
+        plt.plot(data['time'], data['rpm'])
 
 #TODO: add write to file output that includes gearing and geear_collected
 class Trace():
@@ -341,6 +354,9 @@ class DragDerivation():
                 sum_time += DragDerivation.TIC
                 geardict['time'].append(sum_time)
                 geardict['speed'].append(sum_speed)
+            
+            geardict['time'] = np.array(geardict['time'])
+            geardict['speed'] = np.array(geardict['speed'])
             
             geararrays.append(geardict)
             if drawgraph:
