@@ -17,10 +17,17 @@ import numpy as np
 from pprint import pprint
 
 #steps
-#collect full sweep in a gear affected by drag on flat ground (manual required)
-#start the sweep at the lowest rpm possible near idle (if forza doesn't mess with the clutch)
-#collect all gear ratios
-# this is because car is still accelerating to maximum acceleration initially
+#F10 to start updating the GUI
+#F9 to toggle collecting gear ratios (this is done through comparing wheel rotation speed and engine rpm)
+#disable gear ratio collection after obtaining all the ratios (ignore reverse)
+#if necessary: upgrade tire compound because tires must not lose traction during sweep
+#head to a drag strip (flat area with tarmac), be in manual
+#set gear to one that is affected by drag at the higher rpm values
+#be near idle rpm or whatever lowest value where forza doesn't add clutch when full throttle
+#press F8, then hold W for 100% throttle
+#release W after hitting the rev limit
+#click the RPM/Torque button in the GUI to calculate optimal shift rpm
+
 #we need a full acceleration trace:
     # can be derived from an interpolated speed variable differentiated
     # acceleration_z is available, but is a noisy channel, may need smoothing
@@ -29,19 +36,20 @@ from pprint import pprint
 #derive scalar by dividing initial torque by initial acceleration
 #subtract the acceleration multiplied by the scalar from torque
     # at low speed drag is neglible, thus we assume 100% of torque is used for acceleration
+    # realistically, this is 99.x%. 
     # the difference that remains is the effect of drag on the engine torque value
     # there is an initial ramp up to torque that we cannot use and must discard
+        #this is done through the CUT variable
     # C is derived from the mean of the last _20_ points, this is a magic constant
     # we brute force an optimal/good cut by looping over it and comparing to a sum of squares of differences
     # given a derived C:
         # we take the minimum value of CUT where:
         # the sum of squares of differences between Cv*v and the array with:
         # the differences between the scaled accel and the torque scaled to gear ratio
+        
 #scale the torque graph per gear by multiplying speed by the relative ratio
 #and dividing the torque by the relative ratio
-#if it exists, the intersection of any such torque graphs and the drag penalty is the top speed
-
-
+#if it exists, the intersection of any such torque graphs and the drag penalty is the top speed for that gear
 
 def main():
     global gears, drag
@@ -59,12 +67,12 @@ def main():
                           drag.speed_gradient, drag.gears, drag.gearratio_collected, 
                           drag.initial_ratio, drag.C, drag.CUT)
 
-
+#TODO: add write to file output that includes gearing and geear_collected
 class Trace():
-    factor_power = 1/1000
-    factor_speed = 3.6
+    factor_power = 1/1000 #W to KW
+    factor_speed = 3.6 #m/s to km/h
     
-    REMOVE_FROM_START = 5
+    REMOVE_FROM_START = 5 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
     DEFAULTFILENAME = "rpmtorqueraw.txt"
     
     def __init__(self, gear_collected, fromfile=False, filename=None):
@@ -87,7 +95,8 @@ class Trace():
         self.power  = np.array([x[2]*Trace.factor_power for x in array])
         self.speed  = np.array([x[3]*Trace.factor_speed for x in array])
         self.accel  = np.array([x[4] for x in array])
-        
+    
+    #TODO: update this when adding write to file function
     def readfromfile(self, filename): #Trace.DEFAULTFILENAME
         array = []
         with open(filename) as raw:
@@ -107,9 +116,8 @@ def find_roots(x,y):
     s = np.abs(np.diff(np.sign(y))).astype(bool)
     return x[:-1][s] + np.diff(x)[s]/(np.abs(y[1:][s]/y[:-1][s])+1)
 
-
 class DragDerivation():
-    MAXCUT = 120+1
+    MAXCUT = 120+1 #120 frames or 2 seconds
     
     def __init__(self, gears, final_drive=1, trace=None, gear_collected=None, filename=None):
         self.gears = [g/final_drive for g in gears]
@@ -131,9 +139,10 @@ class DragDerivation():
         self.time = np.linspace(0, (len(self.speed)-1)/60, len(self.speed))
     
         #accel is gathered separately but is a noisy channel, so we differentiate speed instead
-        self.speed_gradient = np.gradient(self.speed, self.time) #60/1000)
+        self.speed_gradient = np.gradient(self.speed, self.time)
     
         #raw data is engine torque, multiply by ratio to get effective torque at the wheel
+        #we are not concerned with actual grip levels
         self.torque_adj = self.torque*self.gearratio_collected
     
         winner = self.find_winner(self.torque_adj, self.speed, self.speed_gradient)
@@ -176,12 +185,9 @@ class DragDerivation():
         #running a second pass does result in a slightly better fit, but the subsequent
         #calculated modifier is worse so it does not seem to work for convergence
         # modifier = 1 - (C * speed[CUT] ** 2) / torque_adj[CUT]
-        # stats = [derive_drag_stats(CUT, ratio_modifier=0.992) for CUT in range(MAXCUT)]
+        # stats = [DragDerivation.derive_drag_stats(CUT, torque_adj, speed, speed_gradient, modifier) for CUT in range(MAXCUT)]
         # winner = min(stats, key=lambda x: x['lstsq'])
-        # points = winner['points']
-        # CUT = winner['CUT']
-        # initial_ratio = winner['initial_ratio']
-        # C = winner['C'] 
+        # return winner
     
     @classmethod
     def top_speed_by_drag_of_gearratio(self, torque, speed, gearratio, gearratio_collected, C, do_print=False, *args, **kwargs): 
