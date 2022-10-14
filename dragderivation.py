@@ -129,6 +129,8 @@ def find_roots(x,y):
 
 class DragDerivation():
     MAXCUT = 120+1 #120 frames or 2 seconds
+    TIC = 1/60 #seconds
+    MAXTIME = 90 #seconds
     
     def __init__(self, gears, final_drive=1, trace=None, gear_collected=None, filename=None):
         self.gears = [g/final_drive for g in gears]
@@ -318,8 +320,6 @@ class DragDerivation():
         
     @classmethod
     def derive_timespeed_all_gears(cls, torque, torque_adj, speed, speed_gradient, gears, gearratio_collected, C, drawgraph=False, *args, **kwargs):
-        TIC = 1/1000 #seconds
-        MAXTIME = 90 #seconds
         if drawgraph:
             fig, ax = plt.subplots(1)
             fig.tight_layout()
@@ -336,9 +336,9 @@ class DragDerivation():
             geardict = {'time':[sum_time], 'speed': [sum_speed]}
             #consider https://www.cs.uu.nl/docs/vakken/mgp/2018-2019/Lecture%205%20-%20Time%20Integration.pdf for improved euler method   
             #TODO: replace gear_x[-1] with min(gear_x[-1] and top speed in gear ratio)
-            while sum_speed < gear_x[-1] and sum_time <= MAXTIME:
-                sum_speed +=  gear_interpolate(sum_speed) * TIC
-                sum_time += TIC
+            while sum_speed < gear_x[-1] and sum_time <= DragDerivation.MAXTIME:
+                sum_speed +=  gear_interpolate(sum_speed) * DragDerivation.TIC
+                sum_time += DragDerivation.TIC
                 geardict['time'].append(sum_time)
                 geardict['speed'].append(sum_speed)
             
