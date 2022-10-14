@@ -30,6 +30,8 @@ from guibraketest import GUIBraketest, GUIBraketestDummy
 from guilaunchtest import GUILaunchtest, GUILaunchtestDummy
 from guigearstats import GUIGearStats, GUIGearStatsDummy
 
+from dragderivation import Trace
+
 sys.path.append(r'./forza_motorsport')
 
 #import helper
@@ -177,17 +179,22 @@ class MainWindow:
             if fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
                 self.collectedingear = fdp.gear
+                self.trace = Trace(gear_collected=fdp.gear)
         #collect data
         if self.collect_rpm == 2:
             #self.logger.info(f"{fdp.current_engine_rpm} vs {self.prevrev_torque}")
             if fdp.power > 0 and fdp.accel > 0: #fdp.current_engine_rpm > self.prevrev_torque:
-                self.rpmtorque.append((fdp.current_engine_rpm, 
+                item = (fdp.current_engine_rpm, 
                                        fdp.torque,
                                        fdp.power/1000.0,
                                        fdp.speed,
-                                       fdp.acceleration_z))
+                                       fdp.acceleration_z)
+                self.rpmtorque.append(item)
+                self.trace.add(item)
             else: #finish up and draw graph
-                self.logger.info("Draw graph BY PRESSING THE GODDAMN BUTTON")
+                self.logger.info("Draw graph by pressing the RPM/Torque button")
+                self.trace.finish()
+                self.trace.writetofile("rpmtorqueraw_trace.txt")
                 with open("rpmtorqueraw.txt", "w") as file:
                     file.write(str(self.rpmtorque))
                 #self.logger.info(self.rpmtorque)

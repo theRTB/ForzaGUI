@@ -117,7 +117,7 @@ class Trace():
                     self.torque, 
                     self.power/Trace.factor_power, 
                     self.speed/Trace.factor_speed,
-                    [0]*len(self.rpm)) #boost, unused
+                    self.accel) #boost, unused
         with open(filename, "w") as file:
              file.write(str(array))
     
