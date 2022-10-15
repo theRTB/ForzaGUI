@@ -21,8 +21,8 @@ tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 
 #TODO:
-    #include reaction time offset to optimal shift
-    #add interpolation and smoothing to collected rpm values per frame
+    #move ledbar to top right, make it vertical
+    #move gearing to bottom right, move credits to top left
     #add hysteresis to the rpm value before updating state
     
 
@@ -82,14 +82,14 @@ class GUILed:
         self.state = 0
         self.rpm = 0
         
-        self.lower_bound_var = tkinter.StringVar()
-        self.lower_bound_var.set("0000")
+        # self.lower_bound_var = tkinter.StringVar()
+        # self.lower_bound_var.set("0000")
         
-        self.step_var = tkinter.StringVar()
-        self.step_var.set("0000")
+        # self.step_var = tkinter.StringVar()
+        # self.step_var.set("0000")
         
-        self.rpm_var = tkinter.StringVar()
-        self.rpm_var.set("0000")
+        # self.rpm_var = tkinter.StringVar()
+        # self.rpm_var.set("0000")
 
     def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
         for j, x in enumerate(rpmvalues):
@@ -153,9 +153,9 @@ class GUILed:
         if state > 6:
             state = 6
             
-        self.lower_bound_var.set(f"{self.lower_bound[fdp.gear]}")
-        self.step_var.set(f"{self.step[fdp.gear]}")
-        self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+        # self.lower_bound_var.set(f"{self.lower_bound[fdp.gear]}")
+        # self.step_var.set(f"{self.step[fdp.gear]}")
+        # self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
                     
         self.update_leds()
         self.state = state
@@ -169,14 +169,14 @@ class GUILed:
         self.frame = tkinter.Canvas(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
 
-        tkinter.Label(self.frame, text="LED gearshifts", bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.2, rely=0.2, anchor=tkinter.CENTER)
-        tkinter.Label(self.frame, textvariable=self.lower_bound_var, bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.5, rely=0.2, anchor=tkinter.CENTER)
-        tkinter.Label(self.frame, textvariable=self.step_var, bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.8, rely=0.2, anchor=tkinter.CENTER)
-        tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.8, rely=0.6, anchor=tkinter.CENTER)
+        # tkinter.Label(self.frame, text="LED gearshifts", bg=constants.background_color, fg=constants.text_color,
+        #               font=('Helvetica 15 bold')).place(relx=0.2, rely=0.2, anchor=tkinter.CENTER)
+        # tkinter.Label(self.frame, textvariable=self.lower_bound_var, bg=constants.background_color, fg=constants.text_color,
+        #               font=('Helvetica 15 bold')).place(relx=0.5, rely=0.2, anchor=tkinter.CENTER)
+        # tkinter.Label(self.frame, textvariable=self.step_var, bg=constants.background_color, fg=constants.text_color,
+        #               font=('Helvetica 15 bold')).place(relx=0.8, rely=0.2, anchor=tkinter.CENTER)
+        # tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
+        #               font=('Helvetica 15 bold')).place(relx=0.8, rely=0.6, anchor=tkinter.CENTER)
         
         for i in range(10):
             self.ledbar[i] = self.frame.create_rectangle(10+30* i, 40,10+30+30* i,40+30, fill='black', outline='white')
@@ -185,7 +185,7 @@ class GUILed:
         self.state = 0
         self.update_leds()
         
-        self.lower_bound_var.set("0000")
-        self.step_var.set("0000")
-        self.rpm_var.set("0000")
+        # self.lower_bound_var.set("0000")
+        # self.step_var.set("0000")
+        # self.rpm_var.set("0000")
         
