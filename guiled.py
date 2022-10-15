@@ -155,7 +155,7 @@ class GUILed:
             
         # self.lower_bound_var.set(f"{self.lower_bound[fdp.gear]}")
         # self.step_var.set(f"{self.step[fdp.gear]}")
-        # self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+        self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
                     
         self.update_leds()
         self.state = state
