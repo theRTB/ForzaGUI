@@ -21,9 +21,8 @@ tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 
 #TODO:
-    #move ledbar to top right, make it vertical
-    #move gearing to bottom right, move credits to top left
-    #add hysteresis to the rpm value before updating state
+    #test hysteresis value
+    #add a delay to dropping state for x frames
     
 
 BLACK = '#000000'
@@ -33,9 +32,11 @@ RED   = '#FF8088'
 BLUE  = '#8080FF'
 
 ILLUMINATION_INTERVAL = int(1.0*60) #1.0 seconds
-REACTION_TIME = 10 #166 milliseconds
+REACTION_TIME = 12 #200 milliseconds
 DISTANCE_FROM_REVLIMIT_MS = 5 #83 milliseconds
 DISTANCE_FROM_REVLIMIT_ABS = .992 #99.2% of rev limit
+HYSTERESIS_PCT_REVLIMIT = 0.004 #0.6% of rev limit
+COUNTDOWN_MAX = 5 #dropping state only allowed after 5 frames
 
 STATES = [
     [BLACK]*10,
@@ -75,12 +76,14 @@ class GUILed:
         
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
-        self.unhappy_rpm = [7000 for x in range(11)]
+        self.unhappy_rpm = [7500 for x in range(11)]
+        self.hysteresis_rpm = HYSTERESIS_PCT_REVLIMIT*7500
         
         self.step = [(self.shiftrpm[x] - self.lower_bound[x])/4 for x in range(11)]
         
         self.state = 0
         self.rpm = 0
+        self.statedowntimer = 0
         
         # self.lower_bound_var = tkinter.StringVar()
         # self.lower_bound_var.set("0000")
@@ -101,6 +104,9 @@ class GUILed:
 
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} collectedingear {collectedingear}")
+        
+        self.hysteresis_rpm = HYSTERESIS_PCT_REVLIMIT*revlimit
+        self.logger.info(f"hysteresis at {self.hysteresis_rpm} rpm steps")
         
         drag = DragDerivation(gears, final_drive=1, trace=trace)
         geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
@@ -144,7 +150,9 @@ class GUILed:
                              f"start {self.lower_bound[gear]} step {self.step[gear]}")
         
     def update (self, fdp):
-        state = math.ceil((fdp.current_engine_rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
+        if abs(self.rpm - fdp.current_engine_rpm) >= self.hysteresis_rpm:
+            self.rpm = fdp.current_engine_rpm
+        state = math.ceil((self.rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
         if fdp.current_engine_rpm > self.unhappy_rpm[fdp.gear]:
             state = 6
         
@@ -153,12 +161,22 @@ class GUILed:
         if state > 6:
             state = 6
             
+        if state < self.state:
+            if self.countdowntimer < COUNTDOWN_MAX:
+                self.countdowntimer += 1
+            else:
+                self.state = state
+        else:
+            self.countdowntimer = COUNTDOWN_MAX
+            self.state = state
+        
+        
+            
         # self.lower_bound_var.set(f"{self.lower_bound[fdp.gear]}")
         # self.step_var.set(f"{self.step[fdp.gear]}")
         self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
                     
         self.update_leds()
-        self.state = state
 
     def update_leds(self):
         ledbar = STATES[self.state]
@@ -192,6 +210,7 @@ class GUILed:
     
     def reset(self):
         self.state = 0
+        self.dropdowntimer = COUNTDOWN_MAX
         self.update_leds()
         
         # self.lower_bound_var.set("0000")
