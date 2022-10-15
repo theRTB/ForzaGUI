@@ -70,7 +70,7 @@ class GUIGearStats:
     def display(self):
         gear = self.gear if self.gear > 0 else 'R'
         self.gear_var.set(f'Gear: {gear}')
-        self.shiftdelay_var.set(f'Shiftdelay: {self.shiftdelay_latest:.2f}s {self.shiftdelay_median/60:.2f}s')
+        self.shiftdelay_var.set(f'Shiftdelay: {self.shiftdelay_latest/60:.2f}s {self.shiftdelay_median/60:.2f}s')
         
         if self.counter == 60:
             self.counter = 0
