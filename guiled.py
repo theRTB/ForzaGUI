@@ -88,8 +88,8 @@ class GUILed:
         # self.step_var = tkinter.StringVar()
         # self.step_var.set("0000")
         
-        # self.rpm_var = tkinter.StringVar()
-        # self.rpm_var.set("0000")
+        self.rpm_var = tkinter.StringVar()
+        self.rpm_var.set("0000")
 
     def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
         for j, x in enumerate(rpmvalues):
@@ -175,8 +175,8 @@ class GUILed:
         #               font=('Helvetica 15 bold')).place(relx=0.5, rely=0.2, anchor=tkinter.CENTER)
         # tkinter.Label(self.frame, textvariable=self.step_var, bg=constants.background_color, fg=constants.text_color,
         #               font=('Helvetica 15 bold')).place(relx=0.8, rely=0.2, anchor=tkinter.CENTER)
-        # tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
-        #               font=('Helvetica 15 bold')).place(relx=0.8, rely=0.6, anchor=tkinter.CENTER)
+        tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
+                      font=('Helvetica 18 bold')).place(relx=0.8, rely=0.9, anchor=tkinter.CENTER)
         
         START_X = 250-80
         START_Y = 1
@@ -196,5 +196,5 @@ class GUILed:
         
         # self.lower_bound_var.set("0000")
         # self.step_var.set("0000")
-        # self.rpm_var.set("0000")
+        self.rpm_var.set("0000")
         
