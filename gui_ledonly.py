@@ -119,7 +119,7 @@ class MainWindow:
         self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
         # Configure the rows that are in use to have weight #
         self.root.grid_rowconfigure(0, minsize=550, weight=550)
-        self.root.grid_rowconfigure(1, minsize=300, weight=300)
+        self.root.grid_rowconfigure(1, minsize=300, weight=400)
 
         # Configure the cols that are in use to have weight #
         self.root.grid_columnconfigure(0, minsize=175, weight=175)
@@ -128,8 +128,8 @@ class MainWindow:
 
         self.root.title("Forza Horizon 5: Totally Work-in-progress something stats")
         self.root.geometry("1050x850+-1208+0")
-        self.root.minsize(1050, 850)
-        self.root.maxsize(1050, 850)
+        self.root.minsize(1050, 950)
+        self.root.maxsize(1050, 950)
         self.root["background"] = constants.background_color
     
     def __init__variables(self):
@@ -376,7 +376,6 @@ class MainWindow:
         self.lateralg.set_canvas(self.car_perf_frame)
         self.braketest.set_canvas(self.car_perf_frame)
         self.launchtest.set_canvas(self.car_perf_frame)
-        self.ledbar.set_canvas(self.car_perf_frame)
         
         #self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
         self.frame_basic.place(         anchor=tkinter.NW,  relx=0.0 ,  rely=0.0) 
@@ -385,7 +384,7 @@ class MainWindow:
         #self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
         #self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
         #self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
-        self.ledbar.frame.place(        anchor=tkinter.S,   relx=0.5,   rely=1.00, width=500, height=90)
+        #self.ledbar.frame.place(        anchor=tkinter.CENTER,   relx=0.5,   rely=0.50, width=500, height=500)
                                                                                        
     def set_shift_point_frame(self):
         """set shift point frame
@@ -395,7 +394,8 @@ class MainWindow:
                                                background=constants.background_color,
                                                highlightthickness=True, highlightcolor=constants.text_color)
 
-        self.gearstats.set_canvas(self.shift_point_frame)
+        #self.gearstats.set_canvas(self.shift_point_frame)
+        self.ledbar.set_canvas(self.shift_point_frame)
         self.shift_point_frame.grid(row=0, column=2, sticky='news')
 
     def set_button_frame(self):
@@ -452,12 +452,13 @@ class MainWindow:
         self.program_info_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color,
                                                 relief="groove",
                                                 highlightthickness=True, highlightcolor=constants.text_color)
-        label = tkinter.Label(self.program_info_frame, text='RTB work in progress GUI for Forza remote telemetry. '
-                                                            'derived from https://github.com/Juice-XIJ/forza_auto_gear',
-                              bg=constants.background_color, borderwidth=2, fg=constants.text_color,
-                              relief="groove", anchor="nw", justify=tkinter.LEFT)
-        label.bind('<Configure>', lambda e: label.config(wraplength=int(label.winfo_width() * 0.9)))
-        label.pack(fill="both", expand=True)
+        # label = tkinter.Label(self.program_info_frame, text='RTB work in progress GUI for Forza remote telemetry. '
+        #                                                     'derived from https://github.com/Juice-XIJ/forza_auto_gear',
+        #                       bg=constants.background_color, borderwidth=2, fg=constants.text_color,
+        #                       relief="groove", anchor="nw", justify=tkinter.LEFT)
+       # label.bind('<Configure>', lambda e: label.config(wraplength=int(label.winfo_width() * 0.9)))
+        # label.pack(fill="both", expand=True)
+        self.gearstats.set_canvas(self.program_info_frame)
         self.program_info_frame.grid(row=1, column=2, sticky='news')
 
     def collect_data_handler(self, event):
