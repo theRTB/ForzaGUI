@@ -55,6 +55,7 @@ class GUIGearStats:
         
         self.shiftdelay_var = tkinter.StringVar()
         self.shiftdelay_median = 0
+        self.shiftdelay_latest = 0
         self.shiftdelay = deque(maxlen=20)
         self.shiftdelay_step = 0
         self.shiftdelay_gear = 0
@@ -69,7 +70,7 @@ class GUIGearStats:
     def display(self):
         gear = self.gear if self.gear > 0 else 'R'
         self.gear_var.set(f'Gear: {gear}')
-        self.shiftdelay_var.set(f'Shiftdelay: {self.shiftdelay_median/60:.2f}s')
+        self.shiftdelay_var.set(f'Shiftdelay: {self.shiftdelay_latest:.2f}s {self.shiftdelay_median/60:.2f}s')
         
         if self.counter == 60:
             self.counter = 0
@@ -132,6 +133,7 @@ class GUIGearStats:
             elif fdp.power > 0:
                 self.last_shiftrpm[self.shiftdelay_gear] = self.shiftdelay_rpm
                 self.shiftdelay.append(self.shiftdelay_counter)
+                self.shiftdelay_latest = self.shiftdelay_counter
                 self.shiftdelay_median = statistics.median(self.shiftdelay)
                 self.shiftdelay_step = 0
             else:
@@ -192,7 +194,8 @@ class GUIGearStats:
             self.last_shiftrpm[g] = 0
         self.gear = 1
         self.shiftdelay.clear() 
-        self.shiftdelay_median = 0   
+        self.shiftdelay_median = 0  
+        self.shiftdelay_latest = 0   
         self.shiftdelay_step = 0
         self.shiftdelay_gear = 0
         self.shiftdelay_rpm = 0
