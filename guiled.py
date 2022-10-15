@@ -178,8 +178,17 @@ class GUILed:
         # tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
         #               font=('Helvetica 15 bold')).place(relx=0.8, rely=0.6, anchor=tkinter.CENTER)
         
+        START_X = 250-80
+        START_Y = 1
+        LED_HEIGHT = 45
+        LED_WIDTH = 80
         for i in range(10):
-            self.ledbar[i] = self.frame.create_rectangle(10+30* i, 40,10+30+30* i,40+30, fill='black', outline='white')
+            self.ledbar[i] = self.frame.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
+                                                         START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
+                                                         fill='black', outline='white')
+        self.frame.pack(fill='both', expand=True)
+            #self.ledbar[i] = self.frame.create_rectangle(40, 1+45*i, 40+80, 1+50+45*i, fill='black', outline='white')
+            #self.ledbar[i] = self.frame.create_rectangle(10+30*i, 40,10+30+30*i,40+30, fill='black', outline='white')
     
     def reset(self):
         self.state = 0
