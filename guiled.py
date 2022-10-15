@@ -31,12 +31,12 @@ AMBER = '#FFBF7F'
 RED   = '#FF8088'
 BLUE  = '#8080FF'
 
-ILLUMINATION_INTERVAL = int(1.0*60) #1.0 seconds
+ILLUMINATION_INTERVAL = int(2.0*60) #2.0 seconds
 REACTION_TIME = 12 #200 milliseconds
 DISTANCE_FROM_REVLIMIT_MS = 5 #83 milliseconds
-DISTANCE_FROM_REVLIMIT_ABS = .992 #99.2% of rev limit
-HYSTERESIS_PCT_REVLIMIT = 0.004 #0.6% of rev limit
-COUNTDOWN_MAX = 5 #dropping state only allowed after 5 frames
+DISTANCE_FROM_REVLIMIT_ABS = .99 #99.2% of rev limit
+HYSTERESIS_PCT_REVLIMIT = 0.001 #0.1% of rev limit
+COUNTDOWN_MAX = 12 #dropping state only allowed after 12 frames
 
 STATES = [
     [BLACK]*10,
