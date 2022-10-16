@@ -75,6 +75,7 @@ class GUILed:
         
         self.frame = None
         
+        self.run_shiftleds = [False for x in range(11)]
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
         self.unhappy_rpm = [7500 for x in range(11)]
@@ -123,6 +124,7 @@ class GUILed:
         for gear, rpm in enumerate(rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
                 continue
+            self.run_shiftleds[gear] = True
             
             self.logger.info(f"gear {gear} rpm {rpm}")
             
@@ -151,6 +153,11 @@ class GUILed:
                              f"start {self.lower_bound[gear]} step {self.step[gear]}")
         
     def update (self, fdp):
+        self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+        
+        if not self.run_shiftleds[fdp.gear]:
+            return
+        
         if abs(self.rpm - fdp.current_engine_rpm) >= self.hysteresis_rpm:
             self.rpm = fdp.current_engine_rpm
         state = math.ceil((self.rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
@@ -170,12 +177,9 @@ class GUILed:
         else:
             self.countdowntimer = COUNTDOWN_MAX
             self.state = state
-        
-        
             
         # self.lower_bound_var.set(f"{self.lower_bound[fdp.gear]}")
         # self.step_var.set(f"{self.step[fdp.gear]}")
-        self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
                     
         self.update_leds()
 
