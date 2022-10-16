@@ -167,7 +167,10 @@ class MainWindow:
         """
         if not self.forza5.isRunning:
             return
-                
+        
+        if fdp.gear == 11: #gear 11 is neutral, hit when triggering events in the map
+            return         #this breaks various hardcoded array limits
+        
         #update variable section
         
         #wait for revs to increase

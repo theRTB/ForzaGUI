@@ -116,6 +116,7 @@ class MainWindow:
     
     def __init__window(self):
         self.root = tkinter.Tk()
+        
         self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
         # Configure the rows that are in use to have weight #
         self.root.grid_rowconfigure(0, minsize=550, weight=550)
@@ -170,7 +171,10 @@ class MainWindow:
         """
         if not self.forza5.isRunning:
             return
-                
+        
+        if fdp.gear == 11: #gear 11 is neutral, hit when triggering events in the map
+            return         #this breaks various hardcoded array limits
+        
         #update variable section
         
         #wait for revs to increase
