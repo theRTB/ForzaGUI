@@ -17,6 +17,17 @@ from dragderivation import Trace, DragDerivation
 #TODO:
     #test hysteresis value
     #add frame to gui to edit constants in real time
+        #variables:
+            #illumination_interval
+            #reaction_time in frames (conversion in gui?)
+            #distance from revlimit frames
+            #distance from revlimit percent
+            #hysteresis percentage of revlimit
+            #state dropdown delay in frames
+        #rewrite state triggers to use a full table
+            #add full state trigger table to gui
+        #dynamic led sizing?
+            
         
     #blank shift leds after detecting gear change
     #gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
@@ -148,7 +159,7 @@ class GUILed:
         deltay = event.y - self.y
         x = self.window.winfo_x() + deltax
         y = self.window.winfo_y() + deltay
-        self.window.geometry(f"{WIDTH}x{HEIGHT}+{x}+{y}")
+        self.window.geometry(f"+{x}+{y}")
 
     def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
         for j, x in enumerate(rpmvalues):
