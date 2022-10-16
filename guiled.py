@@ -22,9 +22,15 @@ tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 #TODO:
     #test hysteresis value
-    #clear bounds for gears without a shift point
     #create separate window for the shift lights, force it on top
     #self.root.wm_attributes("-topmost", 1) #put window on top, over forza
+    
+    #blank shift leds after detecting gear change
+    #gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
+    #blank on gear variable changing is simplest, but can be very slow
+    #we can use inputs: https://pypi.org/project/inputs/0.3/
+    #or https://gist.github.com/artizirk/b407ba86feb7f0227654f8f5f1541413
+    #or https://github.com/bayangan1991/PYXInput
 
 BLACK = '#000000'
 GREEN = '#80FF80'
@@ -49,7 +55,7 @@ STATES = [
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]
 
 class GUILedDummy:
-    def __init__(self, logger):
+    def __init__(self, logger, root):
         pass
         
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
@@ -68,14 +74,14 @@ class GUILedDummy:
         pass
 
 class GUILed:
-    def __init__(self, logger):
+    def __init__(self, logger, root):
         self.logger = logger
         
         self.ledbar = [None for x in range(10)]
         
         self.frame = None
         
-        self.run_shiftleds = [False for x in range(11)]
+        self.run_shiftleds = [True for x in range(11)]
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
         self.unhappy_rpm = [7500 for x in range(11)]
@@ -95,6 +101,33 @@ class GUILed:
         
         self.rpm_var = tkinter.StringVar()
         self.rpm_var.set("0000")
+        
+        self.__init__window(root)
+            
+    def __init__window(self, root):
+            START_X = 0
+            START_Y = 0
+            LED_HEIGHT = 40
+            LED_WIDTH = 40
+            LED_COUNT = 10
+            self.root = root
+            self.window = tkinter.Toplevel(root)
+            self.window.wm_attributes("-topmost", 1)
+            height = LED_HEIGHT
+            width = LED_WIDTH*LED_COUNT
+            self.window.geometry(f"{width}x{height}+0+0")
+            self.canvas = tkinter.Canvas(self.window, width=width, height=height, bg=constants.background_color)
+            self.canvas.pack()
+            #self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
+           
+            for i in range(LED_COUNT):
+                # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
+                #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
+                #                                              fill='black', outline='white')
+                self.ledbar[i] = self.canvas.create_rectangle(START_X+LED_WIDTH*i, START_Y,
+                                                         START_X+LED_WIDTH*(i+1),START_Y+LED_HEIGHT, 
+                                                         fill='black', outline='white')
+            #self.ledbar[i] = self.frame.create_rectangle(10+30*i, 40,10+30+30*i,40+30, fill='black', outline='white')
 
     def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
         for j, x in enumerate(rpmvalues):
@@ -186,8 +219,8 @@ class GUILed:
     def update_leds(self):
         ledbar = STATES[self.state]
         for i in range(10):
-            self.frame.itemconfig(self.ledbar[i], fill=ledbar[i])
-    
+            self.canvas.itemconfig(self.ledbar[i], fill=ledbar[i])
+
     def set_canvas(self, frame):
         self.frame = tkinter.Canvas(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
@@ -201,14 +234,14 @@ class GUILed:
         tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
                       font=('Helvetica 18 bold')).place(relx=0.8, rely=0.9, anchor=tkinter.CENTER)
         
-        START_X = 250-80
-        START_Y = 1
-        LED_HEIGHT = 45
-        LED_WIDTH = 80
-        for i in range(10):
-            self.ledbar[i] = self.frame.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
-                                                         START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
-                                                         fill='black', outline='white')
+        # START_X = 250-80
+        # START_Y = 1
+        # LED_HEIGHT = 45
+        # LED_WIDTH = 80
+        # for i in range(10):
+        #     self.ledbar[i] = self.frame.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
+        #                                                  START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
+        #                                                  fill='black', outline='white')
         self.frame.pack(fill='both', expand=True)
             #self.ledbar[i] = self.frame.create_rectangle(40, 1+45*i, 40+80, 1+50+45*i, fill='black', outline='white')
             #self.ledbar[i] = self.frame.create_rectangle(10+30*i, 40,10+30+30*i,40+30, fill='black', outline='white')
