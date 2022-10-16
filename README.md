@@ -2,6 +2,9 @@
 
 GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
 
+Added: 16-10-2022
+gui_ledonly.py now includes a separate always-on-top shiftlight window. Future work will allow real-time editing of constants to tweak the resulting state triggers for the shift lights.
+
 This was a project never originally intended for public view, a hobby project for getting back to Python programming. Code quality is all over the place depending on when the function was written or updated. The GUI seems to be functional on Windows only.
 
 There are various 'plugins' that offer telemetry readouts or derivations but may not be readily enabled unless the code responsible for placing the frames is updated. The plugins that are not currently active may not function or cause performance degradation.
