@@ -7,23 +7,19 @@ Created on Sun Feb 13 15:16:10 2022
 
 import tkinter
 import tkinter.ttk
-
 import constants
 import math
-
-
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 
 from dragderivation import Trace, DragDerivation
-
-tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
-
 
 #TODO:
     #test hysteresis value
     #separate shiftled window is affected by launching a matplotlib graph
         #according to google, no fix
+        #consider https://pypi.org/project/pynput/  "Ensuring consistent coordinates between listener and controller on Windows"
+            #adds windows-only option that tells application is DPI aware
         #add tickbox to draw graph on clicking RPM/Torque, default false
         #alternatively, move graph to a frame inside the window?
         #https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
@@ -60,6 +56,15 @@ STATES = [
     [BLUE]*10,
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]
 
+
+START_X = 0
+START_Y = 0
+LED_HEIGHT = 50
+LED_WIDTH = 50
+LED_COUNT = 10
+HEIGHT = LED_HEIGHT
+WIDTH = LED_WIDTH*LED_COUNT
+
 class GUILedDummy:
     def __init__(self, logger, root):
         pass
@@ -87,7 +92,7 @@ class GUILed:
         
         self.frame = None
         
-        self.run_shiftleds = [True for x in range(11)]
+        self.run_shiftleds = [False for x in range(11)]
         self.lower_bound = [5000 for x in range(11)]
         self.shiftrpm = [7000 for x in range(11)]
         self.unhappy_rpm = [7500 for x in range(11)]
@@ -111,29 +116,43 @@ class GUILed:
         self.__init__window(root)
             
     def __init__window(self, root):
-            START_X = 0
-            START_Y = 0
-            LED_HEIGHT = 50
-            LED_WIDTH = 50
-            LED_COUNT = 10
             self.root = root
             self.window = tkinter.Toplevel(root)
             self.window.wm_attributes("-topmost", 1)
-            height = LED_HEIGHT
-            width = LED_WIDTH*LED_COUNT
-            self.window.geometry(f"{width}x{height}+0+0")
-            self.canvas = tkinter.Canvas(self.window, width=width, height=height, bg=constants.background_color)
+            self.window.geometry(f"{WIDTH}x{HEIGHT}")
+            self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg="#000000")
             self.canvas.pack()
-            #self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
+            self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
            
             for i in range(LED_COUNT):
-                # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
-                #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
-                #                                              fill='black', outline='white')
                 self.ledbar[i] = self.canvas.create_rectangle(START_X+LED_WIDTH*i, START_Y,
                                                          START_X+LED_WIDTH*(i+1),START_Y+LED_HEIGHT, 
                                                          fill='black', outline='white')
-            #self.ledbar[i] = self.frame.create_rectangle(10+30*i, 40,10+30+30*i,40+30, fill='black', outline='white')
+                
+                #vertical bar
+                # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
+                #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
+                #                                              fill='black', outline='white')
+            
+            #from https://stackoverflow.com/questions/4055267/tkinter-mouse-drag-a-window-without-borders-eg-overridedirect1
+            self.canvas.bind("<ButtonPress-1>", self.start_move)
+            self.canvas.bind("<ButtonRelease-1>", self.stop_move)
+            self.canvas.bind("<B1-Motion>", self.do_move)
+
+    def start_move(self, event):
+        self.x = event.x
+        self.y = event.y
+
+    def stop_move(self, event):
+        self.x = None
+        self.y = None
+
+    def do_move(self, event):
+        deltax = event.x - self.x
+        deltay = event.y - self.y
+        x = self.window.winfo_x() + deltax
+        y = self.window.winfo_y() + deltay
+        self.window.geometry(f"{WIDTH}x{HEIGHT}+{x}+{y}")
 
     def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
         for j, x in enumerate(rpmvalues):

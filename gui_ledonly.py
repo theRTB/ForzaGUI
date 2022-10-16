@@ -6,6 +6,12 @@ from tkinter import scrolledtext
 
 from pynput.keyboard import Listener
 
+# from https://pypi.org/project/pynput/
+# section Ensuring consistent coordinates between listener and controller on Windows
+import ctypes
+PROCESS_PER_MONITOR_DPI_AWARE = 2
+ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+
 #from collections import deque
 import statistics
 #from math import pi
@@ -39,12 +45,10 @@ from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
 from logger import Logger, TextHandler
 
-#map xor (suspension or led)
 MAP = False
 LED = True
 WHEELSIZE = False
 LAPTIMES = False
-
 SUSPENSION = False
 CARINFO = False
 LATERALG = False
