@@ -22,8 +22,9 @@ tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 #TODO:
     #test hysteresis value
-    #add a delay to dropping state for x frames
-    
+    #clear bounds for gears without a shift point
+    #create separate window for the shift lights, force it on top
+    #self.root.wm_attributes("-topmost", 1) #put window on top, over forza
 
 BLACK = '#000000'
 GREEN = '#80FF80'
@@ -153,7 +154,7 @@ class GUILed:
         if abs(self.rpm - fdp.current_engine_rpm) >= self.hysteresis_rpm:
             self.rpm = fdp.current_engine_rpm
         state = math.ceil((self.rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
-        if fdp.current_engine_rpm > self.unhappy_rpm[fdp.gear]:
+        if self.rpm > self.unhappy_rpm[fdp.gear]:
             state = 6
         
         if state < 0:
