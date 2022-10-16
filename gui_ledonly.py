@@ -57,21 +57,13 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 '''
 TODO:
+- add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
 - gather points for acceleration graph (on flat ground)
 
--add lateral g per velocity
---gather points: latg, speed, tire grip
---draw graph?
-
 -remove forza dependency
-
 -figure out if socket can be closed cleanly
-
 -abstract away from the large list of plugins to a dictionary
-
-test if the traction frontier is more square under braking
-but i guess mash abs and mash the steering, maybe at various levels of abs
 
 NOTES
 fdp.dist_traveled seems broken for freeroam
@@ -161,7 +153,10 @@ class MainWindow:
         self.rpmtorque = []
         self.collectedingear = 0
         
-        self.rpmtable = [0 for x in range(1,11)]       
+        self.rpmtable = [0 for x in range(1,11)]      
+        
+        self.torquegraph_var = tkinter.IntVar()
+        self.torquegraph_var.set(0)
     
     def update_car_info(self, fdp):
         """update car info
@@ -301,7 +296,6 @@ class MainWindow:
         self.rpmspeed = []
         
         self.rpmtable = [0 for x in range(11)]
-        
 
     def set_car_info_frame(self):
         """set car info frame
@@ -340,6 +334,7 @@ class MainWindow:
         self.peak_torque = self.infotree.insert('', tkinter.END, text='peak_torque_Nm', values=('peak_torque_Nm','-'))
         
         self.infotree.pack(fill="both", expand=True)
+        tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, bg=constants.background_color, fg=constants.text_color).pack()
         
         self.car_info_frame.grid(row=0, column=0, sticky='news')
         
@@ -524,6 +519,13 @@ class MainWindow:
             self.logger.info(f"{i+1}: shift rpm {shiftrpm}, drop to {int(shiftrpm/ratio)}, "
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
 
+        self.logger.info(list(enumerate(self.rpmtable)))
+        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear, self.trace)
+        self.gearstats.set_rpmtable(self.rpmtable)
+        
+        if self.torquegraph_var.get() == 0:
+            return
+        
         #val is the median ratio of rpm and speed scaled to the final ratio
         val = statistics.median([(a/b) for (a, b) in zip(rpm, speed)])*gears[-1]/gears[self.collectedingear-1]
         
@@ -569,9 +571,6 @@ class MainWindow:
         fig.tight_layout()
         plt.show()
 
-        self.logger.info(list(enumerate(self.rpmtable)))
-        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear, self.trace)
-        self.gearstats.set_rpmtable(self.rpmtable)
 
     def gatherratios_handler(self, event):
         self.gearstats.gatherratios = not(self.gearstats.gatherratios)
