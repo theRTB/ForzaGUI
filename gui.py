@@ -90,7 +90,7 @@ class MainWindow:
         self.listener = Listener(on_press=self.on_press)
         
         self.map = GUIMap(self.logger) if MAP else GUIMapDummy(self.logger)
-        self.ledbar = GUILed(self.logger) if LED else GUILedDummy(self.logger)
+        self.ledbar = GUILed(self.logger, self.root) if LED else GUILedDummy(self.logger, self.root)
         self.suspension = GUISuspension(self.logger) if SUSPENSION else GUISuspensionDummy(self.logger)
         self.wheelsize = GUIWheelsize(self.logger) if WHEELSIZE else GUIWheelsizeDummy(self.logger)
         self.laptimes = GUILaptimes(self.logger) if LAPTIMES else GUILaptimesDummy(self.logger)
