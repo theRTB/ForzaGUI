@@ -22,8 +22,14 @@ tanh_offset = lambda x: 1 - math.tanh(0.31 * min(x, 5) + 0.76)
 
 #TODO:
     #test hysteresis value
-    #create separate window for the shift lights, force it on top
-    #self.root.wm_attributes("-topmost", 1) #put window on top, over forza
+    #separate shiftled window is affected by launching a matplotlib graph
+        #according to google, no fix
+        #add tickbox to draw graph on clicking RPM/Torque, default false
+        #alternatively, move graph to a frame inside the window?
+        #https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
+        
+    #remove title bar from shiftled window
+    #add move by holding mouse1 to shiftled window
     
     #blank shift leds after detecting gear change
     #gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
@@ -107,8 +113,8 @@ class GUILed:
     def __init__window(self, root):
             START_X = 0
             START_Y = 0
-            LED_HEIGHT = 40
-            LED_WIDTH = 40
+            LED_HEIGHT = 50
+            LED_WIDTH = 50
             LED_COUNT = 10
             self.root = root
             self.window = tkinter.Toplevel(root)
