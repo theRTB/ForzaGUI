@@ -16,17 +16,8 @@ from dragderivation import Trace, DragDerivation
 
 #TODO:
     #test hysteresis value
-    #separate shiftled window is affected by launching a matplotlib graph
-        #according to google, no fix
-        #consider https://pypi.org/project/pynput/  "Ensuring consistent coordinates between listener and controller on Windows"
-            #adds windows-only option that tells application is DPI aware
-        #add tickbox to draw graph on clicking RPM/Torque, default false
-        #alternatively, move graph to a frame inside the window?
-        #https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
+    #add frame to gui to edit constants in real time
         
-    #remove title bar from shiftled window
-    #add move by holding mouse1 to shiftled window
-    
     #blank shift leds after detecting gear change
     #gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     #blank on gear variable changing is simplest, but can be very slow
@@ -59,8 +50,8 @@ STATES = [
 
 START_X = 0
 START_Y = 0
-LED_HEIGHT = 50
-LED_WIDTH = 50
+LED_HEIGHT = 75
+LED_WIDTH = 75
 LED_COUNT = 10
 HEIGHT = LED_HEIGHT
 WIDTH = LED_WIDTH*LED_COUNT
@@ -129,7 +120,7 @@ class GUILed:
                                                          START_X+LED_WIDTH*(i+1),START_Y+LED_HEIGHT, 
                                                          fill='black', outline='white')
                 
-                #vertical bar
+                #vertical bar, remember to swap *LED_COUNT from WIDTH to HEIGHT 
                 # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
                 #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
                 #                                              fill='black', outline='white')
@@ -144,6 +135,11 @@ class GUILed:
         self.y = event.y
 
     def stop_move(self, event):
+        deltax = event.x - self.x
+        deltay = event.y - self.y
+        x = self.window.winfo_x() + deltax
+        y = self.window.winfo_y() + deltay
+        self.logger.info(f"ledbar offset {x} and {y}")
         self.x = None
         self.y = None
 
