@@ -87,14 +87,12 @@ class V():
     def _init_tkintervariables(cls):
         for name, value in cls.__dict__.items():
             if name[0] == '_':
-                print(f"skipping {name}")
                 continue
-            print(f"working on {name}")
             value.init_tkintervar()
     
     @classmethod
     def _var_list(cls):
-        return [name for name in cls.__dict__.keys() if name[0] != '_']
+        return [var for name, var in cls.__dict__.items() if name[0] != '_']
 
 class GUILedDummy:
     def __init__(self, logger, root):
@@ -278,22 +276,14 @@ class GUILed:
                                             highlightthickness=True, highlightcolor=constants.text_color)
         
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 'font':('Helvetica 12')}
-        table = [{ 'text': 'Illumination interval', 'var':V.illumination_interval.var, 'posttext':'frames'},
-                 { 'text': 'Reaction time',         'var':V.reaction_time.var, 'posttext':'frames'},
-                 { 'text': 'Distance from revlimit', 'var':V.distance_from_revlimit_ms.var, 'posttext':'frames'},
-                 { 'text': 'Distance from revlimit', 'var':V.distance_from_revlimit_pct.var, 'posttext':'percent'},
-                 { 'text': 'Hysteresis, revlimit', 'var':V.hysteresis_pct_revlimit.var, 'posttext':'percent'},
-                 { 'text': 'State dropdown delay', 'var':V.state_dropdown_delay.var, 'posttext':'frames'},
-                 { 'text': 'Shiftlight location x', 'var':V.shiftlight_x.var, 'posttext':'pixels'},
-                 { 'text': 'Shiftlight location y', 'var':V.shiftlight_y.var, 'posttext':'pixels'}]
         
-        for row, line in enumerate(table):
-            tkinter.Label(self.frame, text=line['text'], **opts).grid(row=row, column=0)
-            tkinter.Entry(self.frame, textvariable=line['var'], width=5, justify=tkinter.RIGHT, **opts).grid(row=row, column=1)
-            tkinter.Label(self.frame, text=line['posttext'], **opts).grid(row=row, column=2)            
+        for row, v in enumerate(V._var_list()):
+            tkinter.Label(self.frame, text=v.name, **opts).grid(row=row, column=0)
+            tkinter.Entry(self.frame, textvariable=v.var, width=5, justify=tkinter.RIGHT, **opts).grid(row=row, column=1)
+            tkinter.Label(self.frame, text=v.unit, **opts).grid(row=row, column=2)            
             
         tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 18 bold')).grid(row=len(table))
+                      font=('Helvetica 18 bold')).grid(row=row+1)
 
         self.frame.pack(fill='both', expand=True)
     
