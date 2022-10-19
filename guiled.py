@@ -84,8 +84,8 @@ class V():
     reaction_time = Variable('Reaction time', 12, 'Int', 'frames')  #200 milliseconds
     distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')  #83 milliseconds
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
-    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .001, 'Double', 'percent') #0.1% of rev limit
-    state_dropdown_delay = Variable('State dropdown delay', 12, 'Int', 'frames')  #dropping state only allowed after 12 frames
+    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .015, 'Double', 'percent') #0.1% of rev limit
+    state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', 1763, 'Int', 'pixels')
     
@@ -143,7 +143,7 @@ class GUILed:
         self.update_rpm_var = True
         self.rpm_var = tkinter.StringVar(value='0000')
         
-        self.state_table = [[0 for x in range(0, len(STATES))] for y in range(11)]
+        self.state_table = [[7000 for x in range(0, len(STATES))] for y in range(11)]
                     
         self.__init__window(root)
         V._init_tkintervariables()
@@ -280,10 +280,11 @@ class GUILed:
         if not self.run_shiftleds[fdp.gear]:
             return
         
-        #if engine rpm is dropping, do not drop corrected rpm until difference drops below hysteresis value
-        if (fdp.current_engine_rpm - self.rpm <= -self.hysteresis_rpm or
-            fdp.current_engine_rpm - self.rpm >= 0):
-            self.rpm = fdp.current_engine_rpm
+        self.rpm = fdp.current_engine_rpm
+        # #if engine rpm is dropping, do not drop corrected rpm until difference drops below hysteresis value
+        # if (fdp.current_engine_rpm - self.rpm <= -self.hysteresis_rpm or
+        #     fdp.current_engine_rpm - self.rpm >= 0):
+        #     self.rpm = fdp.current_engine_rpm
         
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
@@ -291,7 +292,9 @@ class GUILed:
                 break
             
         if state < self.state:
-            if self.countdowntimer < V.state_dropdown_delay.get():
+            if self.rpm <= self.state_table[fdp.gear][state] - self.hysteresis_rpm:
+                self.state = state
+            elif self.countdowntimer < V.state_dropdown_delay.get():
                 self.countdowntimer += 1
             else:
                 self.state = state
@@ -325,6 +328,10 @@ class GUILed:
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1, columnspan=2)
+        
+        for gear in range(1, 11):
+            for state in range(1, len(STATES)):
+                tkinter.Label(self.frame, text=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts).grid(row=row+1+gear, column=0+state)
 
         self.frame.pack(fill='both', expand=True)
     
@@ -336,7 +343,7 @@ class GUILed:
         # self.lower_bound_var.set("0000")
         # self.step_var.set("0000")
         self.update_rpm_var = True
-        self.rpm_var.set("0000")
+        self.rpm_var.set("0000 0000")
         
 
         
