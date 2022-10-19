@@ -64,6 +64,9 @@ TODO:
 - add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
 - gather points for acceleration graph (on flat ground)
+- move torque graph to a frame inside the window?
+  https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
+
 
 -remove forza dependency
 -figure out if socket can be closed cleanly
@@ -348,7 +351,7 @@ class MainWindow:
         # Place car perf frame
         self.car_perf_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
-        self.car_perf_frame.grid(row=0, column=1, sticky='news')
+        self.car_perf_frame.grid(row=0, column=1, sticky='news', columnspan=2)
         self.car_perf_frame.update() #is this necessary?
 
 
@@ -379,6 +382,7 @@ class MainWindow:
         self.lateralg.set_canvas(self.car_perf_frame)
         self.braketest.set_canvas(self.car_perf_frame)
         self.launchtest.set_canvas(self.car_perf_frame)
+        self.ledbar.set_canvas(self.car_perf_frame)
         
         #self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
         self.frame_basic.place(         anchor=tkinter.NW,  relx=0.0 ,  rely=0.0) 
@@ -387,19 +391,19 @@ class MainWindow:
         #self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
         #self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
         #self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
-        #self.ledbar.frame.place(        anchor=tkinter.CENTER,   relx=0.5,   rely=0.50, width=500, height=500)
+        self.ledbar.frame.place(        anchor=tkinter.SE,   relx=1,   rely=1)
                                                                                        
     def set_shift_point_frame(self):
         """set shift point frame
         """
         # place shift point frame
-        self.shift_point_frame = tkinter.Frame(self.root, border=0, relief="groove",
-                                               background=constants.background_color,
-                                               highlightthickness=True, highlightcolor=constants.text_color)
+        pass
+        # self.shift_point_frame = tkinter.Frame(self.root, border=0, relief="groove",
+        #                                        background=constants.background_color,
+        #                                        highlightthickness=True, highlightcolor=constants.text_color)
 
-        #self.gearstats.set_canvas(self.shift_point_frame)
-        self.ledbar.set_canvas(self.shift_point_frame)
-        self.shift_point_frame.grid(row=0, column=2, sticky='news')
+        # #self.gearstats.set_canvas(self.shift_point_frame)
+        # self.shift_point_frame.grid(row=0, column=2, sticky='news')
 
     def set_button_frame(self):
         """set buttom frame
