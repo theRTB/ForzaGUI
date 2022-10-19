@@ -141,6 +141,8 @@ class GUILed:
         self.statedowntimer = 0
                 
         self.rpm_var = tkinter.StringVar(value='0000')
+        
+        self.state_table = [[0 for x in range(1, len(STATES)+1)] for y in range(11)]
                     
         self.__init__window(root)
         V._init_tkintervariables()
@@ -249,6 +251,13 @@ class GUILed:
             self.step[gear] = (self.shiftrpm[gear] - self.lower_bound[gear])/4
             self.logger.info(f"gear {gear} newshiftrpm {self.shiftrpm[gear]} "
                              f"start {self.lower_bound[gear]} step {self.step[gear]}")
+            
+            gear_table = self.state_table[gear]
+            for x in range(1,5):
+                gear_table[x] = self.lower_bound[gear] + self.step[gear]*(x-1)
+            gear_table[5] = self.shiftrpm[gear] #happy state
+            gear_table[6] = self.unhappy_rpm[gear] #unhappy state
+            self.logger.info(gear_table)
 
     def update_button(self, event):
         if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
