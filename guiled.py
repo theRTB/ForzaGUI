@@ -139,7 +139,8 @@ class GUILed:
         self.state = 0
         self.rpm = 0
         self.statedowntimer = 0
-                
+        
+        self.update_rpm_var = True
         self.rpm_var = tkinter.StringVar(value='0000')
         
         self.state_table = [[0 for x in range(1, len(STATES)+1)] for y in range(11)]
@@ -268,7 +269,9 @@ class GUILed:
         self.logger.info("update button hit!")
 
     def update (self, fdp):
-        self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+        if self.update_rpm_var:
+            self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+        self.update_rpm_var = not(self.update_rpm_var)
         
         if not self.run_shiftleds[fdp.gear]:
             return
@@ -329,6 +332,7 @@ class GUILed:
         
         # self.lower_bound_var.set("0000")
         # self.step_var.set("0000")
+        self.update_rpm_var = True
         self.rpm_var.set("0000")
         
 
