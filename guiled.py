@@ -200,14 +200,12 @@ class GUILed:
                 #print(f"j {j} val {rpmvalues[j]} offset {offset}")
         return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
-    #TODO: remove unused variables
+    #TODO: remove unused variables: rpmvalues and collectedingear
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
         
         self.rpmtable = rpmtable
         self.revlimit = revlimit
-        self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*revlimit
-        self.logger.info(f"hysteresis at {self.hysteresis_rpm} rpm steps")
         
         drag = DragDerivation(gears, final_drive=1, trace=trace)
         self.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
@@ -252,15 +250,19 @@ class GUILed:
                 
             self.shiftrpm[gear] = rpm
             self.step[gear] = (self.shiftrpm[gear] - self.lower_bound[gear])/4
-            self.logger.info(f"gear {gear} newshiftrpm {self.shiftrpm[gear]} "
-                             f"start {self.lower_bound[gear]} step {self.step[gear]}")
+         #   self.logger.info(f"gear {gear} newshiftrpm {self.shiftrpm[gear]} "
+         #                    f"start {self.lower_bound[gear]} step {self.step[gear]}")
             
             gear_table = self.state_table[gear]
             for x in range(1,5):
-                gear_table[x] = self.lower_bound[gear] + self.step[gear]*(x-1)
+                gear_table[x] = int(self.lower_bound[gear] + self.step[gear]*(x-1))
             gear_table[5] = self.shiftrpm[gear] #happy state
             gear_table[6] = self.unhappy_rpm[gear] #unhappy state
+            
             self.logger.info(gear_table)
+        
+        self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
+        self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm} rpm steps")
 
     def update_button(self, event):
         if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
@@ -272,20 +274,21 @@ class GUILed:
 
     def update (self, fdp):
         if self.update_rpm_var:
-            self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
+            self.rpm_var.set(f"{fdp.current_engine_rpm:.0f} {self.rpm:.0f}")
         self.update_rpm_var = not(self.update_rpm_var)
         
         if not self.run_shiftleds[fdp.gear]:
             return
         
+        #if engine rpm is dropping, do not drop corrected rpm until difference drops below hysteresis value
         if (fdp.current_engine_rpm - self.rpm <= -self.hysteresis_rpm or
             fdp.current_engine_rpm - self.rpm >= 0):
             self.rpm = fdp.current_engine_rpm
         
-        for state, shiftrpm in enumerate(self.state_table[fdp.gear]):
-            if self.rpm < shiftrpm:
+        #loop over state triggers in reverse order
+        for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
+            if self.rpm > shiftrpm:
                 break
-        state = min(state - 1, 0) #TODO: find better method of deriving state
             
         if state < self.state:
             if self.countdowntimer < V.state_dropdown_delay.get():
