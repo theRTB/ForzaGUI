@@ -198,23 +198,28 @@ class GUILed:
         return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
-        self.logger.info(f"revlimit {revlimit} collectedingear {collectedingear}")
+        self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
         
+        self.rpmtable = rpmtable
+        self.revlimit = revlimit
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*revlimit
         self.logger.info(f"hysteresis at {self.hysteresis_rpm} rpm steps")
         
         drag = DragDerivation(gears, final_drive=1, trace=trace)
-        geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
+        self.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
         
         lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
         rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
-        gearratio_collected = gears[collectedingear-1]
+        gearratio_collected = gears[trace.gear_collected-1]
         
         #data['rpm'] is the drag corrected rpm over time per gear
-        for data, gearratio in zip(geardata[1:], gears):
+        for data, gearratio in zip(self.geardata[1:], gears):
             data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
+            
+        self.calculate_state_triggers()
         
-        for gear, rpm in enumerate(rpmtable):
+    def calculate_state_triggers(self):
+        for gear, rpm in enumerate(self.rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
                 continue
             self.run_shiftleds[gear] = True
@@ -222,21 +227,21 @@ class GUILed:
             self.logger.info(f"gear {gear} rpm {rpm}")
             
             #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
-            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), revlimit, geardata[gear]['rpm'])
-            adjusted_rpmlimit_abs = int(revlimit*V.distance_from_revlimit_pct.get())
+            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), self.revlimit, self.geardata[gear]['rpm'])
+            adjusted_rpmlimit_abs = int(self.revlimit*V.distance_from_revlimit_pct.get())
             self.logger.info(f"adjusted rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
             rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
             
             #at optimal shift rpm, we change state to 'past optimal' because humans have reaction time
             self.unhappy_rpm[gear] = rpm
-            rpm = self.timeadjusted_rpm(V.reaction_time.get(), rpm, geardata[gear]['rpm'])
+            rpm = self.timeadjusted_rpm(V.reaction_time.get(), rpm, self.geardata[gear]['rpm'])
             self.logger.info(f"adjusted for reaction time {rpm}")
             
-            for j, x in enumerate(geardata[gear]['rpm']):
+            for j, x in enumerate(self.geardata[gear]['rpm']):
                 if x >= rpm:
                     offset = int(max(j - V.illumination_interval.get(), 0))
-                    self.lower_bound[gear] = int(geardata[gear]['rpm'][offset])
+                    self.lower_bound[gear] = int(self.geardata[gear]['rpm'][offset])
                     #print(f"j {j} val {rpmvalues[j]} offset {offset}")
                     break
                 
@@ -249,6 +254,8 @@ class GUILed:
         if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
             self.window.geometry(f"+{V.shiftlight_x.get()}+{V.shiftlight_y.get()}")
             self.logger.info(f"ledbar offset {V.shiftlight_x.get()} and {V.shiftlight_y.get()}")
+        else:
+            self.calculate_state_triggers()
         self.logger.info("update button hit!")
 
     def update (self, fdp):
