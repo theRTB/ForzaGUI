@@ -56,20 +56,27 @@ LED_COUNT = 10
 HEIGHT = LED_HEIGHT
 WIDTH = LED_WIDTH*LED_COUNT
 
+#extend tkinter.Variable? get and set functions are only set for the subtypes
 class Variable():
-    def __init__(self, name, value, vartype, unit):
+    def __init__(self, name, defaultvalue, vartype, unit):
         self.name = name
-        self.value = value
+        self.defaultvalue = defaultvalue
         self.vartype = vartype
         self.unit = unit
+        
+    def get(self):
+        return self.var.get()
+    
+    def set(self, value):
+        return self.var.set(value)
 
     def init_tkintervar(self):
         if self.vartype == 'String':
-            self.var = tkinter.StringVar(value=self.value)
+            self.var = tkinter.StringVar(value=self.defaultvalue)
         elif self.vartype == 'Double':
-            self.var = tkinter.DoubleVar(value=self.value)
+            self.var = tkinter.DoubleVar(value=self.defaultvalue)
         elif self.vartype == 'Int':
-            self.var = tkinter.IntVar(value=self.value)
+            self.var = tkinter.IntVar(value=self.defaultvalue)
         
 #convenient class for displaying and modifying variables live in the GUI
 class V(): 
@@ -78,7 +85,7 @@ class V():
     distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')  #83 milliseconds
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
     hysteresis_pct_revlimit = Variable('Hysteresis', .001, 'Double', 'percent') #0.1% of rev limit
-    state_dropdown_delay = Variable('Shiftlight location x', 1532, 'Int', 'pixels')  #dropping state only allowed after 12 frames
+    state_dropdown_delay = Variable('State dropdown delay', 12, 'Int', 'frames')  #dropping state only allowed after 12 frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', 1763, 'Int', 'pixels')
     
@@ -125,7 +132,7 @@ class GUILed:
         self.lower_bound = [5000 for x in range(11)] #these placeholder values mean nothing
         self.shiftrpm = [7000 for x in range(11)]
         self.unhappy_rpm = [7500 for x in range(11)]
-        self.hysteresis_rpm = V.hysteresis_pct_revlimit.value*7500
+        self.hysteresis_rpm = V.hysteresis_pct_revlimit.defaultvalue*7500
         
         self.step = [(self.shiftrpm[x] - self.lower_bound[x])/4 for x in range(11)]
         
@@ -134,7 +141,7 @@ class GUILed:
         self.statedowntimer = 0
                 
         self.rpm_var = tkinter.StringVar(value='0000')
-            
+                    
         self.__init__window(root)
         V._init_tkintervariables()
             
@@ -142,7 +149,7 @@ class GUILed:
             self.root = root
             self.window = tkinter.Toplevel(root)
             self.window.wm_attributes("-topmost", 1) #force always on top
-            self.window.geometry(f"{WIDTH}x{HEIGHT}+{V.shiftlight_x.value}+{V.shiftlight_y.value}")
+            self.window.geometry(f"{WIDTH}x{HEIGHT}+{V.shiftlight_x.defaultvalue}+{V.shiftlight_y.defaultvalue}")
             self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg="#000000")
             self.canvas.pack()
             self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
@@ -169,9 +176,9 @@ class GUILed:
     def stop_move(self, event):
         deltax = event.x - self.x
         deltay = event.y - self.y
-        x = self.window.winfo_x() + deltax
-        y = self.window.winfo_y() + deltay
-        self.logger.info(f"ledbar offset {x} and {y}")
+        V.shiftlight_x.set(self.window.winfo_x() + deltax)
+        V.shiftlight_y.set(self.window.winfo_y() + deltay)
+        self.logger.info(f"ledbar offset {V.shiftlight_x.get()} and {V.shiftlight_y.get()}")
         self.x = None
         self.y = None
 
@@ -193,7 +200,7 @@ class GUILed:
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} collectedingear {collectedingear}")
         
-        self.hysteresis_rpm = V.hysteresis_pct_revlimit.value*revlimit
+        self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*revlimit
         self.logger.info(f"hysteresis at {self.hysteresis_rpm} rpm steps")
         
         drag = DragDerivation(gears, final_drive=1, trace=trace)
@@ -215,20 +222,20 @@ class GUILed:
             self.logger.info(f"gear {gear} rpm {rpm}")
             
             #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
-            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.value, revlimit, geardata[gear]['rpm'])
-            adjusted_rpmlimit_abs = int(revlimit*V.distance_from_revlimit_pct.value)
+            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), revlimit, geardata[gear]['rpm'])
+            adjusted_rpmlimit_abs = int(revlimit*V.distance_from_revlimit_pct.get())
             self.logger.info(f"adjusted rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
             rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
             
             #at optimal shift rpm, we change state to 'past optimal' because humans have reaction time
             self.unhappy_rpm[gear] = rpm
-            rpm = self.timeadjusted_rpm(V.reaction_time.value, rpm, geardata[gear]['rpm'])
+            rpm = self.timeadjusted_rpm(V.reaction_time.get(), rpm, geardata[gear]['rpm'])
             self.logger.info(f"adjusted for reaction time {rpm}")
             
             for j, x in enumerate(geardata[gear]['rpm']):
                 if x >= rpm:
-                    offset = int(max(j - V.illumination_interval.value, 0))
+                    offset = int(max(j - V.illumination_interval.get(), 0))
                     self.lower_bound[gear] = int(geardata[gear]['rpm'][offset])
                     #print(f"j {j} val {rpmvalues[j]} offset {offset}")
                     break
@@ -237,7 +244,13 @@ class GUILed:
             self.step[gear] = (self.shiftrpm[gear] - self.lower_bound[gear])/4
             self.logger.info(f"gear {gear} newshiftrpm {self.shiftrpm[gear]} "
                              f"start {self.lower_bound[gear]} step {self.step[gear]}")
-        
+
+    def update_button(self, event):
+        if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
+            self.window.geometry(f"+{V.shiftlight_x.get()}+{V.shiftlight_y.get()}")
+            self.logger.info(f"ledbar offset {V.shiftlight_x.get()} and {V.shiftlight_y.get()}")
+        self.logger.info("update button hit!")
+
     def update (self, fdp):
         self.rpm_var.set(f"{fdp.current_engine_rpm:.0f}")
         
@@ -256,12 +269,12 @@ class GUILed:
             state = 6
             
         if state < self.state:
-            if self.countdowntimer < V.state_dropdown_delay.value:
+            if self.countdowntimer < V.state_dropdown_delay.get():
                 self.countdowntimer += 1
             else:
                 self.state = state
         else:
-            self.countdowntimer = V.state_dropdown_delay.value
+            self.countdowntimer = V.state_dropdown_delay.get()
             self.state = state
                                 
         self.update_leds()
@@ -285,11 +298,17 @@ class GUILed:
         tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
                       font=('Helvetica 18 bold')).grid(row=row+1)
 
+        #TODO: grey out update button unless changes are made?
+        button = tkinter.Button(self.frame, text='Update', bg=constants.background_color, fg=constants.text_color,
+                                borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
+        button.bind('<Button-1>', self.update_button)
+        button.grid(row=row+1, column=1, columnspan=2)
+
         self.frame.pack(fill='both', expand=True)
     
     def reset(self):
         self.state = 0
-        self.dropdowntimer = V.state_dropdown_delay.value
+        self.dropdowntimer = V.state_dropdown_delay.get()
         self.update_leds()
         
         # self.lower_bound_var.set("0000")
