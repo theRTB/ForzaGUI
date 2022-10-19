@@ -143,7 +143,7 @@ class GUILed:
         self.update_rpm_var = True
         self.rpm_var = tkinter.StringVar(value='0000')
         
-        self.state_table = [[7000 for x in range(0, len(STATES))] for y in range(11)]
+        self.state_table = [[tkinter.IntVar() for x in range(0, len(STATES))] for y in range(11)]
                     
         self.__init__window(root)
         V._init_tkintervariables()
@@ -255,14 +255,17 @@ class GUILed:
             
             gear_table = self.state_table[gear]
             for x in range(1,5):
-                gear_table[x] = int(self.lower_bound[gear] + self.step[gear]*(x-1))
-            gear_table[5] = self.shiftrpm[gear] #happy state
-            gear_table[6] = self.unhappy_rpm[gear] #unhappy state
+                gear_table[x].set(int(self.lower_bound[gear] + self.step[gear]*(x-1)))
+            gear_table[5].set(self.shiftrpm[gear]) #happy state
+            gear_table[6].set(self.unhappy_rpm[gear]) #unhappy state
             
-            self.logger.info(gear_table)
+            #self.logger.info(gear_table)
         
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
         self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm} rpm steps")
+        
+        self.run_shiftleds[sum(self.run_shiftleds)] = False #highest available gear should not show leds
+            
 
     def update_button(self, event):
         if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
@@ -288,11 +291,11 @@ class GUILed:
         
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
-            if self.rpm > shiftrpm:
+            if self.rpm > shiftrpm.get():
                 break
             
         if state < self.state:
-            if self.rpm <= self.state_table[fdp.gear][state] - self.hysteresis_rpm:
+            if self.rpm <= self.state_table[fdp.gear][state].get() - self.hysteresis_rpm:
                 self.state = state
             elif self.countdowntimer < V.state_dropdown_delay.get():
                 self.countdowntimer += 1
@@ -329,9 +332,15 @@ class GUILed:
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1, columnspan=2)
         
-        for gear in range(1, 11):
+        row += 2
+        #TODO: hide rows that have run_shiftled as false
+        tkinter.Label(self.frame, text='Gear \ State', width=10, **opts).grid(row=row+0, column=0, sticky=tkinter.E)
+        for state in range(1, len(STATES)):
+            tkinter.Label(self.frame, text=state, width=5, **opts).grid(row=row+0, column=0+state, sticky=tkinter.N)
+        for gear in range(1, 11):            
+            tkinter.Label(self.frame, text=gear, width=5, **opts).grid(row=row+gear, column=0, sticky=tkinter.E)
             for state in range(1, len(STATES)):
-                tkinter.Label(self.frame, text=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts).grid(row=row+1+gear, column=0+state)
+                tkinter.Label(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts).grid(row=row+gear, column=0+state)
 
         self.frame.pack(fill='both', expand=True)
     
