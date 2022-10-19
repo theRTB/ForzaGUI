@@ -84,7 +84,7 @@ class V():
     reaction_time = Variable('Reaction time', 12, 'Int', 'frames')  #200 milliseconds
     distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')  #83 milliseconds
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
-    hysteresis_pct_revlimit = Variable('Hysteresis', .001, 'Double', 'percent') #0.1% of rev limit
+    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .001, 'Double', 'percent') #0.1% of rev limit
     state_dropdown_delay = Variable('State dropdown delay', 12, 'Int', 'frames')  #dropping state only allowed after 12 frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', 1763, 'Int', 'pixels')
@@ -143,7 +143,7 @@ class GUILed:
         self.update_rpm_var = True
         self.rpm_var = tkinter.StringVar(value='0000')
         
-        self.state_table = [[0 for x in range(1, len(STATES)+1)] for y in range(11)]
+        self.state_table = [[0 for x in range(0, len(STATES))] for y in range(11)]
                     
         self.__init__window(root)
         V._init_tkintervariables()
@@ -200,6 +200,7 @@ class GUILed:
                 #print(f"j {j} val {rpmvalues[j]} offset {offset}")
         return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
+    #TODO: remove unused variables
     def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
         self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
         
@@ -220,7 +221,8 @@ class GUILed:
             data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
             
         self.calculate_state_triggers()
-        
+    
+    #TODO: remove intermediary step with lower_bound, step and shiftrpm and translate straight to state triggers
     def calculate_state_triggers(self):
         for gear, rpm in enumerate(self.rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
@@ -276,16 +278,14 @@ class GUILed:
         if not self.run_shiftleds[fdp.gear]:
             return
         
-        if abs(self.rpm - fdp.current_engine_rpm) >= self.hysteresis_rpm:
+        if (fdp.current_engine_rpm - self.rpm <= -self.hysteresis_rpm or
+            fdp.current_engine_rpm - self.rpm >= 0):
             self.rpm = fdp.current_engine_rpm
-        state = math.ceil((self.rpm - self.lower_bound[fdp.gear]) / self.step[fdp.gear])
-        if self.rpm > self.unhappy_rpm[fdp.gear]:
-            state = 6
         
-        if state < 0:
-            state = 0
-        if state > 6:
-            state = 6
+        for state, shiftrpm in enumerate(self.state_table[fdp.gear]):
+            if self.rpm < shiftrpm:
+                break
+        state = min(state - 1, 0) #TODO: find better method of deriving state
             
         if state < self.state:
             if self.countdowntimer < V.state_dropdown_delay.get():
