@@ -14,25 +14,25 @@ import numpy as np
 
 from dragderivation import Trace, DragDerivation
 
-#TODO:
-    #test hysteresis value
-    #create configuration file for constants
-    #add frame to gui to edit constants in real time
-    #move constants into objects
-        #name, value, gui_var, text, posttext, from/to lambdas
-        #rewrite state triggers to use a full table
-            #add full state trigger table to gui
-        #dynamic led sizing?
-    #add audio tone to (different) reaction time adjusted shift rpm
-            
-        
-    #blank shift leds after detecting gear change
-    #gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
-    #blank on gear variable changing is simplest, but can be very slow
-    #we can use inputs: https://pypi.org/project/inputs/0.3/
-    #or https://gist.github.com/artizirk/b407ba86feb7f0227654f8f5f1541413
-    #or https://github.com/bayangan1991/PYXInput
-
+'''
+TODO:
+    test hysteresis value
+    create configuration file for constants
+    move constants into objects
+        name, value, gui_var, text, posttext, from/to lambdas
+        dynamic led sizing?
+    add audio tone to (different) reaction time adjusted shift rpm
+    derive expected time in gear shifting optimally
+    
+    merge self.rpm and self.rpm_var
+    
+    blank shift leds after detecting gear change
+    gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
+    blank on gear variable changing is simplest, but can be very slow
+    we can use inputs: https://pypi.org/project/inputs/0.3/
+    or https://gist.github.com/artizirk/b407ba86feb7f0227654f8f5f1541413
+    or https://github.com/bayangan1991/PYXInput
+'''
 BLACK = '#000000'
 GREEN = '#80FF80'
 AMBER = '#FFBF7F'
@@ -250,22 +250,23 @@ class GUILed:
                 
             self.shiftrpm[gear] = rpm
             self.step[gear] = (self.shiftrpm[gear] - self.lower_bound[gear])/4
-         #   self.logger.info(f"gear {gear} newshiftrpm {self.shiftrpm[gear]} "
-         #                    f"start {self.lower_bound[gear]} step {self.step[gear]}")
             
             gear_table = self.state_table[gear]
             for x in range(1,5):
                 gear_table[x].set(int(self.lower_bound[gear] + self.step[gear]*(x-1)))
             gear_table[5].set(self.shiftrpm[gear]) #happy state
             gear_table[6].set(self.unhappy_rpm[gear]) #unhappy state
-            
-            #self.logger.info(gear_table)
         
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
         self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm} rpm steps")
         
-        self.run_shiftleds[sum(self.run_shiftleds)] = False #highest available gear should not show leds
-            
+        #self.run_shiftleds[sum(self.run_shiftleds)] = False #highest available gear should not show leds
+        
+        #grey out gears that do not have a shift rpm
+        for label_array, active in zip(self.trigger_labels, self.run_shiftleds[1:]):
+            fg = constants.text_color if active else '#1A1A1A'
+            for label in label_array:
+                label.configure(fg=fg)
 
     def update_button(self, event):
         if (V.shiftlight_x.get() != self.window.winfo_x() or V.shiftlight_y.get() != self.window.winfo_y()):
@@ -284,10 +285,6 @@ class GUILed:
             return
         
         self.rpm = fdp.current_engine_rpm
-        # #if engine rpm is dropping, do not drop corrected rpm until difference drops below hysteresis value
-        # if (fdp.current_engine_rpm - self.rpm <= -self.hysteresis_rpm or
-        #     fdp.current_engine_rpm - self.rpm >= 0):
-        #     self.rpm = fdp.current_engine_rpm
         
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
@@ -332,16 +329,22 @@ class GUILed:
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1, columnspan=2)
         
-        row += 2
+        row += 2 #TODO: split settings and trigger table
+        
+        self.trigger_labels = []
         #TODO: hide rows that have run_shiftled as false
         tkinter.Label(self.frame, text='Gear \ State', width=10, **opts).grid(row=row+0, column=0, sticky=tkinter.E)
         for state in range(1, len(STATES)):
             tkinter.Label(self.frame, text=state, width=5, **opts).grid(row=row+0, column=0+state, sticky=tkinter.N)
         for gear in range(1, 11):            
             tkinter.Label(self.frame, text=gear, width=5, **opts).grid(row=row+gear, column=0, sticky=tkinter.E)
+            row_labels = []
             for state in range(1, len(STATES)):
-                tkinter.Label(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts).grid(row=row+gear, column=0+state)
-
+                label = tkinter.Label(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts)
+                label.grid(row=row+gear, column=0+state)
+                row_labels.append(label)
+            self.trigger_labels.append(row_labels)
+            
         self.frame.pack(fill='both', expand=True)
     
     def reset(self):
@@ -352,7 +355,7 @@ class GUILed:
         # self.lower_bound_var.set("0000")
         # self.step_var.set("0000")
         self.update_rpm_var = True
-        self.rpm_var.set("0000 0000")
+        self.rpm_var.set("0000")
         
 
         
