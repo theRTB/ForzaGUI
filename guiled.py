@@ -24,6 +24,20 @@ TODO:
     add audio tone to (different) reaction time adjusted shift rpm
     derive expected time in gear shifting optimally
     
+    add log of actual duration per state per gear
+    
+    add displayed difference of reaction time state vs actual shift
+    
+    add linear extrapolation when looking up how far to run backwards on the rpm/speed array
+    this in case the result goes below the minimum rpm collected
+    
+    set a minimum distance in rpm between states for high gears
+    
+    hide shift lights if game is in menu/paused -> use fdp.is_race_on
+    
+    rpm/speed array is useless for gear that cannot hit rev limit
+    find conditional to force a neutral style illumination interval
+    
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     blank on gear variable changing is simplest, but can be very slow
@@ -140,8 +154,10 @@ class GUILed:
         self.update_rpm_var = True
         self.rpm_var = tkinter.IntVar(value=0)
         
+        self.display_lights_var = tkinter.BooleanVar(value=True)
+        
         self.state_table = [[tkinter.IntVar() for x in range(0, len(STATES))] for y in range(11)]
-                    
+    
         self.__init__window(root)
         V._init_tkintervariables()
             
@@ -255,7 +271,7 @@ class GUILed:
             gear_table[6].set(self.unhappy_rpm[gear]) #unhappy state
         
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
-        self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm} rpm steps")
+        self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm:.0f} rpm steps")
         
         #self.run_shiftleds[sum(self.run_shiftleds)] = False #highest available gear should not show leds
         
@@ -306,6 +322,12 @@ class GUILed:
         for i in range(10):
             self.canvas.itemconfig(self.ledbar[i], fill=ledbar[i])
 
+    def update_lights_visibility(self):
+        if self.display_lights_var.get():
+            self.window.deiconify()
+        else:
+            self.window.withdraw()
+
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
@@ -325,6 +347,10 @@ class GUILed:
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1, columnspan=2)
+        
+        tkinter.Checkbutton(self.frame, text='Lights', variable=self.display_lights_var,
+                            bg=constants.background_color, fg=constants.text_color,
+                            command=self.update_lights_visibility).grid(row=row+1, column=3, columnspan=2)
         
         row += 2 #TODO: split settings and trigger table
         
