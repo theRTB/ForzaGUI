@@ -24,8 +24,6 @@ TODO:
     add audio tone to (different) reaction time adjusted shift rpm
     derive expected time in gear shifting optimally
     
-    merge self.rpm and self.rpm_var
-    
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     blank on gear variable changing is simplest, but can be very slow
@@ -87,7 +85,7 @@ class V():
     hysteresis_pct_revlimit = Variable('Hysteresis downwards', .015, 'Double', 'percent') #0.1% of rev limit
     state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
-    shiftlight_y = Variable('Shiftlight location y', 1763, 'Int', 'pixels')
+    shiftlight_y = Variable('Shiftlight location y', 1363, 'Int', 'pixels')
     
     #initialize tkinter variable must be done after creating a tkinter root window
     @classmethod 
@@ -137,11 +135,10 @@ class GUILed:
         self.step = [(self.shiftrpm[x] - self.lower_bound[x])/4 for x in range(11)]
         
         self.state = 0
-        self.rpm = 0
         self.statedowntimer = 0
         
         self.update_rpm_var = True
-        self.rpm_var = tkinter.StringVar(value='0000')
+        self.rpm_var = tkinter.IntVar(value=0)
         
         self.state_table = [[tkinter.IntVar() for x in range(0, len(STATES))] for y in range(11)]
                     
@@ -277,22 +274,22 @@ class GUILed:
         self.logger.info("update button hit!")
 
     def update (self, fdp):
-        if self.update_rpm_var:
-            self.rpm_var.set(f"{fdp.current_engine_rpm:.0f} {self.rpm:.0f}")
+        if self.update_rpm_var: #update rate 30hz
+            self.rpm_var.set(int(fdp.current_engine_rpm))
         self.update_rpm_var = not(self.update_rpm_var)
         
         if not self.run_shiftleds[fdp.gear]:
             return
         
-        self.rpm = fdp.current_engine_rpm
+        #self.rpm = fdp.current_engine_rpm
         
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
-            if self.rpm > shiftrpm.get():
+            if self.rpm_var.get() > shiftrpm.get():
                 break
             
         if state < self.state:
-            if self.rpm <= self.state_table[fdp.gear][state].get() - self.hysteresis_rpm:
+            if self.rpm_var.get() <= self.state_table[fdp.gear][state].get() - self.hysteresis_rpm:
                 self.state = state
             elif self.countdowntimer < V.state_dropdown_delay.get():
                 self.countdowntimer += 1
@@ -332,7 +329,6 @@ class GUILed:
         row += 2 #TODO: split settings and trigger table
         
         self.trigger_labels = []
-        #TODO: hide rows that have run_shiftled as false
         tkinter.Label(self.frame, text='Gear \ State', width=10, **opts).grid(row=row+0, column=0, sticky=tkinter.E)
         for state in range(1, len(STATES)):
             tkinter.Label(self.frame, text=state, width=5, **opts).grid(row=row+0, column=0+state, sticky=tkinter.N)
@@ -352,10 +348,10 @@ class GUILed:
         self.dropdowntimer = V.state_dropdown_delay.get()
         self.update_leds()
         
-        # self.lower_bound_var.set("0000")
-        # self.step_var.set("0000")
         self.update_rpm_var = True
         self.rpm_var.set("0000")
+        self.run_shiftleds = [False for x in range(11)]
+        [state.set(0) for row in self.state_table for state in row]
         
 
         
