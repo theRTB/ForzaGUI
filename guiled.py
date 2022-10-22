@@ -21,7 +21,9 @@ TODO:
     move constants into objects
         name, value, gui_var, text, posttext, from/to lambdas
         dynamic led sizing?
+        
     add audio tone to (different) reaction time adjusted shift rpm
+    
     derive expected time in gear shifting optimally
     
     add log of actual duration per state per gear
@@ -34,6 +36,7 @@ TODO:
     set a minimum distance in rpm between states for high gears
     
     hide shift lights if game is in menu/paused -> use fdp.is_race_on
+    fdp.is_race_on already used, need rewrite in gui_ledonly
     
     rpm/speed array is useless for gear that cannot hit rev limit
     find conditional to force a neutral style illumination interval
@@ -57,8 +60,8 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER] + [BLACK]*6,
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, ] + [BLACK]*4,
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
-    [BLUE]*10,
-    [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]
+    [BLUE]*10,                                                         #shift state, or reaction time state
+    [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]           #overrev state
 
 START_X = 0
 START_Y = 0
@@ -69,6 +72,7 @@ HEIGHT = LED_HEIGHT
 WIDTH = LED_WIDTH*LED_COUNT
 
 #extend tkinter.Variable? get and set functions are only set for the subtypes
+#consider property() functionality
 class Variable():
     def __init__(self, name, defaultvalue, vartype, unit):
         self.name = name
@@ -92,16 +96,16 @@ class Variable():
         
 #convenient class for displaying and modifying variables live in the GUI
 class V(): 
-    illumination_interval = Variable('Illumination interval', int(2.0*60), 'Int', 'frames')  #2.0 seconds
-    reaction_time = Variable('Reaction time', 12, 'Int', 'frames')  #200 milliseconds
+    illumination_interval = Variable('Illumination interval', int(1.0*60), 'Int', 'frames')  #1.0 seconds
+    reaction_time = Variable('Reaction time', 10, 'Int', 'frames')  #200 milliseconds
     distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')  #83 milliseconds
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
-    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .015, 'Double', 'percent') #0.1% of rev limit
+    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .04, 'Double', 'percent') #0.1% of rev limit
     state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', 1363, 'Int', 'pixels')
     
-    #initialize tkinter variable must be done after creating a tkinter root window
+    #initializing tkinter variable must be done after creating a tkinter root window
     @classmethod 
     def _init_tkintervariables(cls):
         for name, value in cls.__dict__.items():
@@ -297,13 +301,13 @@ class GUILed:
         if not self.run_shiftleds[fdp.gear]:
             return
         
-        #self.rpm = fdp.current_engine_rpm
-        
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
             if self.rpm_var.get() > shiftrpm.get():
                 break
-            
+        
+        #drop down in state only if drop in rpm is higher than hysteresis value
+        #alternatively, drop down in state after x frames
         if state < self.state:
             if self.rpm_var.get() <= self.state_table[fdp.gear][state].get() - self.hysteresis_rpm:
                 self.state = state
@@ -352,7 +356,7 @@ class GUILed:
                             bg=constants.background_color, fg=constants.text_color,
                             command=self.update_lights_visibility).grid(row=row+1, column=3, columnspan=2)
         
-        row += 2 #TODO: split settings and trigger table
+        row += 2 #TODO: split settings and trigger table into separate frames
         
         self.trigger_labels = []
         tkinter.Label(self.frame, text='Gear \ State', width=10, **opts).grid(row=row+0, column=0, sticky=tkinter.E)
