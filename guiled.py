@@ -124,7 +124,7 @@ class GUILedDummy:
     def __init__(self, logger, root):
         pass
         
-    def set_rpmtable(self, rpmtable, gears, revlimit, trace):
+    def set_rpmtable(self, rpmtable, revlimit, trace):
         pass
         
     def update (self, fdp):
@@ -206,22 +206,21 @@ class GUILed:
         y = self.window.winfo_y() + deltay
         self.window.geometry(f"+{x}+{y}")
 
-
-    def set_rpmtable(self, rpmtable, gears, revlimit, trace):
+    def set_rpmtable(self, rpmtable, revlimit, trace):
         self.logger.info(f"revlimit {int(revlimit)} gear_collected {trace.gear_collected}")
         
         self.rpmtable = rpmtable
         self.revlimit = revlimit
         
-        drag = DragDerivation(gears, final_drive=1, trace=trace)
+        drag = DragDerivation(trace.gears, final_drive=1, trace=trace)
         self.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
         
         lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
         rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
-        gearratio_collected = gears[trace.gear_collected-1]
+        gearratio_collected = trace.gears[trace.gear_collected-1]
         
         #data['rpm'] is the drag corrected rpm over time per gear
-        for data, gearratio in zip(self.geardata[1:], gears):
+        for data, gearratio in zip(self.geardata[1:], trace.gears):
             data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
             
         self.calculate_state_triggers()

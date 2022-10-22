@@ -185,7 +185,8 @@ class MainWindow:
             if fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
                 self.collectedingear = fdp.gear
-                self.trace = Trace(gear_collected=fdp.gear)
+                self.trace = Trace(gear_collected=fdp.gear,
+                                   gears=self.gearstats.gearratios)
         #collect data
         if self.collect_rpm == 2:
             #self.logger.info(f"{fdp.current_engine_rpm} vs {self.prevrev_torque}")
@@ -539,7 +540,7 @@ class MainWindow:
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
 
         self.logger.info(list(enumerate(self.rpmtable)))
-        self.ledbar.set_rpmtable(self.rpmtable, gears, self.revlimit, self.trace)
+        self.ledbar.set_rpmtable(self.rpmtable, self.revlimit, self.trace)
         self.gearstats.set_rpmtable(self.rpmtable)
         
         if self.torquegraph_var.get() == 0:
