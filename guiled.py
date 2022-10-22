@@ -62,8 +62,8 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
     [BLUE]*10,                                                         #shift state, or reaction time state
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]           #overrev state
-STATE_SHIFT = len(STATES)-1
-STATE_OVERREV = len(STATES)
+STATE_SHIFT = len(STATES)-2
+STATE_OVERREV = len(STATES)-1
 
 
 START_X = 0
