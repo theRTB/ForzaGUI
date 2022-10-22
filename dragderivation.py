@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 #from numpy.polynomial import Polynomial as poly
 from pprint import pprint
+import json
+
 
 #steps
 #F10 to start updating the GUI
@@ -90,10 +92,11 @@ class Trace():
     REMOVE_FROM_START = 5 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
     DEFAULTFILENAME = "rpmtorqueraw.txt"
     
-    def __init__(self, gear_collected, fromfile=False, filename=None):
+    def __init__(self, gear_collected, gears, fromfile=False, filename=None):
         self.array = []
         self.gear_collected = gear_collected
-        
+        self.gears = [g for g in gears if g != 0] #strip unused gears
+
         if fromfile:
             if filename is None:
                 filename = Trace.DEFAULTFILENAME
@@ -111,9 +114,20 @@ class Trace():
         self.power  = np.array([x[2]*Trace.factor_power for x in array])
         self.speed  = np.array([x[3]*Trace.factor_speed for x in array])
         self.accel  = np.array([x[4] for x in array])
-    
-    #TODO: update this when adding write to file function
+
     def readfromfile(self, filename=DEFAULTFILENAME):
+        with open(filename) as file:
+            raw = json.load(file)
+            self.gear_collected = raw[0]
+            self.gears = raw[1]
+            self.array = raw[2]
+        self.finish()
+
+    def writetofile(self, filename=DEFAULTFILENAME):
+        with open(filename, "w") as file:
+            json.dump([self.gear_collected, self.gears, self.array], file)
+
+    def legacy_readfromfile(self, filename=DEFAULTFILENAME):
         array = []
         with open(filename) as raw:
             array = raw.read().split("), (")
@@ -126,9 +140,8 @@ class Trace():
         
         #convert all data to float
         self.array = [[float(p) for p in point] for point in array]
-        
-    #TODO: rewrite read and write from file to use csv
-    def writetofile(self, filename=DEFAULTFILENAME):
+
+    def legacy_writetofile(self, filename=DEFAULTFILENAME):
         array = list(zip(self.rpm, 
                     self.torque, 
                     self.power/Trace.factor_power, 

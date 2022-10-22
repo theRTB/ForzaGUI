@@ -201,13 +201,13 @@ class MainWindow:
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the RPM/Torque button")
                 self.trace.finish()
-                self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.txt")
-                with open("rpmtorqueraw.txt", "w") as file:
-                    file.write(str(self.rpmtorque))
+                self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
+                # with open("rpmtorqueraw.txt", "w") as file:
+                #     file.write(str(self.rpmtorque))
                 #self.logger.info(self.rpmtorque)
                 self.collect_rpm = 0
-                self.infotree.item(self.peak_power, values=('peak_power_kw', round(max([x[2] for x in self.rpmtorque])), 1))
-                self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max([x[1] for x in self.rpmtorque])), 1))
+                self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
+                self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
 
         if fdp.power < 0 and fdp.accel > 0:
             self.revlimit = max(self.prevrev, self.revlimit)
