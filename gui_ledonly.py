@@ -196,11 +196,11 @@ class MainWindow:
                                        fdp.speed,
                                        fdp.acceleration_z)
                 self.rpmtorque.append(item)
-                self.trace.add(item)
+                self.trace.add(fdp)
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the RPM/Torque button")
                 self.trace.finish()
-                self.trace.writetofile("rpmtorqueraw_trace.txt")
+                self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.txt")
                 with open("rpmtorqueraw.txt", "w") as file:
                     file.write(str(self.rpmtorque))
                 #self.logger.info(self.rpmtorque)
@@ -261,6 +261,7 @@ class MainWindow:
             if key == "drivetrain_type":
                 value = ['FWD', 'RWD', 'AWD'][value]
             self.infotree.item(self.infovar_tree[key], values=(key,value))
+        #TODO: add check to enable button to load torque/ratio button
 
     def reset_car_info(self):
         """reset car info and tree view
@@ -304,6 +305,10 @@ class MainWindow:
         
         self.rpmtable = [0 for x in range(11)]
 
+    def load_data(self, event):
+        self.logger.info("Load data button was pressed! It did nothing!")
+    #grab car ordinal and car performance index from self.infovartree
+
     def set_car_info_frame(self):
         """set car info frame
         """
@@ -342,7 +347,12 @@ class MainWindow:
         
         self.infotree.pack(fill="both", expand=True)
         tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, bg=constants.background_color, fg=constants.text_color).pack()
-        
+
+        self.load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
+                                borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
+        self.load_data_button.pack()
+        self.load_data_button.bind('<Button-1>', self.load_data)
+
         self.car_info_frame.grid(row=0, column=0, sticky='news')
         
     def set_car_perf_frame(self):
@@ -492,6 +502,7 @@ class MainWindow:
             self.threadPool.submit(starting)
             
 #TODO: split calculation and graphing into separate functions
+#TODO: rewrite calculation to use Trace
     def rpmtorque_handler(self, event):
         #log data (through update_car_info) if no data exists
         if len(self.rpmtorque) == 0:
