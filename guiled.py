@@ -62,8 +62,8 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
     [BLUE]*10,                                                         #shift state, or reaction time state
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]           #overrev state
-STATE_SHIFT = 5
-STATE_OVERREV = 6
+STATE_SHIFT = len(STATES)-1
+STATE_OVERREV = len(STATES)
 
 
 START_X = 0
@@ -100,10 +100,10 @@ class Variable():
 #convenient class for displaying and modifying variables live in the GUI
 class V(): 
     illumination_interval = Variable('Illumination interval', int(1.0*60), 'Int', 'frames')  #1.0 seconds
-    reaction_time = Variable('Reaction time', 10, 'Int', 'frames')  #200 milliseconds
-    distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')  #83 milliseconds
+    reaction_time = Variable('Reaction time', 10, 'Int', 'frames')
+    distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
-    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .04, 'Double', 'percent') #0.1% of rev limit
+    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .05, 'Double', 'percent')
     state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
     shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', 1363, 'Int', 'pixels')
@@ -208,7 +208,7 @@ class GUILed:
 
 
     def set_rpmtable(self, rpmtable, gears, revlimit, trace):
-        self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
+        self.logger.info(f"revlimit {int(revlimit)} gear_collected {trace.gear_collected}")
         
         self.rpmtable = rpmtable
         self.revlimit = revlimit
@@ -243,7 +243,7 @@ class GUILed:
             #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
             adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), self.revlimit, self.geardata[gear]['rpm'])
             adjusted_rpmlimit_abs = int(self.revlimit*V.distance_from_revlimit_pct.get())
-            self.logger.info(f"gear {gear} rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
+            self.logger.info(f"{gear}: rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
                         
             gear_table = self.state_table[gear]
             gear_table[STATE_OVERREV].set(min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)) #unhappy state
