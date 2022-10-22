@@ -121,7 +121,7 @@ class GUILedDummy:
     def __init__(self, logger, root):
         pass
         
-    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
+    def set_rpmtable(self, rpmtable, gears, revlimit, trace):
         pass
         
     def update (self, fdp):
@@ -218,7 +218,7 @@ class GUILed:
         return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
     #TODO: remove unused variables: rpmvalues and collectedingear
-    def set_rpmtable(self, rpmtable, rpmvalues, gears, revlimit, collectedingear, trace):
+    def set_rpmtable(self, rpmtable, gears, revlimit, trace):
         self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
         
         self.rpmtable = rpmtable

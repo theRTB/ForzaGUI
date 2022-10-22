@@ -528,7 +528,7 @@ class MainWindow:
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
 
         self.logger.info(list(enumerate(self.rpmtable)))
-        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear, self.trace)
+        self.ledbar.set_rpmtable(self.rpmtable, gears, self.revlimit, self.trace)
         self.gearstats.set_rpmtable(self.rpmtable)
         
         if self.torquegraph_var.get() == 0:
