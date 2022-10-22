@@ -69,6 +69,8 @@ def main():
     
     draw_rpm_time(drag, 3, gears, drag.geardata)
 
+    
+
 def draw_rpm_time(trace, collectedingear, gears, geardata):
     lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
     rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
@@ -98,7 +100,8 @@ class Trace():
             self.readfromfile(filename)
             self.finish()
     
-    def add(self, item):
+    def add(self, fdp):
+        item = (fdp.current_engine_rpm, fdp.torque, fdp.power, fdp.speed, fdp.acceleration_z)
         self.array.append(item)
     
     def finish(self):
