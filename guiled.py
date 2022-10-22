@@ -62,6 +62,9 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
     [BLUE]*10,                                                         #shift state, or reaction time state
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]           #overrev state
+STATE_SHIFT = 5
+STATE_OVERREV = 6
+
 
 START_X = 0
 START_Y = 0
@@ -209,15 +212,7 @@ class GUILed:
         y = self.window.winfo_y() + deltay
         self.window.geometry(f"+{x}+{y}")
 
-    def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
-        for j, x in enumerate(rpmvalues):
-            if x >= rpm_start:
-                offset = int(max(j - framecount, 0))
-                return int(rpmvalues[offset])
-                #print(f"j {j} val {rpmvalues[j]} offset {offset}")
-        return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
 
-    #TODO: remove unused variables: rpmvalues and collectedingear
     def set_rpmtable(self, rpmtable, gears, revlimit, trace):
         self.logger.info(f"revlimit {revlimit} gear_collected {trace.gear_collected}")
         
@@ -236,7 +231,15 @@ class GUILed:
             data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
             
         self.calculate_state_triggers()
-    
+
+    def timeadjusted_rpm(self, framecount, rpm_start, rpmvalues):
+        for j, x in enumerate(rpmvalues):
+            if x >= rpm_start:
+                offset = int(max(j - framecount, 0))
+                return int(rpmvalues[offset])
+                #print(f"j {j} val {rpmvalues[j]} offset {offset}")
+        return int(rpmvalues[-framecount-1]) #if rpm_start not in rpmvalues, commonly used for revlimit
+
     #TODO: remove intermediary step with lower_bound, step and shiftrpm and translate straight to state triggers
     def calculate_state_triggers(self):
         for gear, rpm in enumerate(self.rpmtable):
@@ -251,34 +254,26 @@ class GUILed:
             adjusted_rpmlimit_abs = int(self.revlimit*V.distance_from_revlimit_pct.get())
             self.logger.info(f"adjusted rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
-            rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
-            
             #at optimal shift rpm, we change state to 'past optimal' because humans have reaction time
-            self.unhappy_rpm[gear] = rpm
-            rpm = self.timeadjusted_rpm(V.reaction_time.get(), rpm, self.geardata[gear]['rpm'])
-            self.logger.info(f"adjusted for reaction time {rpm}")
-            
-            for j, x in enumerate(self.geardata[gear]['rpm']):
-                if x >= rpm:
-                    offset = int(max(j - V.illumination_interval.get(), 0))
-                    self.lower_bound[gear] = int(self.geardata[gear]['rpm'][offset])
-                    #print(f"j {j} val {rpmvalues[j]} offset {offset}")
-                    break
-                
-            self.shiftrpm[gear] = rpm
+            self.unhappy_rpm[gear] = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
+            self.shiftrpm[gear] = self.timeadjusted_rpm(V.reaction_time.get(), self.unhappy_rpm[gear], self.geardata[gear]['rpm'])
+            self.lower_bound[gear] = self.timeadjusted_rpm(V.illumination_interval.get(), self.shiftrpm[gear], self.geardata[gear]['rpm'])                
             self.step[gear] = (self.shiftrpm[gear] - self.lower_bound[gear])/4
+            self.logger.info(f"adjusted for reaction time {rpm}")            
             
             gear_table = self.state_table[gear]
-            for x in range(1,5):
-                gear_table[x].set(int(self.lower_bound[gear] + self.step[gear]*(x-1)))
-            gear_table[5].set(self.shiftrpm[gear]) #happy state
-            gear_table[6].set(self.unhappy_rpm[gear]) #unhappy state
+            # for x in range(1,5):
+            #     gear_table[x].set(int(self.lower_bound[gear] + self.step[gear]*(x-1)))
+            gear_table[STATE_OVERREV].set(min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)) #unhappy state
+            gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), self.unhappy_rpm[gear], self.geardata[gear]['rpm'])) #happy state
+            interval = int(V.illumination_interval.get()/(STATE_SHIFT-1)) #STATE_SHIFT-1 is the number of states for the ramp up
+            for state in range(STATE_SHIFT-1, 0, -1):
+                gear_table[state].set(self.timeadjusted_rpm(interval, gear_table[state+1].get(), self.geardata[gear]['rpm']))
+                
         
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
         self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm:.0f} rpm steps")
-        
-        #self.run_shiftleds[sum(self.run_shiftleds)] = False #highest available gear should not show leds
-        
+                
         #grey out gears that do not have a shift rpm
         for label_array, active in zip(self.trigger_labels, self.run_shiftleds[1:]):
             fg = constants.text_color if active else '#1A1A1A'
