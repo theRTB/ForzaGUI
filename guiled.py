@@ -61,9 +61,11 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, ] + [BLACK]*4,
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
     [BLUE]*10,                                                         #shift state, or reaction time state
-    [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED] ]           #overrev state
-STATE_SHIFT = len(STATES)-2
-STATE_OVERREV = len(STATES)-1
+    [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED],            #overrev state
+    [RED]*10 ]                                                         #rev limit state
+STATE_REVLIMIT = len(STATES)-1
+STATE_OVERREV = STATE_REVLIMIT-1
+STATE_SHIFT = STATE_OVERREV-1
 
 
 START_X = 0
@@ -248,6 +250,7 @@ class GUILed:
             self.logger.info(f"{gear}: rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
             gear_table = self.state_table[gear]
+            gear_table[STATE_REVLIMIT].set(min(adjusted_rpmlimit_ms, adjusted_rpmlimit_abs))
             gear_table[STATE_OVERREV].set(min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)) #unhappy state
             gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), gear_table[STATE_OVERREV].get(), self.geardata[gear]['rpm'])) #happy state
             interval = int(V.illumination_interval.get()/(STATE_SHIFT-1)) #STATE_SHIFT-1 is the number of states for the ramp up
