@@ -55,14 +55,11 @@ import json
 
 def main():
     global gears, drag
-  #  gears = [12.506, 7.437, 4.847, 3.7] #datsun 510, collected 2, final_drive 1
-  #  gears = [13.89, 8.794, 6.425, 5.164, 4.373, 3.751, 3.184, 2.7, 2.295] #nsx acura stock, collected 4, final drive 1
-    #drag = DragDerivation(gears, final_drive=1, trace=None, gear_collected=3, filename='rpmtorqueraw.txt')
-    drag = DragDerivation(trace=None, filename='trace_ord3749_pi900.json')
+    car_ordinal = 3402
+    car_performance_index = 731
+    drag = DragDerivation(trace=None, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
     gears = drag.gears
     
-#    geardata = DragDerivation.derive_timespeed_all_gears(drag.torque, drag.torque_adj, drag.speed, 
-#                               drag.speed_gradient, drag.gears, drag.gearratio_collected, drag.C)
     drag.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
     DragDerivation.draw_timespeed_graphs(drag.gears, drag.geardata)
         
@@ -70,7 +67,7 @@ def main():
                             drag.speed_gradient, drag.gears, drag.gearratio_collected,
                             drag.initial_ratio, drag.C, drag.CUT)
     
-    draw_rpm_time(drag, 3, gears, drag.geardata)
+    draw_rpm_time(drag, drag.gear_collected, gears, drag.geardata)
 
     
 
