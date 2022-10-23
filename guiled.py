@@ -278,6 +278,9 @@ class GUILed:
         self.update_rpm_var = not(self.update_rpm_var)
         
         if not self.run_shiftleds[fdp.gear]:
+            if self.state != 0: #reset state for gears without leds
+                self.state = 0
+                self.update_leds()
             return
         
         #loop over state triggers in reverse order
