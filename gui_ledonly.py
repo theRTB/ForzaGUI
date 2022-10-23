@@ -63,9 +63,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 '''
 TODO:
+- Move magical constants to a configuration file
 - add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
-- gather points for acceleration graph (on flat ground)
 - move torque graph to a frame inside the window?
   https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
 
