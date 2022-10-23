@@ -63,10 +63,10 @@ STATES = [
     [BLUE]*10,                                                         #shift state, or reaction time state
     [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED],            #overrev state
     [RED]*10 ]                                                         #rev limit state
+
 STATE_REVLIMIT = len(STATES)-1
 STATE_OVERREV = STATE_REVLIMIT-1
 STATE_SHIFT = STATE_OVERREV-1
-
 
 START_X = 0
 START_Y = 0
@@ -351,7 +351,7 @@ class GUILed:
             tkinter.Label(self.frame, text=gear, width=5, **opts).grid(row=row+gear, column=0, sticky=tkinter.E)
             row_labels = []
             for state in range(1, len(STATES)):
-                label = tkinter.Label(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts)
+                label = tkinter.Entry(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts)
                 label.grid(row=row+gear, column=0+state)
                 row_labels.append(label)
             self.trigger_labels.append(row_labels)
