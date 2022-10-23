@@ -93,8 +93,8 @@ class GUIGearStats:
             rad = (fdp.wheel_rotation_speed_FL + fdp.wheel_rotation_speed_FR) / 2.0
         elif fdp.drivetrain_type == 1: #RWD
             rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0
-        else: #AWD assumes primary power is sent to rear, otherwise gear ratio floats. 
-            #rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0
+        else:
+            #rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0  #AWD assumes primary power is sent to rear, otherwise gear ratio floats. 
             rad = (fdp.wheel_rotation_speed_FL + fdp.wheel_rotation_speed_FR + 
                    fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 4.0
         if rad == 0:
