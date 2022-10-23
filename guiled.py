@@ -240,10 +240,13 @@ class GUILed:
             self.run_shiftleds[gear] = True
                         
             #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
-            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), self.revlimit, self.geardata[gear]['rpm'])
+            #scale graph to rev limit as to avoid issues with gears capping out below rev limit leading to a too low rpmlimit_ms
+            adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), 
+                                                         self.revlimit, 
+                                                         self.geardata[gear]['rpm']*(self.revlimit/self.geardata[gear]['rpm'][-1])) 
             adjusted_rpmlimit_abs = int(self.revlimit*V.distance_from_revlimit_pct.get())
             self.logger.info(f"{gear}: rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
-                        
+            
             gear_table = self.state_table[gear]
             gear_table[STATE_OVERREV].set(min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)) #unhappy state
             gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), gear_table[STATE_OVERREV].get(), self.geardata[gear]['rpm'])) #happy state
