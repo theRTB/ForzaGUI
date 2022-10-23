@@ -57,8 +57,9 @@ def main():
     global gears, drag
   #  gears = [12.506, 7.437, 4.847, 3.7] #datsun 510, collected 2, final_drive 1
   #  gears = [13.89, 8.794, 6.425, 5.164, 4.373, 3.751, 3.184, 2.7, 2.295] #nsx acura stock, collected 4, final drive 1
-    gears = [8.027, 5.605, 4.239, 3.55, 2.716, 2.24] #dodge srt viper gts 2013, collected 3, final drive 1
-    drag = DragDerivation(gears, final_drive=1, trace=None, gear_collected=3, filename='rpmtorqueraw.txt')
+    #drag = DragDerivation(gears, final_drive=1, trace=None, gear_collected=3, filename='rpmtorqueraw.txt')
+    drag = DragDerivation(trace=None, filename='trace_ord3749_pi900.json')
+    gears = drag.gears
     
 #    geardata = DragDerivation.derive_timespeed_all_gears(drag.torque, drag.torque_adj, drag.speed, 
 #                               drag.speed_gradient, drag.gears, drag.gearratio_collected, drag.C)
@@ -84,24 +85,23 @@ def draw_rpm_time(trace, collectedingear, gears, geardata):
         data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
         plt.plot(data['time'], data['rpm'])
 
-#TODO: add write to file output that includes gearing and geear_collected
 class Trace():
     factor_power = 1/1000 #W to KW
     factor_speed = 3.6 #m/s to km/h
     
-    REMOVE_FROM_START = 5 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
+    REMOVE_FROM_START = 10 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
     DEFAULTFILENAME = "rpmtorqueraw.txt"
     
-    def __init__(self, gear_collected, gears, fromfile=False, filename=None):
-        self.array = []
-        self.gear_collected = gear_collected
-        self.gears = [g for g in gears if g != 0] #strip unused gears
-
+    def __init__(self, gear_collected=None, gears=[], fromfile=False, filename=None):
         if fromfile:
             if filename is None:
                 filename = Trace.DEFAULTFILENAME
             self.readfromfile(filename)
             self.finish()
+        else:
+            self.array = []
+            self.gear_collected = gear_collected
+            self.gears = [g for g in gears if g != 0] #strip unused gears
     
     def add(self, fdp):
         item = (fdp.current_engine_rpm, fdp.torque, fdp.power, fdp.speed, fdp.acceleration_z)
@@ -161,9 +161,9 @@ class DragDerivation():
     TIC = 1/60 #seconds
     MAXTIME = 90 #seconds
     
-    def __init__(self, gears, final_drive=1, trace=None, gear_collected=None, filename=None):
-        self.gears = [g/final_drive for g in gears]
-        self.final_drive = final_drive
+    def __init__(self, gears=None, final_drive=1, trace=None, gear_collected=None, filename=None):
+        #self.gears = [g/final_drive for g in gears]
+        #self.final_drive = final_drive
         
         if trace is None:
             #gear_collected cannot be None
@@ -174,6 +174,7 @@ class DragDerivation():
         self.power = trace.power
         self.speed = trace.speed
         self.accel = trace.accel
+        self.gears = trace.gears
         
         self.gearratio_collected = self.gears[self.gear_collected-1]
         
