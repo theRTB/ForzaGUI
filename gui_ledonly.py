@@ -22,6 +22,8 @@ from scipy import interpolate
 import matplotlib.pyplot as plt
 import numpy as np
 
+from os.path import exists
+
 import constants
 #import keyboard_helper
 
@@ -146,6 +148,7 @@ class MainWindow:
         
         self.infovar_tree = {}
         self.infovar_car_ordinal = None
+        self.infovar_car_performance_index = None
         
         self.prevrev = 0
         self.prevrev_torque = 0
@@ -156,14 +159,11 @@ class MainWindow:
         self.peak_power = None
         self.peak_torque = None
 
-        self.collect_rpm = 0
-        self.rpmtorque = []
-        self.collectedingear = 0
-        
+        self.collect_rpm = 0    
+        self.trace = None
         self.rpmtable = [0 for x in range(1,11)]      
         
-        self.torquegraph_var = tkinter.IntVar()
-        self.torquegraph_var.set(0)
+        self.torquegraph_var = tkinter.IntVar(value=0)
     
     def update_car_info(self, fdp):
         """update car info
@@ -184,27 +184,17 @@ class MainWindow:
             #self.logger.info(f"Waiting on throttle input {fdp.current_engine_rpm} vs {self.prevrev_torque}")
             if fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
-                self.collectedingear = fdp.gear
                 self.trace = Trace(gear_collected=fdp.gear,
                                    gears=self.gearstats.gearratios)
         #collect data
         if self.collect_rpm == 2:
             #self.logger.info(f"{fdp.current_engine_rpm} vs {self.prevrev_torque}")
             if fdp.power > 0 and fdp.accel > 0: #fdp.current_engine_rpm > self.prevrev_torque:
-                item = (fdp.current_engine_rpm, 
-                                       fdp.torque,
-                                       fdp.power/1000.0,
-                                       fdp.speed,
-                                       fdp.acceleration_z)
-                self.rpmtorque.append(item)
                 self.trace.add(fdp)
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the RPM/Torque button")
                 self.trace.finish()
                 self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
-                # with open("rpmtorqueraw.txt", "w") as file:
-                #     file.write(str(self.rpmtorque))
-                #self.logger.info(self.rpmtorque)
                 self.collect_rpm = 0
                 self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
                 self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
@@ -217,6 +207,7 @@ class MainWindow:
         
         if self.infovar_car_ordinal != fdp.car_ordinal:
             self.infovar_car_ordinal = fdp.car_ordinal
+            self.infovar_car_performance_index = fdp.car_performance_index
             self.update_car_info_infovars(fdp)
         
         self.map.update(fdp)
@@ -262,7 +253,6 @@ class MainWindow:
             if key == "drivetrain_type":
                 value = ['FWD', 'RWD', 'AWD'][value]
             self.infotree.item(self.infovar_tree[key], values=(key,value))
-        #TODO: add check to enable button to load torque/ratio button
 
     def reset_car_info(self):
         """reset car info and tree view
@@ -297,18 +287,33 @@ class MainWindow:
         self.revlimit_counter = 0
         self.shiftlimit = 0
         
+        self.car_ordinal = 0
+        self.car_performance_index = 0
         self.infotree.item(self.peak_power, values=('peak_power_kw', '-'))
         self.infotree.item(self.peak_torque, values=('peak_torque_Nm', '-'))
       
         self.collect_rpm = 0
-        self.rpmtorque = []
-        self.rpmspeed = []
+        self.trace = None
+        #self.rpmspeed = []
         
         self.rpmtable = [0 for x in range(11)]
 
     def load_data(self, event):
-        self.logger.info("Load data button was pressed! It did nothing!")
-    #grab car ordinal and car performance index from self.infovartree
+        self.logger.info("Load data button was pressed!")
+        filename = f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
+        if exists(filename):
+            self.trace = Trace(fromfile=True, filename=f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json")
+            self.revlimit = self.trace.rpm[-1]
+            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
+            self.gearstats.display()
+            self.logger.info("loaded file")
+            self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
+            self.trace.finish()
+            self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
+            self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
+            self.rpmtorque_handler(None)
+        else:
+            self.logger.info("File does not exist")
 
     def set_car_info_frame(self):
         """set car info frame
@@ -503,21 +508,20 @@ class MainWindow:
             self.threadPool.submit(starting)
             
 #TODO: split calculation and graphing into separate functions
-#TODO: rewrite calculation to use Trace
     def rpmtorque_handler(self, event):
         #log data (through update_car_info) if no data exists
-        if len(self.rpmtorque) == 0:
+        if self.trace is None:
             self.collect_rpm = 1
             self.logger.info("Logging rpm/torque/power")
             return
         
         self.collect_rpm = 0
-        self.logger.info("Drawing graph")
+        self.logger.info("Doing maths")
         
-        rpm = [x[0] for x in self.rpmtorque]
-        torque = [x[1] for x in self.rpmtorque]
-        power = [x[2] for x in self.rpmtorque] #power in kw
-        speed = [x[3]*3.6 for x in self.rpmtorque] #speed in kmh
+        rpm = self.trace.rpm
+        torque = self.trace.torque
+        power = self.trace.power #power in kw
+        speed = self.trace.speed #speed in kmh
                     
         gears = [self.gearstats.gearratios[key] for key in range(1,11) if self.gearstats.gearratios[key] != 0]
         ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
@@ -547,7 +551,7 @@ class MainWindow:
             return
         
         #val is the median ratio of rpm and speed scaled to the final ratio
-        val = statistics.median([(a/b) for (a, b) in zip(rpm, speed)])*gears[-1]/gears[self.collectedingear-1]
+        val = statistics.median([(a/b) for (a, b) in zip(rpm, speed)])*gears[-1]/gears[self.trace.gear_collected-1]
         
         plt.close()
         plt.ion()
