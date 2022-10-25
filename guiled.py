@@ -12,6 +12,10 @@ import math
 #import matplotlib.pyplot as plt
 import numpy as np
 
+#for importing config
+import json
+from os.path import exists
+
 from dragderivation import Trace, DragDerivation
 
 '''
@@ -48,6 +52,17 @@ TODO:
     or https://gist.github.com/artizirk/b407ba86feb7f0227654f8f5f1541413
     or https://github.com/bayangan1991/PYXInput
 '''
+
+FILENAME_SETTINGS = 'settings_guiled.json'
+config = {}
+if exists(FILENAME_SETTINGS):
+    with open(FILENAME_SETTINGS) as file:
+        config = json.load(file)
+else:
+    config = {"shiftlight_x": 960, "shiftlight_y": 540} #middle of a 1080p screen, safe enough
+    with open(FILENAME_SETTINGS, 'w') as file:
+        json.dump(config, file)
+    
 BLACK = '#000000'
 GREEN = '#80FF80'
 AMBER = '#FFBF7F'
@@ -108,8 +123,8 @@ class V():
     distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
     hysteresis_pct_revlimit = Variable('Hysteresis downwards', .05, 'Double', 'percent')
     state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
-    shiftlight_x = Variable('Shiftlight location x', 1532, 'Int', 'pixels')
-    shiftlight_y = Variable('Shiftlight location y', 1363, 'Int', 'pixels')
+    shiftlight_x = Variable('Shiftlight location x', config['shiftlight_x'], 'Int', 'pixels')
+    shiftlight_y = Variable('Shiftlight location y', config['shiftlight_y'], 'Int', 'pixels')
     
     #initializing tkinter variable must be done after creating a tkinter root window
     @classmethod 
