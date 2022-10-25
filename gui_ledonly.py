@@ -22,6 +22,8 @@ from scipy import interpolate
 import matplotlib.pyplot as plt
 import numpy as np
 
+#for importing config and data files
+import json
 from os.path import exists
 
 import constants
@@ -57,6 +59,16 @@ LATERALG = False
 BRAKETEST = False
 LAUNCHTEST = False
 GEARSTATS = True
+
+FILENAME_SETTINGS = 'settings_gui.json'
+config = {}
+if exists(FILENAME_SETTINGS):
+    with open(FILENAME_SETTINGS) as file:
+        config = json.load(file)
+else:
+    config = {"window_offset_x": 0, "window_offset_y": 0}
+    with open(FILENAME_SETTINGS, 'w') as file:
+        json.dump(config, file)
 
 # suppress matplotlib warning while running in thread
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -129,7 +141,7 @@ class MainWindow:
         self.root.grid_columnconfigure(2, minsize=250, weight=250)
 
         self.root.title("Forza Horizon 5: Totally Work-in-progress something stats")
-        self.root.geometry("1050x850+-1208+0")
+        self.root.geometry(f"1050x950+{config['window_offset_x']}+{config['window_offset_y']}")
         self.root.minsize(1050, 950)
         self.root.maxsize(1050, 950)
         self.root["background"] = constants.background_color
@@ -307,7 +319,7 @@ class MainWindow:
             self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
             self.gearstats.display()
             self.logger.info("loaded file")
-            self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
+            #self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
             self.trace.finish()
             self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
             self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
