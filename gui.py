@@ -6,6 +6,12 @@ from tkinter import scrolledtext
 
 from pynput.keyboard import Listener
 
+# from https://pypi.org/project/pynput/
+# section Ensuring consistent coordinates between listener and controller on Windows
+import ctypes
+PROCESS_PER_MONITOR_DPI_AWARE = 2
+ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+
 #from collections import deque
 import statistics
 #from math import pi
@@ -15,6 +21,10 @@ from scipy import interpolate
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+#for importing config and data files
+import json
+from os.path import exists
 
 import constants
 #import keyboard_helper
@@ -30,6 +40,8 @@ from guibraketest import GUIBraketest, GUIBraketestDummy
 from guilaunchtest import GUILaunchtest, GUILaunchtestDummy
 from guigearstats import GUIGearStats, GUIGearStatsDummy
 
+from dragderivation import Trace
+
 sys.path.append(r'./forza_motorsport')
 
 #import helper
@@ -41,7 +53,6 @@ MAP = False
 LED = False
 WHEELSIZE = False
 LAPTIMES = False
-
 SUSPENSION = True
 CARINFO = True
 LATERALG = True
@@ -49,26 +60,31 @@ BRAKETEST = True
 LAUNCHTEST = True
 GEARSTATS = True
 
+FILENAME_SETTINGS = 'settings_gui.json'
+config = {}
+if exists(FILENAME_SETTINGS):
+    with open(FILENAME_SETTINGS) as file:
+        config = json.load(file)
+else:
+    config = {"window_offset_x": 0, "window_offset_y": 0}
+    with open(FILENAME_SETTINGS, 'w') as file:
+        json.dump(config, file)
+
 # suppress matplotlib warning while running in thread
 warnings.filterwarnings("ignore", category=UserWarning)
 
 '''
 TODO:
+- Move magical constants to a configuration file
+- add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
-- gather points for acceleration graph (on flat ground)
+- move torque graph to a frame inside the window?
+  https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
 
--add lateral g per velocity
---gather points: latg, speed, tire grip
---draw graph?
 
 -remove forza dependency
-
 -figure out if socket can be closed cleanly
-
 -abstract away from the large list of plugins to a dictionary
-
-test if the traction frontier is more square under braking
-but i guess mash abs and mash the steering, maybe at various levels of abs
 
 NOTES
 fdp.dist_traveled seems broken for freeroam
@@ -113,10 +129,11 @@ class MainWindow:
     
     def __init__window(self):
         self.root = tkinter.Tk()
+        
         self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
         # Configure the rows that are in use to have weight #
         self.root.grid_rowconfigure(0, minsize=550, weight=550)
-        self.root.grid_rowconfigure(1, minsize=300, weight=300)
+        self.root.grid_rowconfigure(1, minsize=300, weight=400)
 
         # Configure the cols that are in use to have weight #
         self.root.grid_columnconfigure(0, minsize=175, weight=175)
@@ -124,9 +141,9 @@ class MainWindow:
         self.root.grid_columnconfigure(2, minsize=250, weight=250)
 
         self.root.title("Forza Horizon 5: Totally Work-in-progress something stats")
-        self.root.geometry("1050x850+-1208+0")
-        self.root.minsize(1050, 850)
-        self.root.maxsize(1050, 850)
+        self.root.geometry(f"1050x950+{config['window_offset_x']}+{config['window_offset_y']}")
+        self.root.minsize(1050, 950)
+        self.root.maxsize(1050, 950)
         self.root["background"] = constants.background_color
     
     def __init__variables(self):
@@ -143,6 +160,7 @@ class MainWindow:
         
         self.infovar_tree = {}
         self.infovar_car_ordinal = None
+        self.infovar_car_performance_index = None
         
         self.prevrev = 0
         self.prevrev_torque = 0
@@ -153,11 +171,11 @@ class MainWindow:
         self.peak_power = None
         self.peak_torque = None
 
-        self.collect_rpm = 0
-        self.rpmtorque = []
-        self.collectedingear = 0
+        self.collect_rpm = 0    
+        self.trace = None
+        self.rpmtable = [0 for x in range(1,11)]      
         
-        self.rpmtable = [0 for x in range(1,11)]       
+        self.torquegraph_var = tkinter.IntVar(value=0)
     
     def update_car_info(self, fdp):
         """update car info
@@ -178,24 +196,20 @@ class MainWindow:
             #self.logger.info(f"Waiting on throttle input {fdp.current_engine_rpm} vs {self.prevrev_torque}")
             if fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
-                self.collectedingear = fdp.gear
+                self.trace = Trace(gear_collected=fdp.gear,
+                                   gears=self.gearstats.gearratios)
         #collect data
         if self.collect_rpm == 2:
             #self.logger.info(f"{fdp.current_engine_rpm} vs {self.prevrev_torque}")
             if fdp.power > 0 and fdp.accel > 0: #fdp.current_engine_rpm > self.prevrev_torque:
-                self.rpmtorque.append((fdp.current_engine_rpm, 
-                                       fdp.torque,
-                                       fdp.power/1000.0,
-                                       fdp.speed,
-                                       fdp.boost))
+                self.trace.add(fdp)
             else: #finish up and draw graph
-                self.logger.info("Draw graph BY PRESSING THE GODDAMN BUTTON")
-                with open("rpmtorqueraw.txt", "w") as file:
-                    file.write(str(self.rpmtorque))
-                #self.logger.info(self.rpmtorque)
+                self.logger.info("Draw graph by pressing the RPM/Torque button")
+                self.trace.finish()
+                self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
-                self.infotree.item(self.peak_power, values=('peak_power_kw', round(max([x[2] for x in self.rpmtorque])), 1))
-                self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max([x[1] for x in self.rpmtorque])), 1))
+                self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
+                self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
 
         if fdp.power < 0 and fdp.accel > 0:
             self.revlimit = max(self.prevrev, self.revlimit)
@@ -205,6 +219,7 @@ class MainWindow:
         
         if self.infovar_car_ordinal != fdp.car_ordinal:
             self.infovar_car_ordinal = fdp.car_ordinal
+            self.infovar_car_performance_index = fdp.car_performance_index
             self.update_car_info_infovars(fdp)
         
         self.map.update(fdp)
@@ -284,15 +299,33 @@ class MainWindow:
         self.revlimit_counter = 0
         self.shiftlimit = 0
         
+        self.car_ordinal = 0
+        self.car_performance_index = 0
         self.infotree.item(self.peak_power, values=('peak_power_kw', '-'))
         self.infotree.item(self.peak_torque, values=('peak_torque_Nm', '-'))
       
         self.collect_rpm = 0
-        self.rpmtorque = []
-        self.rpmspeed = []
+        self.trace = None
+        #self.rpmspeed = []
         
         self.rpmtable = [0 for x in range(11)]
-        
+
+    def load_data(self, event):
+        self.logger.info("Load data button was pressed!")
+        filename = f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
+        if exists(filename):
+            self.trace = Trace(fromfile=True, filename=f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json")
+            self.revlimit = self.trace.rpm[-1]
+            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
+            self.gearstats.display()
+            self.logger.info("loaded file")
+            #self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
+            self.trace.finish()
+            self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
+            self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
+            self.rpmtorque_handler(None)
+        else:
+            self.logger.info("File does not exist")
 
     def set_car_info_frame(self):
         """set car info frame
@@ -331,7 +364,13 @@ class MainWindow:
         self.peak_torque = self.infotree.insert('', tkinter.END, text='peak_torque_Nm', values=('peak_torque_Nm','-'))
         
         self.infotree.pack(fill="both", expand=True)
-        
+        tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, bg=constants.background_color, fg=constants.text_color).pack()
+
+        self.load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
+                                borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
+        self.load_data_button.pack()
+        self.load_data_button.bind('<Button-1>', self.load_data)
+
         self.car_info_frame.grid(row=0, column=0, sticky='news')
         
     def set_car_perf_frame(self):
@@ -340,7 +379,7 @@ class MainWindow:
         # Place car perf frame
         self.car_perf_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
-        self.car_perf_frame.grid(row=0, column=1, sticky='news')
+        self.car_perf_frame.grid(row=0, column=1, sticky='news', columnspan=2)
         self.car_perf_frame.update() #is this necessary?
 
 
@@ -371,7 +410,7 @@ class MainWindow:
         self.lateralg.set_canvas(self.car_perf_frame)
         self.braketest.set_canvas(self.car_perf_frame)
         self.launchtest.set_canvas(self.car_perf_frame)
-     #   self.ledbar.set_canvas(self.car_perf_frame)
+        self.ledbar.set_canvas(self.car_perf_frame)
         
         self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
         self.frame_basic.place(         anchor=tkinter.NW,  relx=0.0 ,  rely=0.0) 
@@ -380,18 +419,19 @@ class MainWindow:
         self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
         self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
         self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
-        #self.ledbar.frame.place(        anchor=tkinter.S,   relx=0.5,   rely=1.00, width=500, height=90)
+        # self.ledbar.frame.place(        anchor=tkinter.SE,   relx=1,   rely=1)
                                                                                        
     def set_shift_point_frame(self):
         """set shift point frame
         """
         # place shift point frame
-        self.shift_point_frame = tkinter.Frame(self.root, border=0, relief="groove",
-                                               background=constants.background_color,
-                                               highlightthickness=True, highlightcolor=constants.text_color)
+        pass
+        # self.shift_point_frame = tkinter.Frame(self.root, border=0, relief="groove",
+        #                                        background=constants.background_color,
+        #                                        highlightthickness=True, highlightcolor=constants.text_color)
 
-        self.gearstats.set_canvas(self.shift_point_frame)
-        self.shift_point_frame.grid(row=0, column=2, sticky='news')
+        # #self.gearstats.set_canvas(self.shift_point_frame)
+        # self.shift_point_frame.grid(row=0, column=2, sticky='news')
 
     def set_button_frame(self):
         """set buttom frame
@@ -447,12 +487,13 @@ class MainWindow:
         self.program_info_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color,
                                                 relief="groove",
                                                 highlightthickness=True, highlightcolor=constants.text_color)
-        label = tkinter.Label(self.program_info_frame, text='RTB work in progress GUI for Forza remote telemetry. '
-                                                            'derived from https://github.com/Juice-XIJ/forza_auto_gear',
-                              bg=constants.background_color, borderwidth=2, fg=constants.text_color,
-                              relief="groove", anchor="nw", justify=tkinter.LEFT)
-        label.bind('<Configure>', lambda e: label.config(wraplength=int(label.winfo_width() * 0.9)))
-        label.pack(fill="both", expand=True)
+        # label = tkinter.Label(self.program_info_frame, text='RTB work in progress GUI for Forza remote telemetry. '
+        #                                                     'derived from https://github.com/Juice-XIJ/forza_auto_gear',
+        #                       bg=constants.background_color, borderwidth=2, fg=constants.text_color,
+        #                       relief="groove", anchor="nw", justify=tkinter.LEFT)
+       # label.bind('<Configure>', lambda e: label.config(wraplength=int(label.winfo_width() * 0.9)))
+        # label.pack(fill="both", expand=True)
+        self.gearstats.set_canvas(self.program_info_frame)
         self.program_info_frame.grid(row=1, column=2, sticky='news')
 
     def collect_data_handler(self, event):
@@ -481,18 +522,18 @@ class MainWindow:
 #TODO: split calculation and graphing into separate functions
     def rpmtorque_handler(self, event):
         #log data (through update_car_info) if no data exists
-        if len(self.rpmtorque) == 0:
+        if self.trace is None:
             self.collect_rpm = 1
             self.logger.info("Logging rpm/torque/power")
             return
         
         self.collect_rpm = 0
-        self.logger.info("Drawing graph")
+        self.logger.info("Doing maths")
         
-        rpm = [x[0] for x in self.rpmtorque]
-        torque = [x[1] for x in self.rpmtorque]
-        power = [x[2] for x in self.rpmtorque] #power in kw
-        speed = [x[3]*3.6 for x in self.rpmtorque] #speed in kmh
+        rpm = self.trace.rpm
+        torque = self.trace.torque
+        power = self.trace.power #power in kw
+        speed = self.trace.speed #speed in kmh
                     
         gears = [self.gearstats.gearratios[key] for key in range(1,11) if self.gearstats.gearratios[key] != 0]
         ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
@@ -514,8 +555,15 @@ class MainWindow:
             self.logger.info(f"{i+1}: shift rpm {shiftrpm}, drop to {int(shiftrpm/ratio)}, "
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
 
+        self.logger.info(list(enumerate(self.rpmtable)))
+        self.ledbar.set_rpmtable(self.rpmtable, self.revlimit, self.trace)
+        self.gearstats.set_rpmtable(self.rpmtable)
+        
+        if self.torquegraph_var.get() == 0:
+            return
+        
         #val is the median ratio of rpm and speed scaled to the final ratio
-        val = statistics.median([(a/b) for (a, b) in zip(rpm, speed)])*gears[-1]/gears[self.collectedingear-1]
+        val = statistics.median([(a/b) for (a, b) in zip(rpm, speed)])*gears[-1]/gears[self.trace.gear_collected-1]
         
         plt.close()
         plt.ion()
@@ -559,9 +607,6 @@ class MainWindow:
         fig.tight_layout()
         plt.show()
 
-        self.logger.info(list(enumerate(self.rpmtable)))
-        self.ledbar.set_rpmtable(self.rpmtable, rpm, gears, self.revlimit, self.collectedingear)
-        self.gearstats.set_rpmtable(self.rpmtable)
 
     def gatherratios_handler(self, event):
         self.gearstats.gatherratios = not(self.gearstats.gatherratios)
