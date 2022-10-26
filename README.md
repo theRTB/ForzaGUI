@@ -37,6 +37,8 @@ As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and 
 Original code by https://github.com/Juice-XIJ/forza_auto_gear
 
 ![example GUI](example.png)
+![example GUI ledonly](gui_ledonly_AcuraNSX_stock.png)
+![example ingame ledbar](ingameledbar_AcuraNSX_stock.png)
 ![example torque graph per gear](example_AcuraNSX_stock.png)
 ![example drag corrected torque per gear](drag_corrected_torque_AcuraNSX_stock.png)
 ![example derived speed over time per gear](speed_per_gear_AcuraNSX_stock.png)
