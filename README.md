@@ -28,6 +28,7 @@ Basic steps for torque graph:
 - Collect gear ratios with F9
 - F9 again to stop updating ratios during data collection for torque
 - set car to a drag strip and select gear for several seconds of data collection (3rd or 4th is usually fine)
+- let the RPM drop to near idle, but not so low the game will engage the clutch
 - Press F8 and press W for instant 100% forward acceleration
 - Hold W until rev limit is hit
 - click on RPM/Torque (f8) button to display graph
