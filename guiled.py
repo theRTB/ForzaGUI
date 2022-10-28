@@ -338,46 +338,55 @@ class GUILed:
             self.window.withdraw()
 
     def set_canvas(self, frame):
-        self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
+        self.set_config_canvas(frame)
+        self.set_table_canvas(frame)
+
+    def set_config_canvas(self, frame):
+        self.frame_config = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
         
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 'font':('Helvetica 12')}
         
         for row, v in enumerate(V._var_list()):
-            tkinter.Label(self.frame, text=v.name, **opts).grid(row=row, column=0)
-            tkinter.Entry(self.frame, textvariable=v.var, width=5, justify=tkinter.RIGHT, **opts).grid(row=row, column=1)
-            tkinter.Label(self.frame, text=v.unit, **opts).grid(row=row, column=2)            
+            tkinter.Label(self.frame_config, text=v.name, **opts).grid(row=row, column=0)
+            tkinter.Entry(self.frame_config, textvariable=v.var, width=5, justify=tkinter.RIGHT, **opts).grid(row=row, column=1)
+            tkinter.Label(self.frame_config, text=v.unit, **opts).grid(row=row, column=2)            
             
-        tkinter.Label(self.frame, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
+        tkinter.Label(self.frame_config, textvariable=self.rpm_var, bg=constants.background_color, fg=constants.text_color,
                       font=('Helvetica 18 bold')).grid(row=row+1)
 
         #TODO: grey out update button unless changes are made?
-        button = tkinter.Button(self.frame, text='Update', bg=constants.background_color, fg=constants.text_color,
+        button = tkinter.Button(self.frame_config, text='Update', bg=constants.background_color, fg=constants.text_color,
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1, columnspan=2)
         
-        tkinter.Checkbutton(self.frame, text='Lights', variable=self.display_lights_var,
+        tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var,
                             bg=constants.background_color, fg=constants.text_color,
                             command=self.update_lights_visibility).grid(row=row+1, column=3, columnspan=2)
         
-        row += 2 #TODO: split settings and trigger table into separate frames
+        self.frame_config.pack(fill='both', expand=True)
+    
+    def set_table_canvas(self, frame):
+        self.frame_table = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
+                                            highlightthickness=True, highlightcolor=constants.text_color)
+        opts = {'bg':constants.background_color, 'fg':constants.text_color, 'font':('Helvetica 12')}
         
         self.trigger_labels = []
-        tkinter.Label(self.frame, text='Gear \ State', width=10, **opts).grid(row=row+0, column=0, sticky=tkinter.E)
+        tkinter.Label(self.frame_table, text='Gear \ State', width=10, **opts).grid(row=0, column=0, sticky=tkinter.E)
         for state in range(1, len(STATES)):
-            tkinter.Label(self.frame, text=state, width=5, **opts).grid(row=row+0, column=0+state, sticky=tkinter.N)
+            tkinter.Label(self.frame_table, text=state, width=5, **opts).grid(row=0, column=0+state, sticky=tkinter.N)
         for gear in range(1, 11):            
-            tkinter.Label(self.frame, text=gear, width=5, **opts).grid(row=row+gear, column=0, sticky=tkinter.E)
+            tkinter.Label(self.frame_table, text=gear, width=5, **opts).grid(row=gear, column=0, sticky=tkinter.E)
             row_labels = []
             for state in range(1, len(STATES)):
-                label = tkinter.Entry(self.frame, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts)
-                label.grid(row=row+gear, column=0+state)
+                label = tkinter.Entry(self.frame_table, textvariable=self.state_table[gear][state], width=5, justify=tkinter.RIGHT, **opts)
+                label.grid(row=gear, column=0+state)
                 row_labels.append(label)
             self.trigger_labels.append(row_labels)
             
-        self.frame.pack(fill='both', expand=True)
-    
+        self.frame_table.pack(fill='both', expand=True)
+
     def reset(self):
         self.state = 0
         self.dropdowntimer = V.state_dropdown_delay.get()

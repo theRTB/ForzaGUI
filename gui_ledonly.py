@@ -236,7 +236,6 @@ class MainWindow:
         #update display variables
         self.display_car_info(fdp)
 
-
     def display_car_info(self, fdp):
         self.acceleration_var.set(f"{str(round(fdp.accel / 255 * 100, 1))}%")
         self.brake_var.set(f"{str(round(fdp.brake / 255 * 100, 1))}%")
@@ -419,8 +418,9 @@ class MainWindow:
         #self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
         #self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
         #self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
-        self.ledbar.frame.place(        anchor=tkinter.SE,   relx=1,   rely=1)
-                                                                                       
+        self.ledbar.frame_config.place(  anchor=tkinter.NE,   relx=1,   rely=0)
+        self.ledbar.frame_table.place(   anchor=tkinter.SE,   relx=1,   rely=1)
+    
     def set_shift_point_frame(self):
         """set shift point frame
         """
