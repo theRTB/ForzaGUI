@@ -68,6 +68,7 @@ GREEN = '#80FF80'
 AMBER = '#FFBF7F'
 RED   = '#FF8088'
 BLUE  = '#8080FF'
+CYAN  = '#80FFFF'
 
 #mclaren pattern with added rev limit state
 STATES = [
@@ -76,8 +77,8 @@ STATES = [
     [GREEN, GREEN, AMBER, AMBER] + [BLACK]*6,
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, ] + [BLACK]*4,
     [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
-    [BLUE]*10,                                                         #shift state, or reaction time state
-    [RED, BLUE, RED, BLUE, RED, RED, BLUE, RED, BLUE, RED],            #overrev state
+    [CYAN]*10,                                                         #shift state, or reaction time state
+    [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
     [RED]*10 ]                                                         #rev limit state
 
 STATE_REVLIMIT = len(STATES)-1
