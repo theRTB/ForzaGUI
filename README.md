@@ -23,7 +23,7 @@ Examples of telemetry displayed, derived numbers and graphs:
 - transmission statistics: per-gear ratio (no effective way to derive final ratio), duration of power cut (excludes clutch behavior)
 - torque-per-gear graph: after collecting a full rpm sweep at moderate speed with per-gear ratio
 
-Basic steps for torque graph:
+Steps for collecting data per car:
 - Press F10 to start monitoring
 - Press F9 to enable ratio collecting
   - Drive around a bit per gear until number stabilizes in Ratio column bottom right
@@ -40,7 +40,8 @@ Basic steps for torque graph:
 - Press F8 and let RPM drop to near idle rpm
 - Press and hold W (default keyboard key for accel)
 - Release W after engine hits rev limit
-- Click the RPM/Torque button
+- Click the Sweep button
+- The data is saved. On restarts of the GUI click **Load torque/ratios** after clicking Connect (or pressing F10)
 
 As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
 
