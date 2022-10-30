@@ -440,10 +440,10 @@ class MainWindow:
         self.button_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color, relief="groove",
                                           highlightthickness=True, highlightcolor=constants.text_color)
 
-        button_names = [('Collect Data', self.collect_data_handler, constants.collect_data),
+        button_names = [('Connect', self.collect_data_handler, constants.collect_data),
                         ('Collect ratios', self.gatherratios_handler, constants.gatherratios),
                         #('Analysis', self.analysis_handler, constants.analysis),
-                        ('RPM/Torque', self.rpmtorque_handler, constants.analysis),
+                        ('Sweep', self.rpmtorque_handler, constants.analysis),
                         ('Reset', self.reset_handler, constants.auto_shift)]
                         #('Pause', self.pause_handler, constants.stop),
                         #('Exit', self.exit_handler, constants.close)]
