@@ -10,6 +10,8 @@ import tkinter.ttk
 
 import csv
 
+from os.path import exists
+
 #import statistics
 
 import constants
@@ -72,13 +74,15 @@ class GUICarInfo:
     
     firstrow = []
     data = []
-    with open('fh5_cars_kudosprime2.csv', encoding='ISO-8859-1') as rawcsv:
-        csvobject = csv.reader(rawcsv, delimiter='\t')
-        firstrow = next(csvobject)
-        for row in csvobject: #convert column 5 and 6 to integer from string
-            row[4] = int(row[4]) if row[4] != '' else row[4]
-            row[5] = int(row[5]) if row[5] != '' else row[5]
-            data.append(row)   
+    filename = 'fh5_cars_kudosprime2.csv'
+    if exists(filename):
+        with open(filename, encoding='ISO-8859-1') as rawcsv:
+            csvobject = csv.reader(rawcsv, delimiter='\t')
+            firstrow = next(csvobject)
+            for row in csvobject: #convert column 5 and 6 to integer from string
+                row[4] = int(row[4]) if row[4] != '' else row[4]
+                row[5] = int(row[5]) if row[5] != '' else row[5]
+                data.append(row)   
     
     def __init__(self, logger):
         self.logger = logger
@@ -101,13 +105,14 @@ class GUICarInfo:
         
     @classmethod
     def reloaddata(cls):
-        with open('fh5_cars_kudosprime2.csv') as rawcsv:
-            csvobject = csv.reader(rawcsv, delimiter='\t')
-            firstrow = next(csvobject)
-            for row in csvobject: #convert column 5 and 6 to integer from string
-                row[4] = int(row[4]) if row[4] != '' else row[4]
-                row[5] = int(row[5]) if row[5] != '' else row[5]
-                GUICarInfo.data.append(row)     
+        if exists(GUICarInfo.filename):
+            with open(GUICarInfo.filename) as rawcsv:
+                csvobject = csv.reader(rawcsv, delimiter='\t')
+                firstrow = next(csvobject)
+                for row in csvobject: #convert column 5 and 6 to integer from string
+                    row[4] = int(row[4]) if row[4] != '' else row[4]
+                    row[5] = int(row[5]) if row[5] != '' else row[5]
+                    GUICarInfo.data.append(row)     
 
     @classmethod
     def sortdata(cls):
@@ -115,7 +120,7 @@ class GUICarInfo:
 
     @classmethod
     def writedata_to_csv(cls):
-        with open('fh5_cars_kudosprime2.csv', 'w', newline='') as rawcsv:
+        with open(GUICarInfo.filename, 'w', newline='') as rawcsv:
             csvobject = csv.writer(rawcsv, delimiter='\t', quotechar='', quoting=csv.QUOTE_NONE)    
             csvobject.writerow(GUICarInfo.firstrow)
             for row in GUICarInfo.data:
