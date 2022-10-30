@@ -24,7 +24,7 @@ import json
 #disable gear ratio collection after obtaining all the ratios (ignore reverse)
 #if necessary: upgrade tire compound because tires must not lose traction during sweep
 #head to a drag strip (flat area with tarmac), be in manual
-#set gear to one that is affected by drag at the higher rpm values
+#set gear to one that is affected by drag at the higher rpm values (3rd or 4th normally works)
 #be near idle rpm or whatever lowest value where forza doesn't add clutch when full throttle
 #press F8, then hold W for 100% throttle
 #release W after hitting the rev limit
@@ -55,8 +55,8 @@ import json
 
 def main():
     global gears, drag
-    car_ordinal = 3402
-    car_performance_index = 731
+    car_ordinal = 2096
+    car_performance_index = 675
     drag = DragDerivation(trace=None, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
     gears = drag.gears
     

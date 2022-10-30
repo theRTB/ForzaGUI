@@ -20,14 +20,7 @@ from dragderivation import Trace, DragDerivation
 
 '''
 TODO:
-    
-    implement 1 ----- 2 ----- 3 ----- 4 ----- happy --|-- overrev 1
-    
     test hysteresis value
-    create configuration file for constants
-    move constants into objects
-        name, value, gui_var, text, posttext, from/to lambdas
-        dynamic led sizing?
         
     add audio tone to (different) reaction time adjusted shift rpm
     
@@ -328,7 +321,7 @@ class GUILed:
         #drop down in state only if drop in rpm is higher than hysteresis value
         #alternatively, drop down in state after x frames
         if state < self.state:
-            if self.rpm_var.get() <= self.state_table[fdp.gear][state].get() - self.hysteresis_rpm:
+            if self.rpm_var.get() <= self.state_table[fdp.gear][self.state].get() - self.hysteresis_rpm:
                 self.state = state
             elif self.countdowntimer < V.state_dropdown_delay.get():
                 self.countdowntimer += 1

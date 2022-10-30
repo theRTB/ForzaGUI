@@ -27,35 +27,39 @@ from scipy import interpolate
 import statistics
 import math
 
-final_drive = 4.37
-gears = [2.37, 1.91, 1.55, 1.28, 1.08, 0.92, 0.8]
-collectedingear = 4
+# final_drive = 4.37
+# gears = [2.37, 1.91, 1.55, 1.28, 1.08, 0.92, 0.8]
+# collectedingear = 4
 
+from dragderivation import Trace
+car_ordinal = 3749  #trace_ord3749_pi900
+car_performance_index = 900
 
-gears = [x*final_drive for x in gears]
+trace = Trace(fromfile=True, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
+
+gears = trace.gears
+collectedingear = trace.gear_collected
 ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
 
-array = []
-with open("rpmtorqueraw.txt") as raw:
-    array = raw.read().split("), (")
 
-#manipulate raw input to be readable
-array[0]= array[0][2:]
-array[-1]= array[0][:-2]
-array = array[1:-1]
-array = [x.split(', ') for x in array]
+rpm = trace.rpm
+torque =  trace.torque
+power = trace.power #power in kw
+speed = trace.speed #speed in kmh
 
-#remove inaccurate start of array
-#array = array[8:]
+torque_val = torque[power.argmax()]
+rpm_val = rpm[power.argmax()]
 
-#init arrays for calculations
-rpm = [float(x[0]) for x in array]
-torque = [float(x[1]) for x in array]
-power = [float(x[2]) for x in array]
-speed = [float(x[3])*3.6 for x in array]
+ratio_min = rpm[0]
 
+torque_contour = [torque_val*ratio for ratio in np.linspace(0.1, 100, 2000)]
+rpm_contour = [rpm_val/ratio*gears[-1] for ratio in np.linspace(0.1, 100, 2000)]
+
+
+fig, ax = plt.subplots()
 #plt.plot(rpm, torque)
-#plt.plot(rpm, power)
+ax.plot(rpm, power)
+
 
 #torque
 # graph = [0 for x in range(len(gears)+1)]
@@ -72,7 +76,6 @@ speed = [float(x[3])*3.6 for x in array]
 
 # gear 1 is rpm power
 # gear 2 is rpm*ratio1/ratio2
-
 shiftrpms = []
 
 for ratio in ratios:
@@ -111,8 +114,7 @@ for i, (g, s) in enumerate(zip(gears, shiftrpms)):
         label = f'{i+1:>2}  maxspeed {rpm[-1]/val:5.1f}'
     else:
         label = f'{i+1:>2} {s:>9} {gears[-1]*s/(val*g):>10.1f}'
-    ax.plot([gears[-1]*x/g for x in rpm], [t*g for t in torque], 
-                   label=label)  
+    ax.plot([gears[-1]*x/g for x in rpm], [t*g for t in torque], label=label)  
 
 ymin, ymax = ax.get_ylim()
 for g, s in zip(gears, shiftrpms):
@@ -137,6 +139,8 @@ ax.set_xlim(0, rpmmax)
 ax.set_xticks(xticks)
 ax2.set_xticks(xticks)
 ax2.set_xticklabels([round(x/val,1) for x in xticks])
+
+ax.plot(torque_contour, rpm_contour)
 
 fig.tight_layout()
 plt.show()
