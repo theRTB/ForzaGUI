@@ -54,14 +54,21 @@ TODO:
 '''
 
 FILENAME_SETTINGS = 'settings_guiled.json'
-config = {}
+DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p screen, safe enough
+                 "illumination_interval": 60, #must be divisible by 5
+                 "reaction_time": 10,  #frames within shift state until optimal shift rpm
+                 "distance_from_revlimit_ms": 5, 
+                 "distance_from_revlimit_pct": .99,   #99.0% of rev limit
+                 "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
+                 "state_dropdown_delay": 0} #dropping state only allowed after x frames
+config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
         config = json.load(file)
 else:
-    config = {"shiftlight_x": 960, "shiftlight_y": 540} #middle of a 1080p screen, safe enough
     with open(FILENAME_SETTINGS, 'w') as file:
         json.dump(config, file)
+
     
 BLACK = '#000000'
 GREEN = '#80FF80'
@@ -118,12 +125,12 @@ class Variable():
         
 #convenient class for displaying and modifying variables live in the GUI
 class V(): 
-    illumination_interval = Variable('Illumination interval', int(1.0*60), 'Int', 'frames')  #1.0 seconds
-    reaction_time = Variable('Reaction time', 10, 'Int', 'frames')
-    distance_from_revlimit_ms = Variable('Distance from revlimit', 5, 'Int', 'frames')
-    distance_from_revlimit_pct = Variable('Distance from revlimit', .99, 'Double', 'percent')  #99.0% of rev limit
-    hysteresis_pct_revlimit = Variable('Hysteresis downwards', .05, 'Double', 'percent')
-    state_dropdown_delay = Variable('State dropdown delay', 0, 'Int', 'frames')  #dropping state only allowed after x frames
+    illumination_interval = Variable('Illumination interval', config['illumination_interval'], 'Int', 'frames')  #1.0 seconds
+    reaction_time = Variable('Reaction time', config['reaction_time'], 'Int', 'frames')
+    distance_from_revlimit_ms = Variable('Distance from revlimit', config['distance_from_revlimit_ms'], 'Int', 'frames')
+    distance_from_revlimit_pct = Variable('Distance from revlimit', config['distance_from_revlimit_pct'], 'Double', 'pct revlimit')
+    hysteresis_pct_revlimit = Variable('Hysteresis downwards', config['hysteresis_pct_revlimit'], 'Double', 'pct revlimit')
+    state_dropdown_delay = Variable('State dropdown delay', config['state_dropdown_delay'], 'Int', 'frames')  
     shiftlight_x = Variable('Shiftlight location x', config['shiftlight_x'], 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', config['shiftlight_y'], 'Int', 'pixels')
     
@@ -138,6 +145,10 @@ class V():
     @classmethod
     def _var_list(cls):
         return [var for name, var in cls.__dict__.items() if name[0] != '_']
+    
+    @classmethod
+    def _to_config(cls):
+        return {name:var.get() for name, var in cls.__dict__.items() if name[0] != '_'}
 
 class GUILedDummy:
     def __init__(self, logger, root):
@@ -231,8 +242,8 @@ class GUILed:
         self.rpmtable = rpmtable
         self.revlimit = revlimit
         
-        drag = DragDerivation(trace.gears, final_drive=1, trace=trace)
-        self.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
+        self.drag = DragDerivation(trace.gears, final_drive=1, trace=trace)
+        self.geardata = DragDerivation.derive_timespeed_all_gears(**self.drag.__dict__)
         
         lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
         rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
@@ -295,6 +306,8 @@ class GUILed:
         else:
             self.calculate_state_triggers()
         self.logger.info("update button hit!")
+        with open(FILENAME_SETTINGS, 'w') as file:
+            json.dump(V._to_config(), file)
 
     def update (self, fdp):
         if self.update_rpm_var: #update rate 30hz
