@@ -102,7 +102,7 @@ class MainWindow:
 
         # forza info
         self.threadPool = ThreadPoolExecutor(max_workers=8, thread_name_prefix="exec")
-        self.forza5 = Forza(self.threadPool, self.logger, constants.packet_format, clutch=constants.enable_clutch)
+        self.forza5 = Forza(self.threadPool, self.logger, constants.packet_format)
         self.listener = Listener(on_press=self.on_press)
         
         self.map = GUIMap(self.logger) if MAP else GUIMapDummy(self.logger)
