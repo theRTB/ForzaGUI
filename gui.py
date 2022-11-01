@@ -204,7 +204,7 @@ class MainWindow:
             if fdp.power > 0 and fdp.accel > 0: #fdp.current_engine_rpm > self.prevrev_torque:
                 self.trace.add(fdp)
             else: #finish up and draw graph
-                self.logger.info("Draw graph by pressing the RPM/Torque button")
+                self.logger.info("Draw graph by pressing the Sweep (F8) button")
                 self.trace.finish()
                 self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
