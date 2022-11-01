@@ -61,12 +61,13 @@ LAUNCHTEST = False
 GEARSTATS = True
 
 FILENAME_SETTINGS = 'settings_gui.json'
-config = {}
+DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0}
+
+config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
-        config = json.load(file)
+        config.update(json.load(file))
 else:
-    config = {"window_offset_x": 0, "window_offset_y": 0}
     with open(FILENAME_SETTINGS, 'w') as file:
         json.dump(config, file)
 
