@@ -38,6 +38,10 @@ TODO:
     hide shift lights if game is in menu/paused -> use fdp.is_race_on
     fdp.is_race_on already used, need rewrite in gui_ledonly
     
+    add gear number underneath leds
+    transparency is possible with root.wm_attributes('-transparentcolor', 'red')
+    any frame or widget with red is then transparant. This does mess with aliasing
+    
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     blank on gear variable changing is simplest, but can be very slow
@@ -53,7 +57,10 @@ DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p sc
                  "distance_from_revlimit_ms": 5, 
                  "distance_from_revlimit_pct": .99,   #99.0% of rev limit
                  "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
-                 "state_dropdown_delay": 0} #dropping state only allowed after x frames
+                 "state_dropdown_delay": 0,#dropping state only allowed after x frames
+                 "led_height": 40, 
+                 "led_width": 40} 
+
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
@@ -87,8 +94,8 @@ STATE_SHIFT = STATE_OVERREV-1
 
 START_X = 0
 START_Y = 0
-LED_HEIGHT = 75
-LED_WIDTH = 75
+LED_HEIGHT = config['led_height']
+LED_WIDTH = config['led_width']
 LED_COUNT = 10
 HEIGHT = LED_HEIGHT
 WIDTH = LED_WIDTH*LED_COUNT
