@@ -64,7 +64,7 @@ DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p sc
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
-        config = json.load(file)
+        config.update(json.load(file))
 else:
     with open(FILENAME_SETTINGS, 'w') as file:
         json.dump(config, file)
@@ -77,8 +77,18 @@ RED   = '#FF8088'
 BLUE  = '#8080FF'
 CYAN  = '#80FFFF'
 
+SIDES_PATTERN = [
+    [BLACK]*10,
+    [GREEN] + [BLACK]*8 + [GREEN],
+    [GREEN, AMBER] + [BLACK]*6 + [AMBER, GREEN],
+    [GREEN, AMBER, AMBER] + [BLACK]*4 + [AMBER, AMBER, GREEN],
+    [GREEN, AMBER, AMBER, RED] + [BLACK]*2 + [RED, AMBER, AMBER, GREEN],
+    [CYAN]*10,                                                         #shift state, or reaction time state
+    [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
+    [RED]*10 ]                                                         #rev limit state
+
 #mclaren pattern with added rev limit state
-STATES = [
+LINEAR_PATTERN = [
     [BLACK]*10,
     [GREEN, GREEN] + [BLACK]*8,
     [GREEN, GREEN, AMBER, AMBER] + [BLACK]*6,
@@ -87,6 +97,8 @@ STATES = [
     [CYAN]*10,                                                         #shift state, or reaction time state
     [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
     [RED]*10 ]                                                         #rev limit state
+
+STATES = LINEAR_PATTERN
 
 STATE_REVLIMIT = len(STATES)-1
 STATE_OVERREV = STATE_REVLIMIT-1
