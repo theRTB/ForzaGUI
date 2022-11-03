@@ -54,62 +54,76 @@ FILENAME_SETTINGS = 'settings_guiled.json'
 DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p screen, safe enough
                  "illumination_interval": 60, #must be divisible by 5
                  "reaction_time": 10,  #frames within shift state until optimal shift rpm
-                 "distance_from_revlimit_ms": 5, 
+                 "distance_from_revlimit_ms": 5, #in frames
                  "distance_from_revlimit_pct": .99,   #99.0% of rev limit
                  "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
-                 "state_dropdown_delay": 0,#dropping state only allowed after x frames
-                 "led_height": 40, 
-                 "led_width": 40} 
+                 "state_dropdown_delay": 0, #dropping state only allowed after x frames
+                 "led_height": 40, #in pixels
+                 "led_width": 40,  #in pixels
+                 "sequence": 'linear'} #linear or sides
 
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
         config.update(json.load(file))
-else:
-    with open(FILENAME_SETTINGS, 'w') as file:
-        json.dump(config, file)
+with open(FILENAME_SETTINGS, 'w') as file:
+    json.dump(config, file)
 
+class Shiftlight():
+    BLACK = '#000000'
+    GREEN = '#80FF80'
+    AMBER = '#FFBF7F'
+    RED   = '#FF8088'
+    BLUE  = '#8080FF'
+    CYAN  = '#80FFFF'
     
-BLACK = '#000000'
-GREEN = '#80FF80'
-AMBER = '#FFBF7F'
-RED   = '#FF8088'
-BLUE  = '#8080FF'
-CYAN  = '#80FFFF'
-
-SIDES_PATTERN = [
-    [BLACK]*10,
-    [GREEN] + [BLACK]*8 + [GREEN],
-    [GREEN, AMBER] + [BLACK]*6 + [AMBER, GREEN],
-    [GREEN, AMBER, AMBER] + [BLACK]*4 + [AMBER, AMBER, GREEN],
-    [GREEN, AMBER, AMBER, RED] + [BLACK]*2 + [RED, AMBER, AMBER, GREEN],
-    [CYAN]*10,                                                         #shift state, or reaction time state
-    [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
-    [RED]*10 ]                                                         #rev limit state
-
-#mclaren pattern with added rev limit state
-LINEAR_PATTERN = [
-    [BLACK]*10,
-    [GREEN, GREEN] + [BLACK]*8,
-    [GREEN, GREEN, AMBER, AMBER] + [BLACK]*6,
-    [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, ] + [BLACK]*4,
-    [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
-    [CYAN]*10,                                                         #shift state, or reaction time state
-    [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
-    [RED]*10 ]                                                         #rev limit state
-
-STATES = SIDES_PATTERN
+    START_X = 0
+    START_Y = 0
+    
+    PATTERN_SIDES = [
+        [BLACK]*10,
+        [GREEN] + [BLACK]*8 + [GREEN],
+        [GREEN, AMBER] + [BLACK]*6 + [AMBER, GREEN],
+        [GREEN, AMBER, AMBER] + [BLACK]*4 + [AMBER, AMBER, GREEN],
+        [GREEN, AMBER, AMBER, RED] + [BLACK]*2 + [RED, AMBER, AMBER, GREEN],
+        [CYAN]*10,                                                         #shift state, or reaction time state
+        [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
+        [RED]*10 ]                                                         #rev limit state
+    
+    LED_COUNT = 10
+    LED_OFFSETS_SIDES = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
+    LED_OFFSETS_LINEAR = [0]*LED_COUNT
+    
+    #mclaren pattern with added rev limit state
+    PATTERN_LINEAR = [
+        [BLACK]*10,
+        [GREEN, GREEN] + [BLACK]*8,
+        [GREEN, GREEN, AMBER, AMBER] + [BLACK]*6,
+        [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, ] + [BLACK]*4,
+        [GREEN, GREEN, AMBER, AMBER, AMBER, AMBER, RED, RED] + [BLACK]*2,
+        [CYAN]*10,                                                         #shift state, or reaction time state
+        [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
+        [RED]*10 ]                                                         #rev limit state
+    
+    @classmethod
+    def variables(cls, sequence='linear'):
+        if sequence == 'linear':
+            return (Shiftlight.PATTERN_LINEAR, Shiftlight.LED_OFFSETS_LINEAR, Shiftlight.LED_COUNT)
+        else: #sides
+            return (Shiftlight.PATTERN_SIDES, Shiftlight.LED_OFFSETS_SIDES, Shiftlight.LED_COUNT)
+    
+STATES, LED_OFFSETS_Y, LED_COUNT = Shiftlight.variables(sequence=config['sequence'])
 
 STATE_REVLIMIT = len(STATES)-1
 STATE_OVERREV = STATE_REVLIMIT-1
 STATE_SHIFT = STATE_OVERREV-1
-
+    
 START_X = 0
 START_Y = 0
-LED_OFFSETS_Y = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
+#LED_OFFSETS_Y = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
 LED_HEIGHT = config['led_height']
 LED_WIDTH = config['led_width']
-LED_COUNT = 10
+#LED_COUNT = 10
 HEIGHT = LED_HEIGHT+max(LED_OFFSETS_Y)+1
 WIDTH = LED_WIDTH*LED_COUNT+1
 
