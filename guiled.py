@@ -98,7 +98,7 @@ LINEAR_PATTERN = [
     [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
     [RED]*10 ]                                                         #rev limit state
 
-STATES = LINEAR_PATTERN
+STATES = SIDES_PATTERN
 
 STATE_REVLIMIT = len(STATES)-1
 STATE_OVERREV = STATE_REVLIMIT-1
@@ -106,11 +106,12 @@ STATE_SHIFT = STATE_OVERREV-1
 
 START_X = 0
 START_Y = 0
+LED_OFFSETS_Y = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
 LED_HEIGHT = config['led_height']
 LED_WIDTH = config['led_width']
 LED_COUNT = 10
-HEIGHT = LED_HEIGHT
-WIDTH = LED_WIDTH*LED_COUNT
+HEIGHT = LED_HEIGHT+max(LED_OFFSETS_Y)+1
+WIDTH = LED_WIDTH*LED_COUNT+1
 
 #extend tkinter.Variable? get and set functions are only set for the subtypes
 #consider property() functionality
@@ -202,31 +203,44 @@ class GUILed:
         
     
         self.__init__window(root)
+   #     self.__init__anotherwin(root)
         V._init_tkintervariables()
-            
+    
+    def __init__anotherwin(self, root):
+        self.testwin = tkinter.Toplevel(root)
+        WIDTH = 1000
+        HEIGHT = 500
+        OFFSET_X = int(3840/2 - WIDTH/2)
+        OFFSET_Y = int(2160/2 - HEIGHT/2)
+   #     self.window.wm_attributes("-topmost", 1) #force always on top
+        self.testwin.geometry(f"{WIDTH}x{HEIGHT}+{OFFSET_X}+{OFFSET_Y}")
+        self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
+        self.canvas.pack()
+    
     def __init__window(self, root):
-            self.root = root
-            self.window = tkinter.Toplevel(root)
-            self.window.wm_attributes("-topmost", 1) #force always on top
-            self.window.geometry(f"{WIDTH}x{HEIGHT}+{V.shiftlight_x.defaultvalue}+{V.shiftlight_y.defaultvalue}")
-            self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg="#000000")
-            self.canvas.pack()
-            self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
+        self.root = root
+        self.window = tkinter.Toplevel(root)
+        self.window.wm_attributes("-topmost", 1) #force always on top
+        self.window.wm_attributes('-transparentcolor', 'red')
+        self.window.geometry(f"{WIDTH}x{HEIGHT}+{V.shiftlight_x.defaultvalue}+{V.shiftlight_y.defaultvalue}")
+        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg='red', highlightthickness=0)
+        self.canvas.pack()
+        self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
            
-            for i in range(LED_COUNT):
-                self.ledbar[i] = self.canvas.create_rectangle(START_X+LED_WIDTH*i, START_Y,
-                                                         START_X+LED_WIDTH*(i+1),START_Y+LED_HEIGHT, 
-                                                         fill='black', outline='white')
-                
-                #vertical bar, remember to swap *LED_COUNT from WIDTH to HEIGHT 
-                # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
-                #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
-                #                                              fill='black', outline='white')
+        for i in range(LED_COUNT):
+            self.ledbar[i] = self.canvas.create_rectangle(START_X+LED_WIDTH*i, START_Y+LED_OFFSETS_Y[i],
+                                                     START_X+LED_WIDTH*(i+1),START_Y+LED_HEIGHT+LED_OFFSETS_Y[i], 
+                                                     fill='black', outline='white')
             
-            #from https://stackoverflow.com/questions/4055267/tkinter-mouse-drag-a-window-without-borders-eg-overridedirect1
-            self.canvas.bind("<ButtonPress-1>", self.start_move)
-            self.canvas.bind("<ButtonRelease-1>", self.stop_move)
-            self.canvas.bind("<B1-Motion>", self.do_move)
+            #vertical bar, remember to swap *LED_COUNT from WIDTH to HEIGHT 
+            # self.ledbar[i] = self.canvas.create_rectangle(START_X,           START_Y+LED_HEIGHT*i, 
+            #                                              START_X+LED_WIDTH, START_Y+LED_HEIGHT*(i+1), 
+            #                                              fill='black', outline='white')
+        
+        #from https://stackoverflow.com/questions/4055267/tkinter-mouse-drag-a-window-without-borders-eg-overridedirect1
+        self.canvas.bind("<ButtonPress-1>", self.start_move)
+        self.canvas.bind("<ButtonRelease-1>", self.stop_move)
+        self.canvas.bind("<B1-Motion>", self.do_move)
 
     def start_move(self, event):
         self.x = event.x
@@ -422,7 +436,5 @@ class GUILed:
         self.rpm_var.set("0000")
         self.run_shiftleds = [False for x in range(11)]
         [state.set(0) for row in self.state_table for state in row]
-        
-
-        
+    
         
