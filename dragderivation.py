@@ -55,8 +55,8 @@ import json
 
 def main():
     global gears, drag
-    car_ordinal = 2096
-    car_performance_index = 675
+    car_ordinal = 2935
+    car_performance_index = 912
     drag = DragDerivation(trace=None, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
     gears = drag.gears
     
@@ -308,7 +308,9 @@ class DragDerivation():
     
         top_speeds = DragDerivation.top_speed_by_drag_all_gears(torque, speed, gears, gearratio_collected, C, do_print=True)
         #all memes aside, 488km/h is hard capped top speed in forza on flat ground from engine accel
-        vmax = max([x['top_speed'] for x in top_speeds] if top_speeds else 488) 
+        vmax = 488
+        if len(top_speeds) != 0:
+                vmax = max([x['top_speed'] for x in top_speeds])
     
         ax1.set_title(f"modified engine torque versus torque lost to drag, with C:{C:.6f}, CUT: {CUT}, vmax: {int(vmax)} km/h")
         ax1.set_xlabel('speed km/h')
