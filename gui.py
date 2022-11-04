@@ -64,7 +64,22 @@ FILENAME_SETTINGS = 'settings_gui.json'
 if len(sys.argv) > 1:
     FILENAME_SETTINGS = sys.argv[1]
 
-DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0}
+DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0, 
+    'plugins':{
+#    'frame_basic':{'enabled': False, 'anchor': 'NW', 'relx': 0.0, 'rely': 0.0}, #TODO: rewrite frame_basic to follow plugin format
+    'map':        {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}}, #TODO: remove .place call in guimap.py
+    'ledbar':     {'enabled': False,  'frame_config': {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0},
+                                     'frame_table':  {'anchor': 'se', 'relx': 1.0,   'rely': 1.0}},
+    'suspension': {'enabled': True,  'frame':        {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0}},
+    'wheelsize':  {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
+    'laptimes':   {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
+    'carinfo':    {'enabled': True, 'frame':        {'anchor': 'sw', 'relx': 0.0,   'rely': 1.0}},
+    'lateralg':   {'enabled': True, 'frame':        {'anchor':  'w', 'relx': 0.325, 'rely': 0.63},
+                                     'arrowframe':   {'anchor':  'n', 'relx': 0.40,  'rely': 0.0}},
+    'braketest':  {'enabled': True, 'frame':        {'anchor':  'e', 'relx': 1.0,   'rely': 0.63}},
+    'launchtest': {'enabled': True, 'frame':        {'anchor':  'w', 'relx': 0.0,   'rely': 0.64}},
+    'gearstats':  {'enabled': True } } }
+    
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
@@ -72,7 +87,7 @@ if exists(FILENAME_SETTINGS):
 else:
     print(f'filename {FILENAME_SETTINGS} does not exist, creating')
 with open(FILENAME_SETTINGS, 'w') as file:
-    json.dump(config, file)
+    json.dump(config, file, indent=4)
     
 # suppress matplotlib warning while running in thread
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -109,16 +124,17 @@ class MainWindow:
         self.forza5 = Forza(self.threadPool, self.logger, constants.packet_format)
         self.listener = Listener(on_press=self.on_press)
         
-        self.map = GUIMap(self.logger) if MAP else GUIMapDummy(self.logger)
-        self.ledbar = GUILed(self.logger, self.root) if LED else GUILedDummy(self.logger, self.root)
-        self.suspension = GUISuspension(self.logger) if SUSPENSION else GUISuspensionDummy(self.logger)
-        self.wheelsize = GUIWheelsize(self.logger) if WHEELSIZE else GUIWheelsizeDummy(self.logger)
-        self.laptimes = GUILaptimes(self.logger) if LAPTIMES else GUILaptimesDummy(self.logger)
-        self.carinfo = GUICarInfo(self.logger) if CARINFO else GUICarInfoDummy(self.logger)
-        self.lateralg = GUILateralG(self.logger) if LATERALG else GUILateralGDummy(self.logger)
-        self.braketest = GUIBraketest(self.logger) if BRAKETEST else GUIBraketestDummy(self.logger)
-        self.launchtest = GUILaunchtest(self.logger) if LAUNCHTEST else GUILaunchtestDummy(self.logger)
-        self.gearstats = GUIGearStats(self.logger) if GEARSTATS else GUIGearStatsDummy(self.logger)
+        enabled = {key: value['enabled'] for key, value in config['plugins'].items()}
+        self.map = GUIMap(self.logger) if enabled['map'] else GUIMapDummy(self.logger)
+        self.ledbar = GUILed(self.logger, self.root) if enabled['ledbar'] else GUILedDummy(self.logger, self.root)
+        self.suspension = GUISuspension(self.logger) if enabled['suspension'] else GUISuspensionDummy(self.logger)
+        self.wheelsize = GUIWheelsize(self.logger) if enabled['wheelsize'] else GUIWheelsizeDummy(self.logger)
+        self.laptimes = GUILaptimes(self.logger) if enabled['laptimes'] else GUILaptimesDummy(self.logger)
+        self.carinfo = GUICarInfo(self.logger) if enabled['carinfo'] else GUICarInfoDummy(self.logger)
+        self.lateralg = GUILateralG(self.logger) if enabled['lateralg'] else GUILateralGDummy(self.logger)
+        self.braketest = GUIBraketest(self.logger) if enabled['braketest'] else GUIBraketestDummy(self.logger)
+        self.launchtest = GUILaunchtest(self.logger) if enabled['launchtest'] else GUILaunchtestDummy(self.logger)
+        self.gearstats = GUIGearStats(self.logger) if enabled['gearstats'] else GUIGearStatsDummy(self.logger)
 
         self.set_car_info_frame()
         self.set_car_perf_frame()
@@ -416,14 +432,19 @@ class MainWindow:
         self.launchtest.set_canvas(self.car_perf_frame)
         self.ledbar.set_canvas(self.car_perf_frame)
         
-        self.carinfo.frame.place(       anchor=tkinter.SW,  relx=0.0 ,  rely=1.0)
-        self.frame_basic.place(         anchor=tkinter.NW,  relx=0.0 ,  rely=0.0) 
-        self.launchtest.frame.place(    anchor=tkinter.W,   relx=0.0 ,  rely=0.64)
-        self.braketest.frame.place(     anchor=tkinter.E,   relx=1.00,  rely=0.63) 
-        self.lateralg.frame.place(      anchor=tkinter.W,   relx=0.325, rely=0.63) 
-        self.lateralg.arrowframe.place( anchor=tkinter.N,   relx=0.40 , rely=0.0) 
-        self.suspension.frame.place(    anchor=tkinter.NE,  relx=1.0,   rely=0.0) 
-        # self.ledbar.frame.place(        anchor=tkinter.SE,   relx=1,   rely=1)
+        self.frame_basic.place(anchor=tkinter.NW, relx=0.0, rely=0.0) 
+        
+        for name, plugin in config['plugins'].items():
+            if not plugin['enabled']:
+                continue
+            frames = {k: v for k, v in plugin.items() if k != 'enabled'}
+            for framename, values in frames.items():
+                var = getattr(self, name)
+                canvas = getattr(var, framename)
+                canvas.place(anchor=values['anchor'], relx=values['relx'],
+                             rely=values['rely'])
+            else: #case multiple frames
+                pass
                                                                                        
     def set_shift_point_frame(self):
         """set shift point frame
