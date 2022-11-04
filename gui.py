@@ -42,7 +42,7 @@ from guigearstats import GUIGearStats, GUIGearStatsDummy
 
 from dragderivation import Trace
 
-sys.path.append(r'./forza_motorsport')
+#sys.path.append(r'./forza_motorsport')
 
 #import helper
 from forza import Forza
@@ -61,12 +61,16 @@ LAUNCHTEST = True
 GEARSTATS = True
 
 FILENAME_SETTINGS = 'settings_gui.json'
+if len(sys.argv) > 1:
+    FILENAME_SETTINGS = sys.argv[1]
+
 DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0}
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
         config.update(json.load(file))
 else:
+    print(f'filename {FILENAME_SETTINGS} does not exist, creating')
     with open(FILENAME_SETTINGS, 'w') as file:
         json.dump(config, file)
 
