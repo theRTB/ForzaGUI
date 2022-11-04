@@ -28,7 +28,7 @@ import json
 #be near idle rpm or whatever lowest value where forza doesn't add clutch when full throttle
 #press F8, then hold W for 100% throttle
 #release W after hitting the rev limit
-#click the RPM/Torque button in the GUI to calculate optimal shift rpm
+#click the Sweep button in the GUI to calculate optimal shift rpm
 
 #we need a full acceleration trace:
     # can be derived from an interpolated speed variable differentiated
@@ -53,10 +53,13 @@ import json
 #and dividing the torque by the relative ratio
 #if it exists, the intersection of any such torque graphs and the drag penalty is the top speed for that gear
 
+#example: stock NSX Acura
+car_ordinal = 2352
+car_performance_index = 831 
+filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
+
 def main():
     global gears, drag
-    car_ordinal = 2935
-    car_performance_index = 912
     drag = DragDerivation(trace=None, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
     gears = drag.gears
     

@@ -26,21 +26,22 @@ only divide the x values by the gear ratio
 from scipy import interpolate
 import statistics
 import math
+from dragderivation import Trace
 
 # final_drive = 4.37
 # gears = [2.37, 1.91, 1.55, 1.28, 1.08, 0.92, 0.8]
 # collectedingear = 4
 
-from dragderivation import Trace
-car_ordinal = 3749  #trace_ord3749_pi900
-car_performance_index = 900
+#example: stock NSX Acura
+car_ordinal = 2352
+car_performance_index = 831 
+filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
-trace = Trace(fromfile=True, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
+trace = Trace(fromfile=True, filename=filename)
 
 gears = trace.gears
 collectedingear = trace.gear_collected
 ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
-
 
 rpm = trace.rpm
 torque =  trace.torque
@@ -55,11 +56,9 @@ ratio_min = rpm[0]
 torque_contour = [torque_val*ratio for ratio in np.linspace(0.1, 100, 2000)]
 rpm_contour = [rpm_val/ratio*gears[-1] for ratio in np.linspace(0.1, 100, 2000)]
 
-
 fig, ax = plt.subplots()
 #plt.plot(rpm, torque)
 ax.plot(rpm, power)
-
 
 #torque
 # graph = [0 for x in range(len(gears)+1)]

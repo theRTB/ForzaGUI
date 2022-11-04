@@ -14,16 +14,22 @@ import intersect
 
 from dragderivation import Trace
 
-car_ordinal = 3476 #2352 #3035   trace_ord1460_pi600
-car_performance_index = 466 #900 #831 
+#example: stock NSX Acura
+car_ordinal = 2352
+car_performance_index = 831 
 filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
+
+override_gearratio = [] #e.g.: [4.14, 2.67, 1.82, 1.33, 1.00, 0.8]
+final_ratio = 1
 
 def main (): 
     global trace, gearing
     trace = Trace(fromfile=True, filename=filename)
-#    trace.gears = [x*1 for x in [4.70, 2.86, 2.04, 1.54, 1.32, 1.20]]
+    if len(override_gearratio):
+        trace.gears = override_gearratio
+        trace.gears = [x*final_ratio for x in trace.gears]
 
-    gearing = Gearing(trace, final_ratio=4.11)
+    gearing = Gearing(trace, final_ratio=final_ratio)
 
 class Gear():
     def __init__(self, gear, trace, ax, update_backref, final_ratio=1):
@@ -85,12 +91,13 @@ class Gearing ():
         self.ax.set_xlim(0, rpmmax)        
         self.ax.set_xticks(xticks)
         self.ax2.set_xticks(xticks)
-        self.ax.set_xticklabels([])
+  #      self.ax.set_xticklabels([])
         
         self.ax_top = self.ax.secondary_xaxis("top")
         self.ax_top.set_xlabel("speed (km/h)")
         self.ax_top.set_xticks(xticks)
         self.ax_top.set_xticklabels([round(x/val,1) for x in xticks])
+  #      self.ax_top.set_xticklabels([])
         
         self.ax.set_title(title if title is not None else filename)
         self.fig.tight_layout()
