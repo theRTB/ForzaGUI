@@ -71,9 +71,9 @@ if exists(FILENAME_SETTINGS):
         config.update(json.load(file))
 else:
     print(f'filename {FILENAME_SETTINGS} does not exist, creating')
-    with open(FILENAME_SETTINGS, 'w') as file:
-        json.dump(config, file)
-
+with open(FILENAME_SETTINGS, 'w') as file:
+    json.dump(config, file)
+    
 # suppress matplotlib warning while running in thread
 warnings.filterwarnings("ignore", category=UserWarning)
 
