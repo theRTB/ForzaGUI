@@ -67,7 +67,7 @@ if exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
         config.update(json.load(file))
 with open(FILENAME_SETTINGS, 'w') as file:
-    json.dump(config, file)
+    json.dump(config, file, indent=4)
 
 class Shiftlight():
     BLACK = '#000000'
