@@ -65,6 +65,11 @@ class Gear():
 
 class Gearing ():
     STEP_KMH = 25
+    FINALRATIO_MIN = 2.2
+    FINALRATIO_MAX = 6.1
+    GEARRATIO_MIN = 0.48
+    GEARRATIO_MAX = 6.00
+    RATIO_STEP = 0.01
     
     def __init__(self, trace, final_ratio=1, title=None):
         self.fig, (self.ax, self.ax2) = plt.subplots(2,1)
@@ -182,21 +187,37 @@ class Gearing ():
         self.power_contour = lambda rpm: peak_power_torque*peak_power_rpm/rpm
         rpm_max = int(2*self.trace.rpm[-1])
         self.ax.plot(self.power_contour(range(1, rpm_max)), label='Power curve')
-        
+
+    def slider_limits(self):                
+        if self.final_ratio == 1:
+            final_slider_settings = {'valmin': Gearing.FINALRATIO_MIN / Gearing.FINALRATIO_MAX, 
+                                     'valmax': Gearing.FINALRATIO_MAX / Gearing.FINALRATIO_MIN}
+            gear_slider_settings = {'valmin': Gearing.FINALRATIO_MIN * Gearing.GEARRATIO_MIN, 
+                                    'valmax': Gearing.FINALRATIO_MAX * Gearing.GEARRATIO_MAX}
+        else:
+            final_slider_settings = {'valmin': Gearing.FINALRATIO_MIN, 
+                                     'valmax': Gearing.FINALRATIO_MAX}
+            gear_slider_settings = {'valmin': Gearing.GEARRATIO_MIN, 
+                                    'valmax': Gearing.GEARRATIO_MAX}
+            
+        return (final_slider_settings, gear_slider_settings)
+
     def __init__sliders(self):
         # create space for sliders
         plt.subplots_adjust(right=0.7)
+
+        final_slider_limit, gear_slider_limit = self.slider_limits()
 
         #final gear slider
         self.final_gear_ax = plt.axes([0.76, 0.90, 0.2, 0.03])
         self.final_gear_slider = Slider(
             ax=self.final_gear_ax,
             label='Final gear',
-            valmin=0,
+            valmin=final_slider_limit['valmin'],
             closedmin=False,
-            valmax=6,
+            valmax=final_slider_limit['valmax'],
             valinit=self.final_ratio,
-            valstep = 0.01
+            valstep = Gearing.RATIO_STEP
         )
         self.final_gear_slider.on_changed(self.update_final_ratio)
         
@@ -205,11 +226,11 @@ class Gearing ():
             slider = Slider(
                 ax=ax,
                 label=f'gear {graph.gear+1}',
-                valmin=0.0,
+                valmin=gear_slider_limit['valmin'],
                 closedmin=False,
-                valmax=36.0 / self.final_ratio,
+                valmax=gear_slider_limit['valmax'],
                 valinit=ratio,
-                valstep = 0.01
+                valstep = Gearing.RATIO_STEP
             )
             graph.add_slider(ax, slider)
             # register the update function with each slider
