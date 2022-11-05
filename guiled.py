@@ -91,7 +91,7 @@ class Shiftlight():
         [RED]*10 ]                                                         #rev limit state
     
     LED_COUNT = 10
-    LED_OFFSETS_SIDES = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
+    LED_OFFSETS_SIDES = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70] #scaled to 70 led_height
     LED_OFFSETS_LINEAR = [0]*LED_COUNT
     
     #mclaren pattern with added rev limit state
@@ -112,18 +112,18 @@ class Shiftlight():
         else: #sides
             return (Shiftlight.PATTERN_SIDES, Shiftlight.LED_OFFSETS_SIDES, Shiftlight.LED_COUNT)
     
+START_X = 0
+START_Y = 0
+LED_HEIGHT = config['led_height']
+LED_WIDTH = config['led_width']
 STATES, LED_OFFSETS_Y, LED_COUNT = Shiftlight.variables(sequence=config['sequence'])
+
+LED_OFFSETS_Y = [int(y/70*LED_HEIGHT) for y in LED_OFFSETS_Y]
 
 STATE_REVLIMIT = len(STATES)-1
 STATE_OVERREV = STATE_REVLIMIT-1
 STATE_SHIFT = STATE_OVERREV-1
     
-START_X = 0
-START_Y = 0
-#LED_OFFSETS_Y = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70]
-LED_HEIGHT = config['led_height']
-LED_WIDTH = config['led_width']
-#LED_COUNT = 10
 HEIGHT = LED_HEIGHT+max(LED_OFFSETS_Y)+1
 WIDTH = LED_WIDTH*LED_COUNT+1
 
