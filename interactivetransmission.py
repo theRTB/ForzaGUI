@@ -64,6 +64,8 @@ class Gear():
         self.plot.set_ydata(y)
 
 class Gearing ():
+    STEP_KMH = 25
+    
     def __init__(self, trace, final_ratio=1, title=None):
         self.fig, (self.ax, self.ax2) = plt.subplots(2,1)
         self.fig.set_size_inches(16, 10)
@@ -75,29 +77,37 @@ class Gearing ():
         for i, ratio in enumerate(self.trace.gears):
             self.graphs.append(Gear(i, trace, self.ax, self.update, final_ratio))
 
-        val = (statistics.median([(a/b) for (a, b) in zip(self.trace.rpm, self.trace.speed)]) /
-               (self.graphs[self.trace.gear_collected-1].ratio*self.final_ratio))
-        
         self.ax.grid()
        # self.ax.set_xlabel("rpm (final gear)")
         self.ax.set_ylabel("torque (N.m)")
-                
-        rpmmax = math.ceil(self.trace.rpm[-1]/(self.graphs[-1].ratio*self.final_ratio)/125)*125
-        xticks = np.arange(0,rpmmax+125,125)
+
+        #1 km/h per x rpm, scaled to final ratio
+        val = (statistics.median([(a/b) for (a, b) in zip(self.trace.rpm, self.trace.speed)]) /
+               (self.graphs[self.trace.gear_collected-1].ratio*self.final_ratio))
+        
+        valstep = Gearing.STEP_KMH*val
+        
+        rpmmax = math.ceil(self.trace.rpm[-1]/(self.graphs[-1].ratio*self.final_ratio)/valstep)*valstep
+        xticks = np.arange(0,rpmmax+valstep,valstep)
         
         ymax = max(self.trace.torque*self.graphs[0].ratio*self.final_ratio)
         
         self.ax.set_ylim(0, ymax)
-        self.ax.set_xlim(0, rpmmax)        
+        self.ax.set_xlim(0, rpmmax)    
         self.ax.set_xticks(xticks)
-        self.ax2.set_xticks(xticks)
-  #      self.ax.set_xticklabels([])
+        self.ax.set_xlabel("speed (km/h)")
+        self.ax.set_xticklabels([int(x/val) for x in xticks])
         
-        self.ax_top = self.ax.secondary_xaxis("top")
-        self.ax_top.set_xlabel("speed (km/h)")
-        self.ax_top.set_xticks(xticks)
-        self.ax_top.set_xticklabels([round(x/val,1) for x in xticks])
-  #      self.ax_top.set_xticklabels([])
+        self.ax2.xaxis.tick_top()
+        self.ax2.set_xlim(0, rpmmax)      
+        self.ax2.set_xticks(xticks)  
+        self.ax2.set_xticklabels([])
+        
+        # self.ax_top = self.ax.secondary_xaxis("top")
+        # self.ax_top.set_xlabel("speed (km/h)")
+        # self.ax_top.set_xticks(xticks)
+        # self.ax_top.set_xticklabels()
+        # self.ax_top.set_xticklabels([])
         
         self.ax.set_title(title if title is not None else filename)
         self.fig.tight_layout()
