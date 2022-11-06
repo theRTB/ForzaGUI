@@ -67,17 +67,17 @@ if len(sys.argv) > 1:
 DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0, 
     'plugins':{
 #    'frame_basic':{'enabled': False, 'anchor': 'NW', 'relx': 0.0, 'rely': 0.0}, #TODO: rewrite frame_basic to follow plugin format
-    'map':        {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}}, #TODO: remove .place call in guimap.py
-    'ledbar':     {'enabled': False,  'frame_config': {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0},
-                                     'frame_table':  {'anchor': 'se', 'relx': 1.0,   'rely': 1.0}},
-    'suspension': {'enabled': True,  'frame':        {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0}},
-    'wheelsize':  {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
-    'laptimes':   {'enabled': False, 'frame':        {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
-    'carinfo':    {'enabled': True, 'frame':        {'anchor': 'sw', 'relx': 0.0,   'rely': 1.0}},
-    'lateralg':   {'enabled': True, 'frame':        {'anchor':  'w', 'relx': 0.325, 'rely': 0.63},
-                                     'arrowframe':   {'anchor':  'n', 'relx': 0.40,  'rely': 0.0}},
-    'braketest':  {'enabled': True, 'frame':        {'anchor':  'e', 'relx': 1.0,   'rely': 0.63}},
-    'launchtest': {'enabled': True, 'frame':        {'anchor':  'w', 'relx': 0.0,   'rely': 0.64}},
+    'map':        {'enabled': False, 'map_canvas':    {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}}, #TODO: remove .place call in guimap.py
+    'ledbar':     {'enabled': False, 'frame_config':  {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0},
+                                     'frame_table':   {'anchor': 'se', 'relx': 1.0,   'rely': 1.0}},
+    'suspension': {'enabled': True,  'frame':         {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0}},
+    'wheelsize':  {'enabled': False, 'frame':         {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
+    'laptimes':   {'enabled': False, 'frame':         {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
+    'carinfo':    {'enabled': True,  'frame':         {'anchor': 'sw', 'relx': 0.0,   'rely': 1.0}},
+    'lateralg':   {'enabled': True,  'frame':         {'anchor':  'w', 'relx': 0.325, 'rely': 0.63},
+                                     'arrowframe':    {'anchor':  'n', 'relx': 0.40,  'rely': 0.0}},
+    'braketest':  {'enabled': True,  'frame':         {'anchor':  'e', 'relx': 1.0,   'rely': 0.63}},
+    'launchtest': {'enabled': True,  'frame':         {'anchor':  'w', 'relx': 0.0,   'rely': 0.64}},
     'gearstats':  {'enabled': True } } }
     
 config = DEFAULTCONFIG

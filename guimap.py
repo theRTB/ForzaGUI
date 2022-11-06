@@ -82,14 +82,14 @@ class GUIMap:
     def set_canvas (self, frame):
         # place map information canvas
         self.map_canvas = tkinter.Canvas(frame, background=constants.background_color, bd=0,
-                                          highlightthickness=False)
-        self.map_canvas.place(relx=0.6, rely=0.5,
-                                width=582, height=400,
-                                anchor=tkinter.CENTER)
-        tkinter.Label(frame, text="Map information", bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.5, rely=0.0, anchor=tkinter.NW)
+                                          highlightthickness=True, width=582, height=400)
+        # self.map_canvas.place(relx=0.6, rely=0.5,
+        #                         width=582, height=400,
+        #                         anchor=tkinter.CENTER)
+        # tkinter.Label(frame, text="Map information", bg=constants.background_color, fg=constants.text_color,
+        #               font=('Helvetica 15 bold')).place(relx=0.5, rely=0.0, anchor=tkinter.NW)
                                                                          
-        self.map_canvas.create_line(0,0, 582-1,0, 582-1,400-1, 0,400-1, 0,0, fill='white')
+        # self.map_canvas.create_line(0,0, 582-1,0, 582-1,400-1, 0,400-1, 0,0, fill='white')
 
     #todo: optimize so that only new points are checked by saving min/max
     def center_map(self):
@@ -129,7 +129,7 @@ class GUIMap:
         points = [item for sublist in points for item in sublist]
         self.map_canvas.create_line(*points, fill='white')
         
-        self.map_canvas.create_line(0,0, 582-1,0, 582-1,400-1, 0,400-1, 0,0, fill='white')
+     #   self.map_canvas.create_line(0,0, 582-1,0, 582-1,400-1, 0,400-1, 0,0, fill='white')
 
 
     # def init_pointxyz(self):
