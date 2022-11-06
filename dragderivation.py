@@ -56,7 +56,7 @@ import json
 #example: stock NSX Acura
 car_ordinal = 2352
 car_performance_index = 831 
-filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
+filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
 def main():
     global gears, drag
@@ -379,13 +379,13 @@ class DragDerivation():
             
             geararrays.append(geardict)
             if drawgraph:
-                ax.plot(gear_x, gear_y, label=gear+1)
+                ax.plot(gear_x, gear_y/3.6/9.81, label=gear+1)
         
         if drawgraph:
             ymin, ymax = ax.get_ylim()
             ax.set_ylim(0, ymax)        
             ax.set_xlabel('speed km/h')
-            ax.set_ylabel('accel (km/h) / s')
+            ax.set_ylabel('accel G')
         return geararrays
     
         

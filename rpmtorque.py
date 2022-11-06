@@ -35,7 +35,7 @@ from dragderivation import Trace
 #example: stock NSX Acura
 car_ordinal = 2352
 car_performance_index = 831 
-filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
+filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
 trace = Trace(fromfile=True, filename=filename)
 

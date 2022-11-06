@@ -1,9 +1,13 @@
 import sys
+import os
 import tkinter
 import tkinter.ttk
 import warnings
-from tkinter import scrolledtext
+import json #for importing config and data files
+import statistics
+import math
 
+from tkinter import scrolledtext
 from pynput.keyboard import Listener
 
 # from https://pypi.org/project/pynput/
@@ -12,22 +16,12 @@ import ctypes
 PROCESS_PER_MONITOR_DPI_AWARE = 2
 ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
 
-#from collections import deque
-import statistics
-#from math import pi
-import math
-
 from scipy import interpolate
-
 import matplotlib.pyplot as plt
 import numpy as np
 
-#for importing config and data files
-import json
-from os.path import exists
-
 import constants
-#import keyboard_helper
+from dragderivation import Trace
 
 from guimap import GUIMap, GUIMapDummy
 from guiled import GUILed, GUILedDummy
@@ -40,11 +34,9 @@ from guibraketest import GUIBraketest, GUIBraketestDummy
 from guilaunchtest import GUILaunchtest, GUILaunchtestDummy
 from guigearstats import GUIGearStats, GUIGearStatsDummy
 
-from dragderivation import Trace
+if not os.path.exists('traces'):
+    os.makedirs('traces')
 
-#sys.path.append(r'./forza_motorsport')
-
-#import helper
 from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
 from logger import Logger, TextHandler
@@ -81,7 +73,7 @@ DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0,
     'gearstats':  {'enabled': True } } }
     
 config = DEFAULTCONFIG
-if exists(FILENAME_SETTINGS):
+if os.path.exists(FILENAME_SETTINGS):
     with open(FILENAME_SETTINGS) as file:
         config.update(json.load(file))
 else:
@@ -226,7 +218,7 @@ class MainWindow:
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the Sweep (F8) button")
                 self.trace.finish()
-                self.trace.writetofile(f"trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
+                self.trace.writetofile(f"traces/trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
                 self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
                 self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
@@ -331,14 +323,14 @@ class MainWindow:
         self.rpmtable = [0 for x in range(11)]
 
     def load_data(self, event):
-        self.logger.info("Load data button was pressed!")
-        filename = f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
-        if exists(filename):
-            self.trace = Trace(fromfile=True, filename=f"trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json")
+        #self.logger.info("Load data button was pressed!")
+        filename = f"traces/trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
+        if os.path.exists(filename):
+            self.trace = Trace(fromfile=True, filename=filename)
             self.revlimit = self.trace.rpm[-1]
             self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
             self.gearstats.display()
-            self.logger.info("loaded file")
+            self.logger.info(f"loaded file {filename}")
             #self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
             self.trace.finish()
             self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))

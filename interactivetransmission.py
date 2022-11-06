@@ -17,7 +17,7 @@ from dragderivation import Trace
 #example: stock NSX Acura
 car_ordinal = 2352
 car_performance_index = 831 
-filename = f'trace_ord{car_ordinal}_pi{car_performance_index}.json'
+filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
 override_gearratio = [] #e.g.: [4.14, 2.67, 1.82, 1.33, 1.00, 0.8]
 final_ratio = 1
