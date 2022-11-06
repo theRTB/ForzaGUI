@@ -92,7 +92,6 @@ class Shiftlight():
     
     LED_COUNT = 10
     LED_OFFSETS_SIDES = [70, 40,   20, 10, 0, 0, 10, 20,   40, 70] #scaled to 70 led_height
-    LED_OFFSETS_LINEAR = [0]*LED_COUNT
     
     #mclaren pattern with added rev limit state
     PATTERN_LINEAR = [
@@ -104,6 +103,8 @@ class Shiftlight():
         [CYAN]*10,                                                         #shift state, or reaction time state
         [RED, CYAN, RED, CYAN, RED, RED, CYAN, RED, CYAN, RED],            #overrev state
         [RED]*10 ]                                                         #rev limit state
+    
+    LED_OFFSETS_LINEAR = [0]*LED_COUNT
     
     @classmethod
     def variables(cls, sequence='linear'):
@@ -126,6 +127,8 @@ STATE_SHIFT = STATE_OVERREV-1
     
 HEIGHT = LED_HEIGHT+max(LED_OFFSETS_Y)+1
 WIDTH = LED_WIDTH*LED_COUNT+1
+
+GEAR_HEIGHT = 110 #height of the gear display
 
 #extend tkinter.Variable? get and set functions are only set for the subtypes
 #consider property() functionality
@@ -212,34 +215,40 @@ class GUILed:
         
         self.update_rpm_var = True
         self.rpm_var = tkinter.IntVar(value=0)
+        self.gear_var = tkinter.StringVar(value='1')
         
         self.display_lights_var = tkinter.BooleanVar(value=True)
+        self.display_gearnr_var = tkinter.BooleanVar(value=True)
         
     
         self.__init__window(root)
    #     self.__init__anotherwin(root)
         V._init_tkintervariables()
     
-    def __init__anotherwin(self, root):
-        self.testwin = tkinter.Toplevel(root)
-        WIDTH = 1000
-        HEIGHT = 500
-        OFFSET_X = int(3840/2 - WIDTH/2)
-        OFFSET_Y = int(2160/2 - HEIGHT/2)
-   #     self.window.wm_attributes("-topmost", 1) #force always on top
-        self.testwin.geometry(f"{WIDTH}x{HEIGHT}+{OFFSET_X}+{OFFSET_Y}")
-        self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
-        self.canvas.pack()
+   #  def __init__anotherwin(self, root):
+   #      self.testwin = tkinter.Toplevel(root)
+   #      WIDTH = 1000
+   #      HEIGHT = 500
+   #      OFFSET_X = int(3840/2 - WIDTH/2)
+   #      OFFSET_Y = int(2160/2 - HEIGHT/2)
+   # #     self.window.wm_attributes("-topmost", 1) #force always on top
+   #      self.testwin.geometry(f"{WIDTH}x{HEIGHT}+{OFFSET_X}+{OFFSET_Y}")
+   #      self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
+   #      self.canvas.pack()
     
     def __init__window(self, root):
-        self.root = root
         self.window = tkinter.Toplevel(root)
         self.window.wm_attributes("-topmost", 1) #force always on top
         self.window.wm_attributes('-transparentcolor', 'red')
-        self.window.geometry(f"{WIDTH}x{HEIGHT}+{V.shiftlight_x.defaultvalue}+{V.shiftlight_y.defaultvalue}")
-        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg='red', highlightthickness=0)
-        self.canvas.pack()
         self.window.overrideredirect(True) #remove title bar, needs code to allow window to move
+        self.window.geometry(f"{WIDTH}x{HEIGHT+GEAR_HEIGHT}+{V.shiftlight_x.defaultvalue}+{V.shiftlight_y.defaultvalue}")
+        self.window.configure(bg='red')
+        
+        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bg='red', highlightthickness=0)
+        self.canvas.pack(expand=False, fill='both')
+        
+        self.gear_label = tkinter.Label(self.window, textvariable=self.gear_var, font=('Helvetica 100 bold'), fg='#FFFFFF', bg='black')
+        self.gear_label.pack(expand=True, fill='y')
            
         for i in range(LED_COUNT):
             self.ledbar[i] = self.canvas.create_rectangle(START_X+LED_WIDTH*i, START_Y+LED_OFFSETS_Y[i],
@@ -252,9 +261,9 @@ class GUILed:
             #                                              fill='black', outline='white')
         
         #from https://stackoverflow.com/questions/4055267/tkinter-mouse-drag-a-window-without-borders-eg-overridedirect1
-        self.canvas.bind("<ButtonPress-1>", self.start_move)
-        self.canvas.bind("<ButtonRelease-1>", self.stop_move)
-        self.canvas.bind("<B1-Motion>", self.do_move)
+        self.window.bind("<ButtonPress-1>", self.start_move)
+        self.window.bind("<ButtonRelease-1>", self.stop_move)
+        self.window.bind("<B1-Motion>", self.do_move)
 
     def start_move(self, event):
         self.x = event.x
@@ -350,6 +359,12 @@ class GUILed:
             json.dump(V._to_config(), file)
 
     def update (self, fdp):
+        gear = fdp.gear
+        if gear == 0:
+            gear = 'R'
+        elif gear == 11:
+            gear == 'N'
+        self.gear_var.set(f'{gear}')
         if self.update_rpm_var: #update rate 30hz
             self.rpm_var.set(int(fdp.current_engine_rpm))
         self.update_rpm_var = not(self.update_rpm_var)
@@ -390,6 +405,12 @@ class GUILed:
             self.window.deiconify()
         else:
             self.window.withdraw()
+            
+    def update_gearnr_visibility(self):
+        if self.display_gearnr_var.get():
+            self.gear_label.pack()
+        else:
+            self.gear_label.pack_forget()
 
     def set_canvas(self, frame):
         self.set_config_canvas(frame)
@@ -413,7 +434,11 @@ class GUILed:
         button = tkinter.Button(self.frame_config, text='Update', bg=constants.background_color, fg=constants.text_color,
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
         button.bind('<Button-1>', self.update_button)
-        button.grid(row=row+1, column=1, columnspan=2)
+        button.grid(row=row+1, column=1)
+        
+        tkinter.Checkbutton(self.frame_config, text='Gear', variable=self.display_gearnr_var,
+                            bg=constants.background_color, fg=constants.text_color,
+                            command=self.update_gearnr_visibility).grid(row=row+1, column=2)
         
         tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var,
                             bg=constants.background_color, fg=constants.text_color,
@@ -448,6 +473,7 @@ class GUILed:
         
         self.update_rpm_var = True
         self.rpm_var.set("0000")
+        self.gear_var.set('1')
         self.run_shiftleds = [False for x in range(11)]
         [state.set(0) for row in self.state_table for state in row]
     
