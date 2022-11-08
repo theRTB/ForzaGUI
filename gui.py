@@ -41,16 +41,6 @@ from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
 from logger import Logger, TextHandler
 
-MAP = False
-LED = False
-WHEELSIZE = False
-LAPTIMES = False
-SUSPENSION = True
-CARINFO = True
-LATERALG = True
-BRAKETEST = True
-LAUNCHTEST = True
-GEARSTATS = True
 
 FILENAME_SETTINGS = 'settings_gui.json'
 if len(sys.argv) > 1:
@@ -465,7 +455,7 @@ class MainWindow:
                         #('Pause', self.pause_handler, constants.stop),
                         #('Exit', self.exit_handler, constants.close)]
         
-        if CARINFO:
+        if config['plugins']['carinfo']['enabled']:
             button_names.insert(0, ('Write CSV', self.writeback_handler, constants.writeback))
 
         for i, (name, func, shortcut) in enumerate(button_names):
@@ -666,28 +656,28 @@ class MainWindow:
         #self.logger.info("Writing {}".format(self.carinfo.row))
         self.carinfo.writeback()
 
-    def run_handler(self, event):
-        """run button callback
+    # def run_handler(self, event):
+    #     """run button callback
 
-        Args:
-            event
-        """
-        if self.forza5.isRunning:
-            self.forza5.logger.info('stopping auto gear')
+    #     Args:
+    #         event
+    #     """
+    #     if self.forza5.isRunning:
+    #         self.forza5.logger.info('stopping auto gear')
 
-            def stopping():
-                self.forza5.isRunning = False
-                self.reset_car_info()
+    #         def stopping():
+    #             self.forza5.isRunning = False
+    #             self.reset_car_info()
 
-            self.threadPool.submit(stopping)
-        else:
-            self.forza5.logger.info('starting auto gear')
+    #         self.threadPool.submit(stopping)
+    #     else:
+    #         self.forza5.logger.info('starting auto gear')
 
-            def starting():
-                self.forza5.isRunning = True
-                self.forza5.run(self.update_tree, self.update_car_info)
+    #         def starting():
+    #             self.forza5.isRunning = True
+    #             self.forza5.run(self.update_tree, self.update_car_info)
 
-            self.threadPool.submit(starting)
+    #         self.threadPool.submit(starting)
 
     # def pause_handler(self, event):
     #     """pause button callback
@@ -730,7 +720,7 @@ class MainWindow:
             self.reset_handler(None)
         elif key == constants.gatherratios:
             self.gatherratios_handler(None)
-        elif key == constants.writeback and CARINFO:
+        elif key == constants.writeback and config['plugins']['carinfo']['enabled']:
             self.writeback_handler(None)
         #elif key == constants.stop:
         #    self.pause_handler(None)
