@@ -1,9 +1,6 @@
-import os
 import socket
 import time
 from concurrent.futures.thread import ThreadPoolExecutor
-from os import listdir
-from os.path import isfile, join
 
 from fdp import ForzaDataPacket
 
@@ -35,14 +32,6 @@ class Forza():
         self.packet_format = packet_format
         self.isRunning = False
         self.threadPool = threadPool
-        self.clutch = clutch
-
-        # # constant
-        # self.config_folder = os.path.join(constants.root_path, 'config')
-
-        # # create folders if not existed
-        # if not os.path.exists(self.config_folder):
-        #     os.makedirs(self.config_folder)
 
     def test_gear(self, update_car_gui_func=None):
         """collect gear information
