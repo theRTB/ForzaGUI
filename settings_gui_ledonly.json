@@ -4,7 +4,7 @@
     "plugins": {
         "map": {
             "enabled": false,
-            "frame": {
+            "map_canvas": {
                 "anchor": "nw",
                 "relx": 0.5,
                 "rely": 0.5
