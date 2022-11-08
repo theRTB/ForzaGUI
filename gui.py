@@ -142,7 +142,7 @@ class MainWindow:
         self.root.grid_columnconfigure(1, minsize=625, weight=625)
         self.root.grid_columnconfigure(2, minsize=250, weight=250)
 
-        self.root.title("Forza Horizon 5: Totally Work-in-progress something stats")
+        self.root.title("ForzaGUI")
         self.root.geometry(f"1050x950+{config['window_offset_x']}+{config['window_offset_y']}")
         self.root.minsize(1050, 950)
         self.root.maxsize(1050, 950)
@@ -308,7 +308,6 @@ class MainWindow:
       
         self.collect_rpm = 0
         self.trace = None
-        #self.rpmspeed = []
         
         self.rpmtable = [0 for x in range(11)]
 
@@ -437,7 +436,6 @@ class MainWindow:
         #                                        background=constants.background_color,
         #                                        highlightthickness=True, highlightcolor=constants.text_color)
 
-        # #self.gearstats.set_canvas(self.shift_point_frame)
         # self.shift_point_frame.grid(row=0, column=2, sticky='news')
 
     def set_button_frame(self):
@@ -449,11 +447,8 @@ class MainWindow:
 
         button_names = [('Connect', self.collect_data_handler, constants.collect_data),
                         ('Collect ratios', self.gatherratios_handler, constants.gatherratios),
-                        #('Analysis', self.analysis_handler, constants.analysis),
                         ('Sweep', self.rpmtorque_handler, constants.analysis),
                         ('Reset', self.reset_handler, constants.auto_shift)]
-                        #('Pause', self.pause_handler, constants.stop),
-                        #('Exit', self.exit_handler, constants.close)]
         
         if config['plugins']['carinfo']['enabled']:
             button_names.insert(0, ('Write CSV', self.writeback_handler, constants.writeback))
@@ -494,12 +489,6 @@ class MainWindow:
         self.program_info_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color,
                                                 relief="groove",
                                                 highlightthickness=True, highlightcolor=constants.text_color)
-        # label = tkinter.Label(self.program_info_frame, text='RTB work in progress GUI for Forza remote telemetry. '
-        #                                                     'derived from https://github.com/Juice-XIJ/forza_auto_gear',
-        #                       bg=constants.background_color, borderwidth=2, fg=constants.text_color,
-        #                       relief="groove", anchor="nw", justify=tkinter.LEFT)
-       # label.bind('<Configure>', lambda e: label.config(wraplength=int(label.winfo_width() * 0.9)))
-        # label.pack(fill="both", expand=True)
         self.gearstats.set_canvas(self.program_info_frame)
         self.program_info_frame.grid(row=1, column=2, sticky='news')
 
@@ -622,23 +611,6 @@ class MainWindow:
         else:
             self.logger.info("Ratios not updating")
 
-    # def analysis_handler(self, event, performance_profile=True, is_guid=True):
-    #     """analysis button callback
-
-    #     Args:
-    #         event
-    #         performance_profile (bool, optional): draw performance of not. Defaults to True.
-    #         is_guid (bool, optional): is guid or not. Defaults to True.
-    #     """
-    #     if len(self.forza5.records) <= 0:
-    #         self.logger.info(f'load config {constants.example_car_ordinal}.json for analysis as an example')
-    #         helper.load_config(self.forza5,
-    #                            os.path.join(constants.root_path, 'example', f'{constants.example_car_ordinal}.json'))
-    #     self.logger.info('Analysis')
-
-    #     self.forza5.analyze(performance_profile=performance_profile, is_gui=is_guid)
-    #     self.update_tree()
-
     def reset_handler(self, event):
         """ run reset callback
         
@@ -655,43 +627,6 @@ class MainWindow:
         """
         #self.logger.info("Writing {}".format(self.carinfo.row))
         self.carinfo.writeback()
-
-    # def run_handler(self, event):
-    #     """run button callback
-
-    #     Args:
-    #         event
-    #     """
-    #     if self.forza5.isRunning:
-    #         self.forza5.logger.info('stopping auto gear')
-
-    #         def stopping():
-    #             self.forza5.isRunning = False
-    #             self.reset_car_info()
-
-    #         self.threadPool.submit(stopping)
-    #     else:
-    #         self.forza5.logger.info('starting auto gear')
-
-    #         def starting():
-    #             self.forza5.isRunning = True
-    #             self.forza5.run(self.update_tree, self.update_car_info)
-
-    #         self.threadPool.submit(starting)
-
-    # def pause_handler(self, event):
-    #     """pause button callback
-
-    #     Args:
-    #         event
-    #     """
-    #     shutdown(self.forza5, self.threadPool, self.listener)
-    #     self.reset_car_info()
-    #     self.threadPool = ThreadPoolExecutor(max_workers=8, thread_name_prefix="exec")
-    #     self.forza5.threadPool = self.threadPool
-    #     self.listener = Listener(on_press=self.on_press)
-    #     self.listener.start()
-    #     self.forza5.logger.info('stopped')
 
     def exit_handler(self, event):
         """exit button callback
