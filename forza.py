@@ -62,14 +62,13 @@ class Forza():
                         update_car_gui_func(fdp)
                     info = {
                         'gear': fdp.gear,
-                        'rpm': fdp.current_engine_rpm,
+                        'rpm': round(fdp.current_engine_rpm, 1),
                         'time': time.time(),
                         'speed': fdp.speed * 3.6,
                         'clutch': fdp.clutch,
                         'power': fdp.power / 1000.0,
                         'torque': fdp.torque,
                         'car_ordinal':str(fdp.car_ordinal),
-                        'speed/rpm': fdp.speed * 3.6 / fdp.current_engine_rpm,
                         'posx': fdp.position_x,
                         'posy': fdp.position_y,
                         'posz': fdp.position_z
