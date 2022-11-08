@@ -24,7 +24,7 @@ Current focus is on making an accurate shiftled display. Work has been put into 
 - lap times: best, current, number of laps
 - map
 
-### Steps for collecting data per car:
+### Steps for collecting data per car tune:
 - Press F10 to start monitoring
 - Press F9 to enable ratio collecting
   - Drive around a bit per gear until number stabilizes in Ratio column bottom right
@@ -60,16 +60,16 @@ Configuration is done through editing the json files that are regenerated with d
 
 #### settings_guiled.json
 Settings file for the shiftlights. Most settings apart from led_height, led_width and sequence are also editable inside the GUI and saved on clicking the Update button. Telemetry is sent 60 times per second, one *frame* is therefore 16.66... milliseconds.
-* shiftlight_x: Initial spawn location of the shiftlight window on the horizontal axis, default 860
-* shiftlight_y: Initial spawn location of the shiftlight window on the vertical axis, default 540
-* illumination_interval: Duration of shiftlight interval. It is the distance between the first state lighting up and the optimal shift rpm, default 60 frames (one second)
-* reaction_time: time in frames to react to the shift state (all cyan). Optimal shift rpm is x frames into the shift state. Must be between 0 and 1/5th of the interval. Default 10 frames.
-* distance_from_revlimit_ms: distance in frames from hitting rev limit. Due to the cost of hitting rev limit, we force a minimum distance in time and absolute value. Optimal shift rpm is shifted according to this number. Default 5 frames.
-* distance_from_revlimit_pct": distance as a percentage of rev limit. The optimal shift rpm is shifted lower if it is closer than x% to rev limit. Default 99% as 0.99.
-* hysteresis_pct_revlimit: Shiftlight state is only allowed to drop after live rpm has dropped by this value (taken as a percentage of rev limit) below state trigger rpm. Default 5% as 0.05.
-* state_dropdown_delay: After going up in state, state may not drop for x frames. Default to 0 currently.
-* led_height: Vertical size of LED rectangles in shiftlight window. Defaults to 40
-* led_width": Horizontal size of LED rectangles in shiftlight window. Defaults to 40
+* shiftlight_x: Initial spawn location of the shiftlight window on the horizontal axis, defaults to 960
+* shiftlight_y: Initial spawn location of the shiftlight window on the vertical axis, defaults to 540
+* illumination_interval: Duration of shiftlight interval. It is the distance between the first state lighting up and the optimal shift rpm, defaults to 60 frames (one second)
+* reaction_time: time in frames to react to the shift state (all cyan). Optimal shift rpm is x frames into the shift state. Must be between 0 and 1/5th of the interval. Defaults to 10 frames.
+* distance_from_revlimit_ms: distance in frames from hitting rev limit. Due to the cost of hitting rev limit, we force a minimum distance in time and absolute value. Optimal shift rpm is shifted according to this number. Defaults to 5 frames.
+* distance_from_revlimit_pct": distance as a percentage of rev limit. The optimal shift rpm is shifted lower if it is closer than x% to rev limit. Defaults to 99% as 0.99.
+* hysteresis_pct_revlimit: Shiftlight state is only allowed to drop after live rpm has dropped by this value (taken as a percentage of rev limit) below state trigger rpm. Defaults to 5% as 0.05.
+* state_dropdown_delay: After going up in state, state may not drop for x frames. Defaults to 0 currently.
+* led_height: Vertical size of LED rectangles in shiftlight window. Defaults to 40 pixels
+* led_width": Horizontal size of LED rectangles in shiftlight window. Defaults to 40 pixels
 * sequence": Pattern style. *"linear"* is left to right (McLaren pattern), *"sides"* is sides to center (Porsche pattern). Defaults to *"linear"*
 
 Original GUI code by https://github.com/Juice-XIJ/forza_auto_gear
