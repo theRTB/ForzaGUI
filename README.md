@@ -2,7 +2,7 @@
 
 ### GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
 
-Launching `gui.py settings_gui_ledonly.json` provides a separate always-on-top movable shiftlight window. The GUI has been simplified to primarily show variables related to the shift lights and can be edited to adjust the illumination live. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
+Launching `gui.py settings_gui_ledonly.json` provides a separate always-on-top movable shiftlight window with optional gear number. The GUI has been simplified to primarily show variables related to the shift lights and can be edited to adjust the illumination live. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
 
 This was a project never originally intended for public view, a hobby project for getting back to Python programming. Code quality is all over the place depending on when the function was written or updated. The GUI seems to be functional on Windows only.
 
@@ -21,6 +21,8 @@ Current focus is on making an accurate shiftled display. Work has been put into 
 - brake statistics: start to end speed, distance and duration with ability to dump the data
 - transmission statistics: per-gear ratio (no effective way to derive final ratio), duration of power cut (excludes clutch behavior)
 - torque-per-gear graph: after collecting a full rpm sweep at moderate speed with per-gear ratio
+- lap times: best, current, number of laps
+- map
 
 ### Steps for collecting data per car:
 - Press F10 to start monitoring
