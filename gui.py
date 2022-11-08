@@ -164,7 +164,7 @@ class MainWindow:
         self.infovar_car_ordinal = None
         self.infovar_car_performance_index = None
         
-        self.prevrev = 0
+        #self.prevrev = 0
         self.prevrev_torque = 0
         self.shiftlimit = 0
         self.revlimit_counter = 0
@@ -212,12 +212,13 @@ class MainWindow:
                 self.collect_rpm = 0
                 self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
                 self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
-
-        if fdp.power < 0 and fdp.accel > 0:
-            self.revlimit = max(self.prevrev, self.revlimit)
-        elif fdp.power >= 0:
-            self.prevrev = fdp.current_engine_rpm
+                self.revlimit = fdp.current_engine_rpm
         self.prevrev_torque = fdp.current_engine_rpm
+
+        # if fdp.power < 0 and fdp.accel > 0:
+        #     self.revlimit = max(self.prevrev, self.revlimit)
+        # elif fdp.power >= 0:
+        #     self.prevrev = fdp.current_engine_rpm
         
         if self.infovar_car_ordinal != fdp.car_ordinal:
             self.infovar_car_ordinal = fdp.car_ordinal
@@ -295,7 +296,7 @@ class MainWindow:
         self.braketest.reset()
         self.launchtest.reset()
 
-        self.prevrev = 0
+        #self.prevrev = 0
         self.prevrev_torque = 0
         self.revlimit = 0
         self.revlimit_counter = 0
