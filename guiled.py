@@ -11,6 +11,7 @@ import constants
 import math
 #import matplotlib.pyplot as plt
 import numpy as np
+import itertools
 
 #for importing config
 import json
@@ -37,11 +38,7 @@ TODO:
     
     hide shift lights if game is in menu/paused -> use fdp.is_race_on
     fdp.is_race_on already used, need rewrite in gui_ledonly
-    
-    add gear number underneath leds
-    transparency is possible with root.wm_attributes('-transparentcolor', 'red')
-    any frame or widget with red is then transparant. This does mess with aliasing
-    
+        
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     blank on gear variable changing is simplest, but can be very slow
@@ -209,6 +206,7 @@ class GUILed:
         
         self.run_shiftleds = [False for x in range(11)]
         self.state_table = [[tkinter.IntVar() for x in range(0, len(STATES))] for y in range(11)]
+        self.downshift_limit = [0]*11
         
         self.state = 0
         self.statedowntimer = 0
@@ -301,6 +299,12 @@ class GUILed:
         #data['rpm'] is the drag corrected rpm over time per gear
         for data, gearratio in zip(self.geardata[1:], trace.gears):
             data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
+        
+        #add warning light if in a gear that is too low for the rpm
+        #with a fudge factor of 10% to avoid blinking
+        ratios = [y/x for x,y in itertools.pairwise(trace.gears)]
+        self.downshift_limit = [0,0] + [int(shiftrpm*ratio/1.1) for shiftrpm, ratio in zip(rpmtable[1:], ratios)] 
+        self.logger.info(f'downshift limits: {self.downshift_limit}')
             
         self.calculate_state_triggers()
 
@@ -393,12 +397,18 @@ class GUILed:
             self.countdowntimer = V.state_dropdown_delay.get()
             self.state = state
                                 
-        self.update_leds()
+        self.update_leds(fdp)
 
-    def update_leds(self):
+    def update_leds(self, fdp):
         ledbar = STATES[self.state]
-        for i in range(10):
+        for i in range(9):
             self.canvas.itemconfig(self.ledbar[i], fill=ledbar[i])
+        
+        #update last led to red if rpm is too low
+        lastfill = ledbar[-1]
+        if fdp.current_engine_rpm <= self.downshift_limit[fdp.gear]:
+            lastfill = Shiftlight.RED
+        self.canvas.itemconfig(self.ledbar[-1], fill=lastfill)
 
     def update_lights_visibility(self):
         if self.display_lights_var.get():
