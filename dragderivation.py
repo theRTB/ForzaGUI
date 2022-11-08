@@ -60,7 +60,7 @@ filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
 def main():
     global gears, drag
-    drag = DragDerivation(trace=None, filename=f'trace_ord{car_ordinal}_pi{car_performance_index}.json')
+    drag = DragDerivation(trace=None, filename=filename)
     gears = drag.gears
     
     drag.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
