@@ -106,7 +106,7 @@ class GUICarInfo:
     @classmethod
     def reloaddata(cls):
         if exists(GUICarInfo.filename):
-            with open(GUICarInfo.filename) as rawcsv:
+            with open(GUICarInfo.filename, encoding='ISO-8859-1') as rawcsv:
                 csvobject = csv.reader(rawcsv, delimiter='\t')
                 firstrow = next(csvobject)
                 for row in csvobject: #convert column 5 and 6 to integer from string

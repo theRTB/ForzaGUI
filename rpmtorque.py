@@ -5,27 +5,12 @@ Created on Sun Feb  6 16:00:07 2022
 @author: RTB
 """
 
-import matplotlib.pyplot as plt
-#import matplotlib.font_manager as font_manager
-import numpy as np
-
-'''
-
-divide the x values by gear ratio 1, multiply the y  values by gear ratio 1
-repeat for gear n
-plot in the same space
-well actually there are two ways to visualize the same thing, 
-up to you which is easier to see
-that method would be for values of torque
-if you want to instead use values of power, you would 
-only divide the x values by the gear ratio
-
-
-'''
-
-from scipy import interpolate
 import statistics
 import math
+import matplotlib.pyplot as plt
+import numpy as np
+import intersect
+from scipy import interpolate
 from dragderivation import Trace
 
 # final_drive = 4.37
@@ -53,12 +38,11 @@ rpm_val = rpm[power.argmax()]
 
 ratio_min = rpm[0]
 
-torque_contour = [torque_val*ratio for ratio in np.linspace(0.1, 100, 2000)]
-rpm_contour = [rpm_val/ratio*gears[-1] for ratio in np.linspace(0.1, 100, 2000)]
+
 
 fig, ax = plt.subplots()
 #plt.plot(rpm, torque)
-ax.plot(rpm, power)
+#ax.plot(rpm, power)
 
 #torque
 # graph = [0 for x in range(len(gears)+1)]
@@ -76,6 +60,9 @@ ax.plot(rpm, power)
 # gear 1 is rpm power
 # gear 2 is rpm*ratio1/ratio2
 shiftrpms = []
+X = 0
+shiftrpms_new = [intersect.intersection(rpm, power, rpm*ratio, power)[X] for ratio in ratios]
+shiftrpms_new = [i[X] if len(i) > 0 else rpm[-1] for i in shiftrpms_new]
 
 for ratio in ratios:
     f = interpolate.interp1d(rpm, power)
@@ -87,12 +74,12 @@ for ratio in ratios:
     shiftrpms.append(shiftrpm)
     print(f"shift rpm {shiftrpm}, drop to {int(shiftrpm/ratio)}, "
           f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
-
 shiftrpms.append(0)
+shiftrpms = shiftrpms_new
 print(len(rpm))
 print(len(power))
 
-ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
+#ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
 
 print(gears)
 print(ratios)
@@ -139,7 +126,13 @@ ax.set_xticks(xticks)
 ax2.set_xticks(xticks)
 ax2.set_xticklabels([round(x/val,1) for x in xticks])
 
-ax.plot(torque_contour, rpm_contour)
+#plot power contour
+i = power.argmax()
+peak_power_torque = torque[i]
+peak_power_rpm = rpm[i]*gears[-1]
+power_contour = lambda rpm: peak_power_torque*peak_power_rpm/rpm
+rpm_max = int(2*rpm[-1])
+ax.plot(power_contour(range(1, rpm_max)), label='Power curve')
 
 fig.tight_layout()
 plt.show()

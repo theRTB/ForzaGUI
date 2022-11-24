@@ -302,7 +302,7 @@ class GUILed:
         
         #add warning light if in a gear that is too low for the rpm
         #with a fudge factor of 10% to avoid blinking
-        ratios = [y/x for x,y in itertools.pairwise(trace.gears)]
+        ratios = [y/x for x,y in zip(trace.gears[:-1], trace.gears[1:])]
         self.downshift_limit = [0,0] + [int(shiftrpm*ratio/1.1) for shiftrpm, ratio in zip(rpmtable[1:], ratios)] 
         self.logger.info(f'downshift limits: {self.downshift_limit}')
             
@@ -376,7 +376,7 @@ class GUILed:
         if not self.run_shiftleds[fdp.gear]:
             if self.state != 0: #reset state for gears without leds
                 self.state = 0
-                self.update_leds()
+                self.update_leds(fdp)
             return
         
         #loop over state triggers in reverse order
