@@ -360,7 +360,8 @@ class GUILed:
             self.calculate_state_triggers()
         self.logger.info("update button hit!")
         with open(FILENAME_SETTINGS, 'w') as file:
-            json.dump(V._to_config(), file)
+            config.update(V._to_config())
+            json.dump(config, file)
 
     def update (self, fdp):
         gear = fdp.gear
