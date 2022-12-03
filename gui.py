@@ -49,7 +49,7 @@ if len(sys.argv) > 1:
 DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0, 
     'plugins':{
 #    'frame_basic':{'enabled': False, 'anchor': 'NW', 'relx': 0.0, 'rely': 0.0}, #TODO: rewrite frame_basic to follow plugin format
-    'map':        {'enabled': False, 'map_canvas':    {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}}, #TODO: remove .place call in guimap.py
+    'map':        {'enabled': False, 'map_canvas':    {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}},
     'ledbar':     {'enabled': False, 'frame_config':  {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0},
                                      'frame_table':   {'anchor': 'se', 'relx': 1.0,   'rely': 1.0}},
     'suspension': {'enabled': True,  'frame':         {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0}},
@@ -637,7 +637,6 @@ class MainWindow:
         """
         shutdown(self.forza5, self.threadPool, self.listener)
         self.forza5.logger.info('bye~')
-        #self.forza5.server_socket.close() #spyder console fix: port in use on reopening gui.py
         self.root.destroy()
 
 
@@ -678,7 +677,7 @@ def shutdown(forza: Forza, threadPool: ThreadPoolExecutor, listener: Listener):
         listener (Listener): keyboard listener
     """
     forza.isRunning = False
-    #forza.server_socket.close()
+    forza.server_socket.close()
     threadPool.shutdown(wait=False)
     listener.stop()
 
