@@ -451,8 +451,8 @@ class MainWindow:
                         ('Sweep', self.rpmtorque_handler, constants.analysis),
                         ('Reset', self.reset_handler, constants.auto_shift)]
         
-        if config['plugins']['carinfo']['enabled']:
-            button_names.insert(0, ('Write CSV', self.writeback_handler, constants.writeback))
+        # if config['plugins']['carinfo']['enabled']:
+        #     button_names.insert(0, ('Write CSV', self.writeback_handler, constants.writeback))
 
         for i, (name, func, shortcut) in enumerate(button_names):
             button = tkinter.Button(self.button_frame, text=f'{name} ({shortcut.name})',
@@ -655,8 +655,8 @@ class MainWindow:
             self.reset_handler(None)
         elif key == constants.gatherratios:
             self.gatherratios_handler(None)
-        elif key == constants.writeback and config['plugins']['carinfo']['enabled']:
-            self.writeback_handler(None)
+        # elif key == constants.writeback and config['plugins']['carinfo']['enabled']:
+        #     self.writeback_handler(None)
         #elif key == constants.stop:
         #    self.pause_handler(None)
         #elif key == constants.close:
