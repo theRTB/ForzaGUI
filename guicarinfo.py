@@ -24,7 +24,7 @@ class GUICarInfoDummy:
     def display(self):
         pass
 
-    def update(self, fdp, revlimit, shiftlimit):
+    def update(self, fdp):
         pass
     
     def set_canvas(self, frame):
