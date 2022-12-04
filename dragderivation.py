@@ -319,14 +319,19 @@ class DragDerivation():
         ax1.set_xlabel('speed km/h')
         ax1.set_ylabel('torque')
         
+        xmin, xmax = ax1.get_xlim()
+        ax1.set_xlim(0, xmax)
         ymin, ymax = ax1.get_ylim()
         ax1.vlines(vmax, 0, ymax, linestyle=':')
         
-        ax2.plot([x*torque_adj[CUT]/speed_gradient[CUT] for x in speed_gradient])
-        ax2.plot(torque_adj[1:-1])
+        ax2.plot([x*torque_adj[CUT]/speed_gradient[CUT] for x in speed_gradient], label='accel scaled to torque')
+        ax2.plot(torque_adj[1:-1], label='torque in collected gear')
+        xmin, xmax = ax2.get_xlim()
+        ax2.set_xlim(0, xmax)
         ymin, ymax = ax2.get_ylim()
         ax2.vlines(CUT, 0, ymax, linestyle=':')
-        ax2.set_xlabel('points')   
+        ax2.set_xlabel('points')
+        ax2.legend()
     
     @classmethod
     def find_torque_accel_ratio(cls, torque_adj, speed, speed_gradient, C, drawgraph=False, *args, **kwargs):
