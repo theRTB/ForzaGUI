@@ -79,9 +79,8 @@ class GUICarInfo:
         with open(filename, encoding='ISO-8859-1') as rawcsv:
             csvobject = csv.reader(rawcsv, delimiter='\t')
             firstrow = next(csvobject)
-            for row in csvobject: #convert column 5 and 6 to integer from string
+            for row in csvobject: #convert column 5 to integer from string
                 row[4] = int(row[4]) if row[4] != '' else row[4]
-                row[5] = int(row[5]) if row[5] != '' else row[5]
                 data.append(row)   
     
     def __init__(self, logger):
@@ -109,9 +108,8 @@ class GUICarInfo:
             with open(GUICarInfo.filename, encoding='ISO-8859-1') as rawcsv:
                 csvobject = csv.reader(rawcsv, delimiter='\t')
                 firstrow = next(csvobject)
-                for row in csvobject: #convert column 5 and 6 to integer from string
+                for row in csvobject: #convert column 5 to integer from string
                     row[4] = int(row[4]) if row[4] != '' else row[4]
-                    row[5] = int(row[5]) if row[5] != '' else row[5]
                     GUICarInfo.data.append(row)     
 
     @classmethod
@@ -145,7 +143,7 @@ class GUICarInfo:
             ]
         self.logger.info(newrow)
         for row in GUICarInfo.data:
-            if row[5] == self.car_ordinal or row[4] == self.car_ordinal:
+            if row[4] == self.car_ordinal:
                 for x in range(len(row)):
                     row[x] = newrow[x]
                 break
@@ -159,7 +157,7 @@ class GUICarInfo:
     @classmethod
     def getinfo(cls, num):
         for row in GUICarInfo.data:
-            if row[5] == num or row[4] == num:
+            if row[4] == num:
                 return row
         return None
             
@@ -183,7 +181,7 @@ class GUICarInfo:
             self.year = row[2]
             self.group = row[3]
             
-            if row[6] == 'x':
+            if row[5] == 'x':
                 self.year = self.year + " (DONE!)"
                 
         
