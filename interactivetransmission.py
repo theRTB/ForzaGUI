@@ -14,6 +14,8 @@ import intersect
 
 from dragderivation import Trace
 
+from guicarinfo import CarData
+
 #example: stock NSX Acura
 car_ordinal = 2352
 car_performance_index = 831 
@@ -74,6 +76,10 @@ class Gearing ():
     def __init__(self, trace, final_ratio=1, title=None):
         self.fig, (self.ax, self.ax2) = plt.subplots(2,1)
         self.fig.set_size_inches(16, 10)
+        
+        self.ax.grid()
+        self.ax.set_ylabel("torque (N.m)")
+        
         self.trace = trace
         self.final_ratio = final_ratio
         self.trace.gears = [g/final_ratio for g in self.trace.gears]                
@@ -81,10 +87,6 @@ class Gearing ():
         self.graphs = []
         for i, ratio in enumerate(self.trace.gears):
             self.graphs.append(Gear(i, trace, self.ax, self.update, final_ratio))
-
-        self.ax.grid()
-       # self.ax.set_xlabel("rpm (final gear)")
-        self.ax.set_ylabel("torque (N.m)")
 
         #1 km/h per x rpm, scaled to final ratio
         val = (statistics.median([(a/b) for (a, b) in zip(self.trace.rpm, self.trace.speed)]) /
@@ -114,7 +116,11 @@ class Gearing ():
         # self.ax_top.set_xticklabels()
         # self.ax_top.set_xticklabels([])
         
-        self.ax.set_title(title if title is not None else filename)
+        if title is None:
+            data = CarData.getinfo(car_ordinal)
+            title = f"{data['maker']} {data['model']} ({data['year']}) PI:{car_performance_index} {data['group']}"
+        
+        self.ax.set_title(title)
         self.fig.tight_layout()
         
         self.__init__power_contour()
