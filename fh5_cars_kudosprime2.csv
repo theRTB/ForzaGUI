@@ -1,657 +1,657 @@
-model	maker	year	group	car_ordinal	confirmed	PI	drivetrain	num_cylinders	engine_max	engine_idle	revlimit	shiftlimit
-Integra Type R	Acura	2001	RETRO HOT HATCH	368								
-RSX Type S	Acura	2002	RETRO HOT HATCH	422								
-NSX	Acura	2017	MODERN SUPERCARS	2352								
-A110 1600s	Alpine	1973	CLASSIC RALLY	1536								
-A110	Alpine	2017	MODERN SPORTS CARS	2973								
-Class 10 Race Car	Alumi Craft	2015	UNLIMITED BUGGIES	2552								
-Gremlin X	AMC	1973	CULT CARS	1482								
-M12S Warthog CST	AMG TRANSPORT DYNAMICS	2554	UNLIMITED OFFROAD	2574								
-Intensa Emozione	Apollo	2018	EXTREME TRACK TOYS	3141								
-Intensa Emozione "Welcome Pack"	Apollo	2018	EXTREME TRACK TOYS	3682								
-Atom 500 V8	Ariel	2013	EXTREME TRACK TOYS	1651								
-Nomad	Ariel	2016	UNLIMITED BUGGIES	2430								
-KZ1R	Ascari	2012	MODERN SUPERCARS	1451								
-DB5	Aston Martin	1964	RARE CLASSICS	1105								
-One-77	Aston Martin	2010	SUPER GT	1181								
-V12 Vantage S	Aston Martin	2013	SUPER GT	2181								
-Vantage GT12	Aston Martin	2016	TRACK TOYS	2493								
-DB11	Aston Martin	2017	SUPER GT	2527								
-Vulcan AMR Pro	Aston Martin	2017	EXTREME TRACK TOYS	3211								
-DBS Superleggera	Aston Martin	2019	SUPER GT	3185								
-Valhalla Concept Car	Aston Martin	2019	HYPERCARS	3364								
-Vantage	Aston Martin	2019	GT CARS	3091								
-DBX	Aston Martin	2021	SPORTS UTILITY HEROES	3580								
-GT	ATS	2018	MODERN SUPERCARS	3195								
-Sport quattro	Audi	1983	RETRO RALLY	633								
-Avant RS2	Audi	1995	RETRO SALOONS	1370								
-RS 4 Avant	Audi	2001	RETRO SALOONS	2178								
-RS 6	Audi	2003	RETRO SALOONS	420								
-RS 4	Audi	2006	SUPER SALOONS	419								
-RS 6	Audi	2009	SUPER SALOONS	1184								
-TT RS Coupé	Audi	2010	MODERN SPORTS CARS	1220								
-RS 3 Sportback	Audi	2011	SUPER HOT HATCH	1216								
-RS 5 Coupé	Audi	2011	SUPER SALOONS	1417								
-R8 Coupé V10 plus 5.2 FSI quattro	Audi	2013	MODERN SUPERCARS	2010								
-RS 4 Avant	Audi	2013	SUPER SALOONS	1607								
-RS 7 Sportback	Audi	2013	SUPER SALOONS	2009								
-RS 6 Avant	Audi	2015	SUPER SALOONS	2180								
-S1	Audi	2015	HOT HATCH	2179								
-TTS Coupé	Audi	2015	MODERN SPORTS CARS	2182								
-R8 V10 plus	Audi	2016	MODERN SUPERCARS	2473								
-RS 4 Avant	Audi	2018	SUPER SALOONS	3318								
-RS 5 Coupé	Audi	2018	SUPER SALOONS	3264								
-TT RS	Audi	2018	MODERN SPORTS CARS	3286								
-RS 3 Sedan	Audi	2020	SUPER SALOONS	3454								
-RS 7 Sportback	Audi	2021	SUPER SALOONS	3584								
-RS E-Tron GT	Audi	2021	SUPER SALOONS	3359								
-Sprite MkI	Austin-Healey	1958	CLASSIC SPORTS CARS	1574								
-Type D	Auto Union	1939	VINTAGE RACERS	2096								
-Mono	BAC	2014	TRACK TOYS	2040								
-8 Litre	Bentley	1930	RARE CLASSICS	1372								
-Blower 4-1/2 Litre Supercharged	Bentley	1930	VINTAGE RACERS	2976								
-Turbo R	Bentley	1991	RETRO SALOONS	3172								
-Bentayga	Bentley	2016	SPORTS UTILITY HEROES	2625								
-Continental Supersports	Bentley	2017	GT CARS	2665								
-Isetta 300 Export	BMW	1957	CULT CARS	2412								
-2002 TURBO	BMW	1973	CLASSIC SPORTS CARS	1269								
-M1	BMW	1981	RETRO SUPERCARS	1040								
-M5	BMW	1988	RETRO SALOONS	1368								
-M3	BMW	1991	RETRO SALOONS	642								
-M5	BMW	1995	RETRO SALOONS	1418								
-M3	BMW	1997	RETRO SALOONS	382								
-M3-GTR	BMW	2002	TRACK TOYS	565								
-Z3 M Coupe	BMW	2002	RETRO SPORTS CARS	1268								
-M5	BMW	2003	RETRO SALOONS	1367								
-M3	BMW	2005	RETRO SALOONS	383								
-M3	BMW	2008	SUPER SALOONS	1011								
-Z4 M Coupe	BMW	2008	MODERN SPORTS CARS	1059								
-M5	BMW	2009	SUPER SALOONS	1126								
-M3 GTS	BMW	2010	TRACK TOYS	1598								
-1 Series M Coupe	BMW	2011	SUPER SALOONS	1385								
-X5 M	BMW	2011	SPORTS UTILITY HEROES	1350								
-X5 M Forza Edition	BMW	2011	EXTREME TRACK TOYS	3556								
-M5	BMW	2012	SUPER SALOONS	1388								
-M6 Coupe	BMW	2013	GT CARS	2018								
-M4 Coupe	BMW	2014	SUPER SALOONS	2154								
-i8	BMW	2015	MODERN SUPERCARS	2133								
-X6 M	BMW	2015	SPORTS UTILITY HEROES	2431								
-M2 Coupé	BMW	2016	SUPER SALOONS	2477								
-M4 GTS	BMW	2016	TRACK TOYS	2628								
-M5	BMW	2018	SUPER SALOONS	3071								
-Z4 Roadster	BMW	2019	MODERN SPORTS CARS	3173								
-M8 Competition Coupe	BMW	2020	GT CARS	3518								
-M4 Competition Coupé	BMW	2021	SUPER SALOONS	3645								
-BT62	Brabham	2019	EXTREME TRACK TOYS	3285								
-Type 35 C	Bugatti	1926	VINTAGE RACERS	2066								
-EB110 Super Sport	Bugatti	1992	RETRO SUPERCARS	1219								
-Veyron Super Sport	Bugatti	2011	HYPERCARS	1328								
-Chiron	Bugatti	2018	HYPERCARS	2624								
-Divo	Bugatti	2019	EXTREME TRACK TOYS	3168								
-GSX	Buick	1970	CLASSIC MUSCLE	1329								
-Regal GNX	Buick	1987	RETRO MUSCLE	417								
-ATS-V	Cadillac	2016	MODERN MUSCLE	2262								
-CTS-V Sedan	Cadillac	2016	MODERN MUSCLE	2421								
-Maverick X RS Turbo R	Can-Am	2018	UTV'S	2871								
-Superlight R500	Caterham	2013	TRACK TOYS	1652								
-Corvette	Chevrolet	1953	CLASSIC SPORTS CARS	1564								
-Corvette Forza Edition	Chevrolet	1953	CLASSIC RACERS	3559								
-150 Utility Sedan	Chevrolet	1955	RODS AND CUSTOMS	2507								
-Bel Air	Chevrolet	1957	RODS AND CUSTOMS	1459								
-Corvette	Chevrolet	1960	CLASSIC SPORTS CARS	1093								
-Impala Super Sport 409	Chevrolet	1964	RODS AND CUSTOMS	1300								
-Corvette Stingray 427	Chevrolet	1967	CLASSIC MUSCLE	312								
-Camaro Super Sport Coupe	Chevrolet	1969	CLASSIC MUSCLE	289								
-Nova Super Sport 396	Chevrolet	1969	CLASSIC MUSCLE	1429								
-Camaro Z28	Chevrolet	1970	CLASSIC MUSCLE	1330								
-Chevelle Super Sport 454	Chevrolet	1970	CLASSIC MUSCLE	299								
-Corvette ZR-1	Chevrolet	1970	CLASSIC MUSCLE	315								
-El Camino Super Sport 454	Chevrolet	1970	VANS AND UTILITY	1291								
-Camaro Z28	Chevrolet	1979	CLASSIC MUSCLE	1064								
-Monte Carlo Super Sport	Chevrolet	1988	RETRO MUSCLE	1575								
-Corvette ZR-1	Chevrolet	1995	RETRO MUSCLE	2006								
-Impala Super Sport	Chevrolet	1996	RETRO MUSCLE	1379								
-Corvette Z06	Chevrolet	2002	RETRO MUSCLE	314								
-Corvette ZR1	Chevrolet	2009	MODERN MUSCLE	1069								
-Camaro Z/28	Chevrolet	2015	TRACK TOYS	2183								
-Corvette Z06	Chevrolet	2015	MODERN MUSCLE	2177								
-Camaro ZL1	Chevrolet	2017	MODERN MUSCLE	2739								
-Colorado ZR2	Chevrolet	2017	PICK-UP & 4X4'S	2847								
-Camaro ZL1 1LE	Chevrolet	2018	TRACK TOYS	3149								
-Hot Wheels Copo Camaro	Chevrolet	2018	TRACK TOYS	3163								
-Corvette ZR1	Chevrolet	2019	TRACK TOYS	3118								
-Corvette Stingray Coupe	Chevrolet	2020	MODERN SUPERCARS	3369								
-510	Datsun	1970	CULT CARS	1104								
-Chevrolet Silverado 1500 Drift Truck	Deberti	2018	DRIFT CARS	3088								
-Ford F-150 Prerunner	Deberti	2018	UNLIMITED OFFROAD	3109								
-Jeep Wrangler Unlimited	Deberti	2018	UNLIMITED OFFROAD	3110								
-Toyota Tacoma TRD "The Performance Truck"	Deberti	2019	DRIFT CARS	3441								
-DMC-12	DeLorean	1982	RETRO SPORTS CARS	1270								
-Dart Hemi Super Stock	Dodge	1968	CLASSIC MUSCLE	1332								
-Charger Daytona HEMI	Dodge	1969	CLASSIC MUSCLE	1063								
-Charger R/T	Dodge	1969	CLASSIC MUSCLE	513								
-Charger R/T Forza Edition	Dodge	1969	TRACK TOYS	3561								
-Challenger R/T	Dodge	1970	CLASSIC MUSCLE	639								
-Coronet Super Bee	Dodge	1970	CLASSIC MUSCLE	1352								
-Viper GTS ACR	Dodge	1999	RETRO MUSCLE	483								
-Magnum SRT-8	Dodge	2008	MODERN MUSCLE	3169								
-Viper SRT10 ACR	Dodge	2008	TRACK TOYS	1046								
-SRT Viper GTS	Dodge	2013	MODERN MUSCLE	1562								
-SRT Viper GTS Anniversary Edition	Dodge	2013	MODERN MUSCLE	3749								
-Challenger SRT Hellcat	Dodge	2015	MODERN MUSCLE	2263								
-Charger SRT Hellcat	Dodge	2015	MODERN MUSCLE	2468								
-Viper ACR	Dodge	2016	TRACK TOYS	2544								
-Challenger SRT Demon	Dodge	2018	MODERN MUSCLE	2909								
-Durango SRT	Dodge	2018	SPORTS UTILITY HEROES	2839								
-D8 GTO	Donkervoort	2013	TRACK TOYS	2105								
-Speedster	Eagle	2012	MODERN SPORTS CARS	2908								
-Exocet Off-Road	Exomotive	2018	UNLIMITED BUGGIES	3089								
-Exocet Off-Road Forza Edition	Exomotive	2018	RALLY MONSTERS	3562								
-#125 ABT Cupra XE	Extreme E	2022	UNLIMITED OFFROAD	3708								
-#22 JBXE	Extreme E	2022	UNLIMITED OFFROAD	3709								
-#23 Genesys Andretti United	Extreme E	2022	UNLIMITED OFFROAD	3710								
-#42 XITE Racing Team	Extreme E	2022	UNLIMITED OFFROAD	3711								
-#44 X44	Extreme E	2022	UNLIMITED OFFROAD	3712								
-#5 Veloce Racing	Extreme E	2022	UNLIMITED OFFROAD	3713								
-#55 Acciona | Sainz XE Team	Extreme E	2022	UNLIMITED OFFROAD	3714								
-#58 McLaren Racing	Extreme E	2022	UNLIMITED OFFROAD	3727								
-#6 Rosberg X Racing	Extreme E	2022	UNLIMITED OFFROAD	3715								
-#99 Chip Ganassi Racing GMC Hummer EV	Extreme E	2022	UNLIMITED OFFROAD	3733								
-250 California	Ferrari	1957	RARE CLASSICS	1271								
-250 Testa Rossa	Ferrari	1957	CLASSIC RACERS	1154								
-250 GT Berlinetta Lusso	Ferrari	1962	RARE CLASSICS	1578								
-250 GTO	Ferrari	1962	CLASSIC RACERS	249								
-#24 Ferrari Spa 330 P4	Ferrari	1967	CLASSIC RACERS	2793								
-365 GTB/4	Ferrari	1968	RARE CLASSICS	1318								
-Dino 246 GT	Ferrari	1969	RARE CLASSICS	326								
-288 GTO	Ferrari	1984	RETRO SUPERCARS	358								
-F40	Ferrari	1987	RETRO SUPERCARS	340								
-F40 Competizionne	Ferrari	1989	EXTREME TRACK TOYS	1023								
-512 TR	Ferrari	1992	RETRO SUPERCARS	255								
-F355 Berlinetta	Ferrari	1994	RETRO SUPERCARS	253								
-F50	Ferrari	1995	RETRO SUPERCARS	342								
-F50 GT	Ferrari	1996	EXTREME TRACK TOYS	1020								
-575M Maranello	Ferrari	2002	RETRO SUPERCARS	257								
-Enzo Ferrari	Ferrari	2002	RETRO SUPERCARS	333								
-360 Challenge Stradale	Ferrari	2003	RETRO SUPERCARS	297								
-FXX	Ferrari	2005	EXTREME TRACK TOYS	1006								
-430 Scuderia	Ferrari	2007	MODERN SUPERCARS	1022								
-458 Italia	Ferrari	2009	MODERN SUPERCARS	1131								
-599 GTO	Ferrari	2010	SUPER GT	1319								
-599XX	Ferrari	2010	EXTREME TRACK TOYS	1171								
-599XX Evolution	Ferrari	2012	EXTREME TRACK TOYS	1599								
-458 Speciale	Ferrari	2013	TRACK TOYS	2184								
-LaFerrari	Ferrari	2013	HYPERCARS	2034								
-California T	Ferrari	2014	SUPER GT	2194								
-FXX K	Ferrari	2014	EXTREME TRACK TOYS	2371								
-488 GTB	Ferrari	2015	MODERN SUPERCARS	2467								
-F12tdf	Ferrari	2015	SUPER GT	2577								
-#25 Corse Clienti 488 Challenge	Ferrari	2017	TRACK TOYS	3112								
-812 Superfast	Ferrari	2017	SUPER GT	2974								
-GTC4Lusso	Ferrari	2017	SUPER GT	3122								
-J50	Ferrari	2017	MODERN SUPERCARS	3226								
-FXX-K Evo	Ferrari	2018	EXTREME TRACK TOYS	3311								
-Portofino	Ferrari	2018	SUPER GT	3225								
-488 Pista	Ferrari	2019	TRACK TOYS	3227								
-Monza SP2	Ferrari	2019	SUPER GT	3312								
-F8 Tributo	Ferrari	2020	MODERN SUPERCARS	3595								
-SF90 Stradale	Ferrari	2020	HYPERCARS	3367								
-De Luxe Five-Window Coupe	Ford	1932	RODS AND CUSTOMS	2372								
-De Luxe Five-Window Coupe Forza Edition	Ford	1932	UNLIMITED BUGGIES									
-De Luxe Coupe	Ford	1940	RODS AND CUSTOMS	1530								
-Super Deluxe Station Wagon	Ford	1946	RODS AND CUSTOMS	2504								
-F-100	Ford	1956	RODS AND CUSTOMS	1581								
-Anglia 105E	Ford	1959	CULT CARS	2979								
-GT40 Mk I	Ford	1964	CLASSIC RACERS	2980								
-Mustang GT Coupe	Ford	1965	CLASSIC MUSCLE	1355								
-Transit	Ford	1965	VANS AND UTILITY	3126								
-#2 GT40 Mk II	Ford	1966	CLASSIC RACERS	2792								
-Lotus Cortina	Ford	1966	CLASSIC RACERS	1486								
-Racing Escort MK1	Ford	1967	CLASSIC RALLY	3183								
-Mustang GT 2+2 Fastback	Ford	1968	CLASSIC MUSCLE	2614								
-Mustang Boss 302	Ford	1969	CLASSIC MUSCLE	1668								
-GT70	Ford	1970	CLASSIC RALLY	3167								
-Mustang Mach 1	Ford	1971	CLASSIC MUSCLE	1320								
-Falcon XA GT-HO	Ford	1972	CLASSIC MUSCLE	2585								
-Capri RS3100	Ford	1973	CLASSIC SPORTS CARS	1529								
-Escort RS1600	Ford	1973	CLASSIC RALLY	1580								
-Bronco	Ford	1975	PICK-UP & 4X4'S	2187								
-#5 Escort RS1800 MkII	Ford	1977	CLASSIC RALLY	3184								
-Escort RS1800	Ford	1977	CLASSIC RALLY	1302								
-Fiesta XR2	Ford	1981	RETRO HOT HATCH	2158								
-RS200 Evolution	Ford	1985	RALLY MONSTERS	1108								
-Escort RS Turbo	Ford	1986	RETRO HOT HATCH	2981								
-Mustang SVO	Ford	1986	RETRO MUSCLE	3181								
-Sierra Cosworth RS500	Ford	1987	RETRO SALOONS	1293								
-Escort RS Cosworth	Ford	1992	RETRO RALLY	1272								
-SVT Cobra R	Ford	1993	RETRO MUSCLE	1041								
-Supervan 3	Ford	1994	TRACK TOYS	3170								
-Racing Puma	Ford	1999	RETRO RALLY	3228								
-Racing Puma Forza Edition	Ford	1999	RALLY MONSTERS	3564								
-SVT Cobra R	Ford	2000	RETRO MUSCLE	405								
-Focus RS	Ford	2003	HOT HATCH	2019								
-GT	Ford	2005	RETRO SUPERCARS	348								
-Focus RS	Ford	2009	SUPER HOT HATCH	1086								
-Crown Victoria Police Interceptor	Ford	2010	RETRO MUSCLE	2649								
-F-150 SVT Raptor	Ford	2011	PICK-UP & 4X4'S	1460								
-Transit SuperSportVan	Ford	2011	VANS AND UTILITY	1477								
-Shelby GT500	Ford	2013	MODERN MUSCLE	1654								
-#11 Rockstar F-150 Trophy Truck	Ford	2014	UNLIMITED OFFROAD	2517								
-Fiesta ST	Ford	2014	HOT HATCH	2011								
-FPV Limited Edition Pursuit Ute	Ford	2014	VANS AND UTILITY	2551								
-Ranger T6 Rally Raid	Ford	2014	OFFROAD	2145								
-Falcon GT F 351	Ford	2015	MODERN MUSCLE	2580								
-Mustang GT	Ford	2015	MODERN MUSCLE	2155								
-Shelby GT350R	Ford	2016	TRACK TOYS	2400								
-#14 Rahal Letterman Lanigan Racing GRC Fiesta	Ford	2017	RALLY MONSTERS	2937								
-#25 'Brocky' Ultra4 Bronco RTR	Ford	2017	UNLIMITED OFFROAD	3128								
-F-150 Raptor	Ford	2017	PICK-UP & 4X4'S	2397								
-Focus RS	Ford	2017	SUPER HOT HATCH	2357								
-GT	Ford	2017	MODERN SUPERCARS	2363								
-M-Sport Fiesta RS	Ford	2017	RALLY MONSTERS	3051								
-#25 Mustang RTR	Ford	2018	DRIFT CARS	3093								
-#88 Mustang RTR	Ford	2018	DRIFT CARS	3151								
-Mustang RTR Spec 5	Ford	2018	MODERN MUSCLE	3108								
-Ranger Raptor	Ford	2019	PICK-UP & 4X4'S	3174								
-#2069 Ford Performance Bronco R	Ford	2020	OFFROAD	3489								
-#2069 Ford Performance Bronco R "Welcome Pack"	Ford	2020	OFFROAD	3684								
-Mustang Shelby GT500	Ford	2020	MODERN MUSCLE	3277								
-Super Duty F-450 DRW PLATINUM	Ford	2020	PICK-UP & 4X4'S	3476								
-Bronco	Ford	2021	PICK-UP & 4X4'S	3489								
-Mustang Mache E 1400	Ford	2021	TRACK TOYS	3598								
-#98 BMW 325i	Formula Drift	1989	DRIFT CARS	3037								
-#34 Toyota Supra MKIV	Formula Drift	1995	DRIFT CARS	3411								
-#777 Nissan 240SX	Formula Drift	1997	DRIFT CARS	3000								
-#43 Dodge Viper SRT10	Formula Drift	2006	DRIFT CARS	3003								
-#117 599 GTB Fiorano	Formula Drift	2007	DRIFT CARS	3249								
-#99 Mazda RX-8	Formula Drift	2009	DRIFT CARS	3400								
-#777 Chevrolet Corvette	Formula Drift	2013	DRIFT CARS	3232								
-#13 Ford Mustang	Formula Drift	2015	DRIFT CARS	2996								
-#530 HSV Maloo GEN-F	Formula Drift	2016	DRIFT CARS	2997								
-#357 Chevrolet Corvette	Formula Drift	2017	DRIFT CARS	3446								
-#64 Nissan 370Z	Formula Drift	2018	DRIFT CARS	3247								
-#411 Toyota Corolla Hatchback	Formula Drift	2019	DRIFT CARS	3524								
-#151 Toyota GR Supra	Formula Drift	2020	DRIFT CARS	3523								
-#91 BMW M2	Formula Drift	2020	DRIFT CARS	3551								
-Nissan "Gold Leader" Datsun 280Z	Forsberg Racing	1975	RETRO SPORTS CARS	3529								
-Toyota Gumout 2JZ CAMRY Stock Car	Forsberg Racing	2010	TRACK TOYS	3528								
-Nissan ‘SafariZ’ 370Z Rally Tribute	Forsberg Racing	2014	RALLY MONSTERS	3531								
-F9	Funco Motorsports	2018	UNLIMITED BUGGIES	2935								
-Jimmy	GMC	1970	PICK-UP & 4X4'S	2613								
-Vandura G-1500	GMC	1983	VANS AND UTILITY	1531								
-VDK Commodore Group A	HDT	1985	RETRO MUSCLE	2584								
-Venom GT	Hennessey	2012	HYPERCARS	1532								
-VelociRaptor 6x6	Hennessey	2019	PICK-UP & 4X4'S	3189								
-Venom F5	Hennessey	2021	HYPERCARS	3600								
-HQ Monaro GTS 350	Holden	1973	CLASSIC MUSCLE	2417								
-Sandman HQ panel van	Holden	1974	VANS AND UTILITY	2510								
-Torana A9X	Holden	1977	CLASSIC MUSCLE	1533								
-Civic RS	Honda	1974	RETRO HOT HATCH	1568								
-Civic CRX Mugen	Honda	1984	RETRO HOT HATCH	2119								
-CR-X SiR	Honda	1991	RETRO HOT HATCH	320								
-NSX-R	Honda	1992	RETRO SPORTS CARS	412								
-Prelude Si	Honda	1994	RETRO HOT HATCH	2121								
-Civic Type R	Honda	1997	RETRO HOT HATCH	1273								
-S2000	Honda	2003	MODERN SPORTS CARS	427								
-Civic Type R	Honda	2004	RETRO HOT HATCH	302								
-NSX-R	Honda	2005	RETRO SPORTS CARS	411								
-NSX-R GT	Honda	2005	RETRO SPORTS CARS	569								
-Civic Type R	Honda	2007	HOT HATCH	625								
-S2000 CR	Honda	2009	MODERN SPORTS CARS	2005								
-Civic Coupe	Honda	2016	RALLY MONSTERS	3069								
-Civic Type R	Honda	2016	SUPER HOT HATCH	2163								
-Civic Type R	Honda	2018	SUPER HOT HATCH	2870								
-Chevrolet Bel Air	Hoonigan	1955	RODS AND CUSTOMS	2728								
-Ford "Hoonicorn" Mustang	Hoonigan	1965	DRIFT CARS	2734								
-GYMKHANA 10 Ford Hoonicorn Mustang	Hoonigan	1965	DRIFT CARS	3006								
-Chevrolet Napalm Nova	Hoonigan	1972	CLASSIC MUSCLE	2729								
-GYMKHANA 10 Ford F-150 "Hoonitruck"	Hoonigan	1977	DRIFT CARS	2982								
-Ford Escort RS1800	Hoonigan	1978	RALLY MONSTERS	2730								
-Ford RS200 Evolution	Hoonigan	1986	RALLY MONSTERS	3119								
-GYMKHANA 10 Ford Escort Cosworth Group A	Hoonigan	1991	RALLY MONSTERS	2984								
-Rauh-Welt Begriff Porsche 911 Turbo	Hoonigan	1991	RETRO SUPERCARS	2736								
-Mazda RX-7 Twerkstallion	Hoonigan	1992	DRIFT CARS	2732								
-Ford Escort RS Cosworth WRC “Cossie V2”	Hoonigan	1994	RALLY MONSTERS	3370								
-GYMKHANA 10 Ford Focus RS RX	Hoonigan	2016	RALLY MONSTERS	3115								
-Ford F-5 Dually Custom Hot Rod	Hot Wheels	1949	RODS AND CUSTOMS	3252								
-Nash Metropolitan Custom	Hot Wheels	1957	RODS AND CUSTOMS	3407								
-Twin Mill	Hot Wheels	1969		2750								
-Deora II	Hot Wheels	2000	RODS AND CUSTOMS	3703								
-Ford Mustang	Hot Wheels	2005	TRACK TOYS	2576								
-Bone Shaker	Hot Wheels	2011	RODS AND CUSTOMS	2575								
-Bad to the Blade	Hot Wheels	2012	EXTREME TRACK TOYS	3704								
-Rip Rod	Hot Wheels	2012	UNLIMITED BUGGIES	2751								
-Baja Bone Shaker	Hot Wheels	2013	UNLIMITED OFFROAD	3702								
-2JetZ	Hot Wheels	2018	RODS AND CUSTOMS	3405								
-GEN-F GTS	HSV	2014	MODERN MUSCLE	2131								
-Limited Edition GEN-F GTS Maloo	HSV	2014	VANS AND UTILITY	2422								
-H1 Alpha	HUMMER	2006	PICK-UP & 4X4'S	1345								
-Veloster N	Hyundai	2019	SUPER HOT HATCH	2872								
-Q60 Concept	Infiniti	2015	SUPER SALOONS	2437								
-Scout 800A	International	1970	PICK-UP & 4X4'S	2558								
-ZeroUno	ItalDesign	2018	HYPERCARS	3194								
-D-Type	Jaguar	1956	CLASSIC RACERS	1301								
-Mk II 3.8	Jaguar	1959	CLASSIC RACERS	2559								
-E-type	Jaguar	1961	RARE CLASSICS	336								
-Lightweight E-Type	Jaguar	1964	CLASSIC RACERS	2992								
-XJ13	Jaguar	1966	CLASSIC RACERS	3415								
-Sport XJR-15	Jaguar	1991	RETRO SUPERCARS	3287								
-XJ220	Jaguar	1993	RETRO SUPERCARS	489								
-XJ220S TWR	Jaguar	1993	RETRO SUPERCARS	3293								
-C-X75	Jaguar	2010	MODERN SUPERCARS	3055								
-XKR-S	Jaguar	2012	GT CARS	1496								
-F-Type R Coupé	Jaguar	2015	GT CARS	2162								
-XE-S	Jaguar	2015	SUPER SALOONS	2570								
-XFR-S	Jaguar	2015	SUPER SALOONS	2185								
-XKR-S	Jaguar	2015	TRACK TOYS	2235								
-F-TYPE Project 7	Jaguar	2016	TRACK TOYS	2492								
-F-PACE S	Jaguar	2017	SPORTS UTILITY HEROES	2571								
-I-PACE	Jaguar	2018	SPORTS UTILITY HEROES	3164								
-CJ5 Renegade	Jeep	1976	PICK-UP & 4X4'S	2511								
-Wrangler Rubicon	Jeep	2012	PICK-UP & 4X4'S	1522								
-Grand Cherokee SRT	Jeep	2014	SPORTS UTILITY HEROES	2108								
-Trailcat	Jeep	2016	UNLIMITED OFFROAD	2742								
-Grand Cherokee Trackhawk	Jeep	2018	SPORTS UTILITY HEROES	2841								
-Gladiator Rubicon	Jeep	2020	PICK-UP & 4X4'S	3255								
-CC8S	Koenigsegg	2002	HYPERCARS	294								
-CCGT	Koenigsegg	2008	EXTREME TRACK TOYS	1007								
-Agera	Koenigsegg	2011	HYPERCARS	1397								
-One:1	Koenigsegg	2015	HYPERCARS	2188								
-Regera	Koenigsegg	2016	HYPERCARS	2526								
-Agera RS	Koenigsegg	2017	HYPERCARS	2910								
-Jesko	Koenigsegg	2020	HYPERCARS	3315								
-X-Bow R	KTM	2013	TRACK TOYS	1653								
-X-Bow GT4	KTM	2018	EXTREME TRACK TOYS	3035								
-Miura P400	Lamborghini	1967	RARE CLASSICS	637								
-Espada 400 GT	Lamborghini	1973	RETRO SUPERCARS	3191								
-LM 002	Lamborghini	1986	PICK-UP & 4X4'S	2176								
-Countach LP5000 QV	Lamborghini	1988	RETRO SUPERCARS	316								
-Diablo SV	Lamborghini	1997	RETRO SUPERCARS	325								
-Diablo GTR	Lamborghini	1999	EXTREME TRACK TOYS	324								
-Reventón	Lamborghini	2008	MODERN SUPERCARS	1125								
-Murciélago LP 670-4 SV	Lamborghini	2010	MODERN SUPERCARS	1173								
-Gallardo LP 570-4 Superleggera	Lamborghini	2011	MODERN SUPERCARS	1322								
-Sesto Elemento	Lamborghini	2011	EXTREME TRACK TOYS	1392								
-Sesto Elemento Forza Edition	Lamborghini	2011	EXTREME TRACK TOYS	2941								
-Aventador J	Lamborghini	2012	HYPERCARS	1583								
-Aventador LP700-4	Lamborghini	2012	HYPERCARS	1398								
-Gallardo LP 570-4 Spyder Performante	Lamborghini	2012	MODERN SUPERCARS	1601								
-Veneno	Lamborghini	2013	HYPERCARS	2042								
-Huracán LP 610-4	Lamborghini	2014	MODERN SUPERCARS	2164								
-Urus	Lamborghini	2014	SPORTS UTILITY HEROES	1625								
-Aventador Superveloce	Lamborghini	2016	HYPERCARS	2479								
-Centenario LP 770-4	Lamborghini	2016	HYPERCARS	2616								
-Aventador SVJ	Lamborghini	2018	HYPERCARS	3289								
-Huracán Performante	Lamborghini	2018	TRACK TOYS	3217								
-Huracán EVO	Lamborghini	2020	MODERN SUPERCARS	3371								
-Series III	Land Rover	1972	PICK-UP & 4X4'S	2560								
-Range Rover	Land Rover	1973	PICK-UP & 4X4'S	2985								
-Defender 90	Land Rover	1997	PICK-UP & 4X4'S	2135								
-Range Rover Sport SVR	Land Rover	2015	SPORTS UTILITY HEROES	2494								
-Range Rover Velar First Edition	Land Rover	2018	SPORTS UTILITY HEROES	3136								
-Defender 110 X	Land Rover	2020	SPORTS UTILITY HEROES	3414								
-SC300	Lexus	1997	RETRO SPORTS CARS	1351								
-LFA	Lexus	2010	MODERN SUPERCARS	1260								
-RC F	Lexus	2015	SUPER SALOONS	2175								
-RC F Track Edition	Lexus	2020	TRACK TOYS	3546								
-Rally Fighter	Local Motors	2014	UNLIMITED OFFROAD	2146								
-#6 Penske Sunoco T70 MkIIIB	Lola	1969	CLASSIC RACERS	2423								
-Elan Sprint	Lotus	1971	CLASSIC SPORTS CARS	330								
-Elise GT1	Lotus	1997	RETRO SUPERCARS	2825								
-Elise Series 1 Sport 190	Lotus	1999	RETRO SPORTS CARS	1376								
-Exige S	Lotus	2012	MODERN SPORTS CARS	1523								
-3-Eleven	Lotus	2016	TRACK TOYS	2541								
-Evija	Lotus	2020	HYPERCARS	3449								
-#100 Cyan Racing 03	Lynk&Co	2020	TRACK TOYS	3552								
-O3+	Lynk&Co	2021	SUPER SALOONS	3677								
-8CTF	Maserati	1939	VINTAGE RACERS	2068								
-MC12 Versione Corsa	Maserati	2008	EXTREME TRACK TOYS	3082								
-Gran Turismo S	Maserati	2010	GT CARS	1304								
-Gran Turismo S Forza Edition	Maserati	2010	TRACK TOYS	2788								
-Levante S	Maserati	2017	SPORTS UTILITY HEROES	2865								
-Savanna RX-7	Mazda	1990	RETRO SPORTS CARS	423								
-323 GT-R	Mazda	1992	RETRO RALLY	2209								
-MX-5 Miata	Mazda	1994	RETRO SPORTS CARS	1110								
-RX-7	Mazda	1997	RETRO SPORTS CARS	424								
-RX-7 Spirit R Type-A	Mazda	2002	RETRO SPORTS CARS	425								
-Mazdaspeed MX-5	Mazda	2005	RETRO SPORTS CARS	2171								
-RX-8 R3	Mazda	2011	MODERN SPORTS CARS	1426								
-MX-5	Mazda	2013	MODERN SPORTS CARS	2004								
-MX-5	Mazda	2016	MODERN SPORTS CARS	2267								
-F1	McLaren	1993	RETRO SUPERCARS	1314								
-F1 GT	McLaren	1997	RETRO SUPERCARS	338								
-P1	McLaren	2013	HYPERCARS	1667								
-570S Coupé	McLaren	2015	MODERN SUPERCARS	2472								
-650S Coupé	McLaren	2015	MODERN SUPERCARS	2189								
-650S Spider	McLaren	2015	MODERN SUPERCARS	3087								
-600LT Coupé	McLaren	2018	TRACK TOYS	3153								
-720S Coupé	McLaren	2018	MODERN SUPERCARS	2846								
-Senna	McLaren	2018	HYPERCARS	2988								
-720S Spider	McLaren	2019	MODERN SUPERCARS	3154								
-Speedtail	McLaren	2019	HYPERCARS	3156								
-GT	McLaren	2020	SUPER GT	3437								
-620R	McLaren	2021	TRACK TOYS	3655								
-765LT	McLaren	2021	TRACK TOYS	3484								
-GT S	Mercedes-AMG	2015	SUPER GT	2242								
-C 63 S Coupé	Mercedes-AMG	2016	SUPER SALOONS	2471								
-GT R	Mercedes-AMG	2017	SUPER GT	2654								
-E 63 S	Mercedes-AMG	2018	SUPER SALOONS	3250								
-GT 4-Door Coupé	Mercedes-AMG	2018	SUPER SALOONS	3064								
-Mercedes-AMG ONE	Mercedes-AMG	2021	HYPERCARS	3650								
-Mercedes-AMG ONE Forza Edition	Mercedes-AMG	2021										
-SSK	Mercedes-Benz	1929	RARE CLASSICS	3026								
-W154	Mercedes-Benz	1939	VINTAGE RACERS	2069								
-300 SL Coupé	Mercedes-Benz	1954	RARE CLASSICS	251								
-300 SLR	Mercedes-Benz	1955	CLASSIC RACERS	1559								
-AMG Hammer Coupe	Mercedes-Benz	1987	RETRO SALOONS	3176								
-190E 2.5-16 Evolution II	Mercedes-Benz	1990	RETRO SALOONS	1296								
-AMG CLK GTR	Mercedes-Benz	1998	RETRO SUPERCARS	568								
-AMG CLK GTR Forza Edition	Mercedes-Benz	1998	EXTREME TRACK TOYS	2948								
-SLS AMG	Mercedes-Benz	2011	SUPER GT	1202								
-C 63 AMG Coupé Black Series	Mercedes-Benz	2012	SUPER SALOONS	1500								
-SLK 55 AMG	Mercedes-Benz	2012	MODERN SPORTS CARS	1525								
-A 45 AMG	Mercedes-Benz	2013	SUPER HOT HATCH	1658								
-E 63 AMG	Mercedes-Benz	2013	SUPER SALOONS	2021								
-G 65 AMG	Mercedes-Benz	2013	PICK-UP & 4X4'S	1627								
-G 63 AMG 6x6	Mercedes-Benz	2014	PICK-UP & 4X4'S	3107								
-Unimog U5023	Mercedes-Benz	2014	TRUCKS	2986								
-#24 Tankpool24 Racing Truck	Mercedes-Benz	2015	TRUCKS	2424								
-#24 Tankpool24 Racing Truck Forza Edition	Mercedes-Benz	2015	UNLIMITED OFFROAD	2947								
-X-Class	Mercedes-Benz	2018	PICK-UP & 4X4'S	3063								
-Cyclone Spoiler	Mercury	1970	CLASSIC MUSCLE	3206								
-Manx	Meyers	1968	CULT CARS	2416								
-Manx Forza Edition	Meyers	1968	TRACK TOYS	3570								
-Metro 6R4	MG	1986	RALLY MONSTERS	2147								
-Xpower SV-R	MG	2005	RETRO SPORTS CARS	3271								
-MG3	MG	2015	HOT HATCH	2173								
-Cooper S	Mini	1965	CLASSIC RALLY	1662								
-Cooper S Forza Edition	Mini	1965	SUPER HOT HATCH	2699								
-John Cooper Works	Mini	2009	HOT HATCH	1098								
-John Cooper Works GP	Mini	2012	HOT HATCH	2003								
-X-Raid ALL4 Racing Countryman	Mini	2013	OFFROAD	2148								
-X-Raid John Cooper Works Buggy	Mini	2018	OFFROAD	3132								
-John Cooper Works GP	Mini	2021	SUPER HOT HATCH	3534								
-John Cooper Works Countryman ALL4	Mini	20180	SPORTS UTILITY HEROES	3131								
-Starion ESI-R	Mitsubishi	1988	RETRO SPORTS CARS	1297								
-Eclipse GSX	Mitsubishi	1995	RETRO SPORTS CARS	327								
-GTO	Mitsubishi	1997	RETRO SPORTS CARS	357								
-Lancer Evolution VI GSR	Mitsubishi	1999	RETRO RALLY	375								
-Lancer Evolution VIII MR	Mitsubishi	2004	MODERN RALLY	378								
-Lancer Evolution IX MR	Mitsubishi	2006	MODERN RALLY	374								
-Lancer Evolution X GSR	Mitsubishi	2008	MODERN RALLY	1009								
-Lancer Evolution X GSR "Welcome Pack"	Mitsubishi	2008	MODERN RALLY	3683								
-3 Wheeler	Morgan	2014	CULT CARS	2562								
-Minor 1000	Morris	1953	CULT CARS	2911								
-Minor 1000 Forza Edition	Morris	1953	TRACK TOYS	2964								
-Minor Series II Traveler	Morris	1953	VANS AND UTILITY	3116								
-Mini-Traveller	Morris	1965	VANS AND UTILITY	3142								
-MT900 GT3	Mosler	2006	EXTREME TRACK TOYS	3495								
-MT900S	Mosler	2010	EXTREME TRACK TOYS	1246								
-Napier-Railton	Napier	1933	VINTAGE RACERS	2989								
-EP9	Nio	2016	HYPERCARS	3366								
-Fairlady Z 432	Nissan	1969	CLASSIC SPORTS CARS	343								
-Skyline 2000GT-R	Nissan	1971	CLASSIC SPORTS CARS	1042								
-Skyline H/T 2000GT-R	Nissan	1973	CLASSIC SPORTS CARS	2270								
-Skyline GTS-R (HR31)	Nissan	1987	RETRO SPORTS CARS	2512								
-Pulsar GTI-R	Nissan	1990	RETRO RALLY	3257								
-Silvia CLUB K's	Nissan	1992	RETRO SPORTS CARS	439								
-240SX SE	Nissan	1993	RETRO SPORTS CARS	1282								
-Skyline GT-R V-Spec	Nissan	1993	RETRO SPORTS CARS	444								
-Fairlady Z Version S Twin Turbo	Nissan	1994	RETRO SPORTS CARS	345								
-Silvia K's	Nissan	1994	RETRO SPORTS CARS	440								
-NISMO GT-R LM	Nissan	1995	RETRO SPORTS CARS	2738								
-Skyline GT-R V-Spec	Nissan	1997	RETRO SPORTS CARS	1043								
-R390 (GT1)	Nissan	1998	RETRO SUPERCARS	567								
-Silvia K's Aero	Nissan	1998	RETRO SPORTS CARS	2659								
-Silvia Spec-R	Nissan	2000	RETRO SPORTS CARS	441								
-Skyline GT-R V-Spec II	Nissan	2002	RETRO SPORTS CARS	445								
-Fairlady Z	Nissan	2003	RETRO SPORTS CARS	344								
-Fairlady Z Forza Edition	Nissan	2003	UNLIMITED OFFROAD	2951								
-Pickup #23 Rally Raid	Nissan	2004	UNLIMITED OFFROAD	2744								
-370Z	Nissan	2010	MODERN SPORTS CARS	1103								
-GT-R Black Edition (R35)	Nissan	2012	MODERN SUPERCARS	2002								
-Titan Warrior Concept	Nissan	2016	PICK-UP & 4X4'S	2662								
-GT-R (R35)	Nissan	2017	MODERN SUPERCARS	2618								
-Sentra Nismo	Nissan	2018	SUPER SALOONS	2874								
-370Z Nismo	Nissan	2019	MODERN SPORTS CARS	3307								
-GT-R Nismo (R35)	Nissan	2020	TRACK TOYS	3622								
-Toronado	Oldmobile	1966	CLASSIC MUSCLE	3201								
-Manta 400	Opel	1984	RALLY MONSTERS	2420								
-Zonda Cinque Roadster	Pagani	2009	HYPERCARS	1369								
-Zonda R	Pagani	2010	EXTREME TRACK TOYS	1175								
-Huayra BC	Pagani	2016	HYPERCARS	2647								
-Huayra BC Forza Edition	Pagani	2016	EXTREME TRACK TOYS	3572								
-P50	Peel	1962	CULT CLASSICS	2987								
-Trident	Peel	1965	CULT CLASSICS	3005								
-The Cholla	Penhall	2011	UNLIMITED BUGGIES	2515								
-205 Turbo 16	Peugeot	1984	RETRO RALLY	1591								
-205 Rallye	Peugeot	1991	RETRO HOT HATCH	3180								
-207 Super 2000	Peugeot	2007	RALLY MONSTERS	615								
-Barracuda Formula-S	Plymouth	1968	CLASSIC MUSCLE	281								
-Cuda 426 Hemi	Plymouth	1971	CLASSIC MUSCLE	1277								
-RZR XP 1000 EPS	Polaris	2015	UTV'S	2521								
-GTO	Pontiac	1965	CLASSIC MUSCLE	1285								
-Firebird Trans Am	Pontiac	1977	CLASSIC MUSCLE	1276								
-Firebird Trans Am GTA	Pontiac	1987	RETRO MUSCLE	1045								
-Firebird Trans Am GTA Forza Edition	Pontiac	1987	TRACK TOYS	3057								
-550A Spyder	Porsche	1955	CLASSIC RACERS	1281								
-356 A 1600 Super	Porsche	1959	RARE CLASSICS	3036								
-356 C Cabriolet Emory Special	Porsche	1960	CLASSIC SPORTS CARS	3150								
-#3 917 LH	Porsche	1970	CLASSIC RACERS	2549								
-914/6	Porsche	1970	CLASSIC SPORTS CARS	266								
-#23 917/20	Porsche	1971	CLASSIC RACERS	2849								
-911 Carrera RS	Porsche	1973	RARE CLASSICS	260								
-911 Turbo 3.3	Porsche	1982	RETRO SUPERCARS	265								
-#185 959 Prodrive Rally Raid	Porsche	1985	RALLY MONSTERS	3031								
-959	Porsche	1987	RETRO SUPERCARS	269								
-#65 Rothsport Racing 911 'Desert Flyer'	Porsche	1989	RALLY MONSTERS	3188								
-944 Turbo	Porsche	1989	RETRO SPORTS CARS	268								
-911 Reimagined by Singer – DLS	Porsche	1990	MODERN SUPERCARS	3248								
-968 Turbo S	Porsche	1993	RETRO SPORTS CARS	2534								
-911 Carrera 2 by Gunther Werks	Porsche	1995	MODERN SPORTS CARS	3160								
-911 GT2	Porsche	1995	RETRO SUPERCARS	261								
-911 GT1 Strassenversion	Porsche	1998	RETRO SUPERCARS	641								
-Carrera GT	Porsche	2003	RETRO SUPERCARS	292								
-911 GT3	Porsche	2004	RETRO SUPERCARS	262								
-911 Sport Classic	Porsche	2010	MODERN SPORTS CARS	1234								
-911 GT2 RS	Porsche	2012	TRACK TOYS	1539								
-911 GT3 RS 4.0	Porsche	2012	TRACK TOYS	2297								
-911 Turbo S	Porsche	2014	MODERN SUPERCARS	2289								
-918 Spyder	Porsche	2014	HYPERCARS	2290								
-Cayman GTS	Porsche	2015	MODERN SPORTS CARS	2293								
-911 GT3 RS	Porsche	2016	TRACK TOYS	2528								
-Cayman GT4	Porsche	2016	TRACK TOYS	2529								
-Panamera Turbo	Porsche	2017	SUPER SALOONS	2741								
-718 Cayman GTS	Porsche	2018	MODERN SPORTS CARS	3117								
-911 GT2 RS	Porsche	2018	TRACK TOYS	2755								
-Cayenne Turbo	Porsche	2018	SPORTS UTILITY HEROES	2773								
-Macan LPR Rally Raid	Porsche	2018	OFFROAD	3187								
-911 Carrera S	Porsche	2019	MODERN SPORTS CARS	3123								
-911 GT3 RS	Porsche	2019	TRACK TOYS	3072								
-911 GT3 RS Forza Edition	Porsche	2019	RALLY MONSTERS	3574								
-911 Speedster	Porsche	2019	MODERN SPORTS CARS	3215								
-Macan Turbo	Porsche	2019	SPORTS UTILITY HEROES	2295								
-Taycan Turbo S	Porsche	2020	SUPER SALOONS	3445								
-Taycan Turbo S "Welcome Pack"	Porsche	2020	SUPER SALOONS	3685								
-911 GT3	Porsche	2021	TRACK TOYS	3667								
-RXC Turbo	Radical	2015	EXTREME TRACK TOYS	2486								
-Tachyon Speed	RAESR	2019	HYPERCARS	3196								
-2500 Power Wagon	RAM	2017	PICK-UP & 4X4'S	2838								
-Supervan III	Reliant	1972	CULT CARS	2563								
-8 Gordini	Renault	1967	CLASSIC RALLY	3395								
-4L Export	Renault	1968	CULT CARS	3261								
-5 Turbo	Renault	1980	RETRO RALLY	634								
-Clio Williams	Renault	1993	RETRO HOT HATCH	2149								
-Mégane R26.R	Renault	2008	SUPER HOT HATCH	3129								
-Clio R.S. 200 EDC	Renault	2013	HOT HATCH	2022								
-MEGANE R.S.	Renault	2018	SUPER HOT HATCH	3134								
-Concept Two	Rimac	2019	HYPERCARS	3140								
-#37 Polaris RZR-Rockstar Energy Pro 2 Truck	RJ Anderson	2016	UNLIMITED OFFROAD	2663								
-S7	Saleen	2004	RETRO SUPERCARS	432								
-S1	Saleen	2018	MODERN SUPERCARS	3276								
-962CR	Schuppan	1993	RETRO SUPERCARS	3288								
-Cobra 427 S/C	Shelby	1965	RARE CLASSICS	306								
-Cobra Daytona Coupe	Shelby	1965	CLASSIC RACERS	1155								
-#23 Yokohama Alpha	SIERRA Cars	2020	EXTREME TRACK TOYS	3539								
-RX3	SIERRA Cars	2021	UTV'S	3540								
-Legacy RS	Subaru	1990	RETRO RALLY	1382								
-Impreza 22B-STi Version	Subaru	1998	RETRO RALLY	363								
-IMPREZA WRX STi	Subaru	2004	MODERN RALLY	364								
-IMPREZA WRX STI	Subaru	2005	MODERN RALLY	365								
-IMPREZA WRX STI	Subaru	2008	MODERN RALLY	1060								
-BRZ	Subaru	2013	MODERN SPORTS CARS	1655								
-WRX STI	Subaru	2015	MODERN RALLY	2168								
-WRX STI	Subaru	2015	MODERN RALLY	2168								
-WRX STI ARX Supercar	Subaru	2018	RALLY MONSTERS	3241								
-STI 209	Subaru	2019	MODERN RALLY	3412								
-2000GT	Toyota	1968	RARE CLASSICS	247								
-Celica GT	Toyota	1974	CLASSIC SPORTS CARS	1592								
-FJ40	Toyota	1979	PICK-UP & 4X4'S	2566								
-Sprinter Trueno GT Apex	Toyota	1985	RETRO SPORTS CARS	455								
-MR2 SC	Toyota	1989	RETRO SPORTS CARS	1395								
-Celica GT-Four RC ST185	Toyota	1992	RETRO RALLY	1517								
-Supra 2.0 GT	Toyota	1992	RETRO SPORTS CARS	460								
-#1 T100 Baja Truck	Toyota	1993	UNLIMITED OFFROAD	2636								
-Celica GT-Four ST205	Toyota	1994	RETRO RALLY	1034								
-Supra RZ	Toyota	1998	RETRO SPORTS CARS	461								
-Supra RZ "Welcome Pack"	Toyota	1998	RETRO SPORTS CARS	3681								
-Celica Sport Specialty II	Toyota	2003	RETRO SPORTS CARS	295								
-Hilux Arctic Trucks AT38	Toyota	2007	PICK-UP & 4X4'S	2656								
-86	Toyota	2013	MODERN SPORTS CARS	2007								
-Land Cruiser Arctic Trucks AT37	Toyota	2016	PICK-UP & 4X4'S	2743								
-4Runner TRD Pro	Toyota	2019	PICK-UP & 4X4'S	3373								
-Tacoma TRD Pro	Toyota	2019	PICK-UP & 4X4'S	3374								
-GR Supra	Toyota	2020	MODERN SPORTS CARS	3402								
-Tundra RTD Pro	Toyota	2020	PICK-UP & 4X4'S	3419								
-Cerbera Speed 12	TVR	1998	RETRO SUPERCARS	296								
-Sagaris	TVR	2005	RETRO SPORTS CARS	433								
-Griffith	TVR	2018	MODERN SPORTS CARS	2993								
-Evolution Coupe 1020	Ultima	2015	EXTREME TRACK TOYS	2569								
-Lotus Carlton	Vauxhall	1990	RETRO SALOONS	291								
-Monaro VXR	Vauxhall	2005	MODERN MUSCLE	397								
-Corsa VXR	Vauxhall	2016	HOT HATCH	2427								
-Beetle	Volkswagen	1963	CULT CARS	1435								
-Beetle Forza Edition	Volkswagen	1963	TRACK TOYS	3577								
-Type 2 De Luxe	Volkswagen	1963	CULT CARS	2151								
-Class 5/1600 Baja Bug	Volkswagen	1969	BUGGIES	2568								
-#1107 Desert Dingo Racing Stock Bug	Volkswagen	1970	BUGGIES	2258								
-Scirocco S	Volkswagen	1981	RETRO HOT HATCH	1380								
-Pickup LX	Volkswagen	1982	VANS AND UTILITY	3235								
-Golf GTI	Volkswagen	1983	RETRO HOT HATCH	1995								
-Golf Gti 16v Mk2	Volkswagen	1992	RETRO HOT HATCH	353								
-Corrado VR6	Volkswagen	1995	RETRO HOT HATCH	309								
-GTI VR6 Mk3	Volkswagen	1998	RETRO HOT HATCH	1383								
-Golf R32	Volkswagen	2003	HOT HATCH	354								
-Golf R	Volkswagen	2010	SUPER HOT HATCH	1231								
-Scirocco R	Volkswagen	2011	HOT HATCH	1428								
-Golf R	Volkswagen	2014	SUPER HOT HATCH	2142								
-#34 Volkswagen Andretti Rallycross Beetle	Volkswagen	2017	RALLY MONSTERS	3007								
-Golf R	Volkswagen	2021	SUPER HOT HATCH	3413								
-242 Turbo Evolution	Volvo	1983	CLASSIC RALLY	1299								
-850 R	Volvo	1997	RETRO SALOONS	1387								
-V60 Polestar	Volvo	2015	SUPER SALOONS	2586								
-05RR	VUHL	2017	TRACK TOYS	2844								
-MB Jeep	Willys	1945	PICK-UP & 4X4'S	2049								
-P7	Xpeng	2020	SUPER SALOONS	3547								
-TS1 	Zenvo	2016	HYPERCARS	2474								
-TSR-S	Zenvo	2019	HYPERCARS	3212								
+model	maker	year	group	car_ordinal
+Integra Type R	Acura	2001	RETRO HOT HATCH	368
+RSX Type S	Acura	2002	RETRO HOT HATCH	422
+NSX	Acura	2017	MODERN SUPERCARS	2352
+A110 1600s	Alpine	1973	CLASSIC RALLY	1536
+A110	Alpine	2017	MODERN SPORTS CARS	2973
+Class 10 Race Car	Alumi Craft	2015	UNLIMITED BUGGIES	2552
+Gremlin X	AMC	1973	CULT CARS	1482
+M12S Warthog CST	AMG TRANSPORT DYNAMICS	2554	UNLIMITED OFFROAD	2574
+Intensa Emozione	Apollo	2018	EXTREME TRACK TOYS	3141
+Intensa Emozione "Welcome Pack"	Apollo	2018	EXTREME TRACK TOYS	3682
+Atom 500 V8	Ariel	2013	EXTREME TRACK TOYS	1651
+Nomad	Ariel	2016	UNLIMITED BUGGIES	2430
+KZ1R	Ascari	2012	MODERN SUPERCARS	1451
+DB5	Aston Martin	1964	RARE CLASSICS	1105
+One-77	Aston Martin	2010	SUPER GT	1181
+V12 Vantage S	Aston Martin	2013	SUPER GT	2181
+Vantage GT12	Aston Martin	2016	TRACK TOYS	2493
+DB11	Aston Martin	2017	SUPER GT	2527
+Vulcan AMR Pro	Aston Martin	2017	EXTREME TRACK TOYS	3211
+DBS Superleggera	Aston Martin	2019	SUPER GT	3185
+Valhalla Concept Car	Aston Martin	2019	HYPERCARS	3364
+Vantage	Aston Martin	2019	GT CARS	3091
+DBX	Aston Martin	2021	SPORTS UTILITY HEROES	3580
+GT	ATS	2018	MODERN SUPERCARS	3195
+Sport quattro	Audi	1983	RETRO RALLY	633
+Avant RS2	Audi	1995	RETRO SALOONS	1370
+RS 4 Avant	Audi	2001	RETRO SALOONS	2178
+RS 6	Audi	2003	RETRO SALOONS	420
+RS 4	Audi	2006	SUPER SALOONS	419
+RS 6	Audi	2009	SUPER SALOONS	1184
+TT RS Coupé	Audi	2010	MODERN SPORTS CARS	1220
+RS 3 Sportback	Audi	2011	SUPER HOT HATCH	1216
+RS 5 Coupé	Audi	2011	SUPER SALOONS	1417
+R8 Coupé V10 plus 5.2 FSI quattro	Audi	2013	MODERN SUPERCARS	2010
+RS 4 Avant	Audi	2013	SUPER SALOONS	1607
+RS 7 Sportback	Audi	2013	SUPER SALOONS	2009
+RS 6 Avant	Audi	2015	SUPER SALOONS	2180
+S1	Audi	2015	HOT HATCH	2179
+TTS Coupé	Audi	2015	MODERN SPORTS CARS	2182
+R8 V10 plus	Audi	2016	MODERN SUPERCARS	2473
+RS 4 Avant	Audi	2018	SUPER SALOONS	3318
+RS 5 Coupé	Audi	2018	SUPER SALOONS	3264
+TT RS	Audi	2018	MODERN SPORTS CARS	3286
+RS 3 Sedan	Audi	2020	SUPER SALOONS	3454
+RS 7 Sportback	Audi	2021	SUPER SALOONS	3584
+RS E-Tron GT	Audi	2021	SUPER SALOONS	3359
+Sprite MkI	Austin-Healey	1958	CLASSIC SPORTS CARS	1574
+Type D	Auto Union	1939	VINTAGE RACERS	2096
+Mono	BAC	2014	TRACK TOYS	2040
+8 Litre	Bentley	1930	RARE CLASSICS	1372
+Blower 4-1/2 Litre Supercharged	Bentley	1930	VINTAGE RACERS	2976
+Turbo R	Bentley	1991	RETRO SALOONS	3172
+Bentayga	Bentley	2016	SPORTS UTILITY HEROES	2625
+Continental Supersports	Bentley	2017	GT CARS	2665
+Isetta 300 Export	BMW	1957	CULT CARS	2412
+2002 TURBO	BMW	1973	CLASSIC SPORTS CARS	1269
+M1	BMW	1981	RETRO SUPERCARS	1040
+M5	BMW	1988	RETRO SALOONS	1368
+M3	BMW	1991	RETRO SALOONS	642
+M5	BMW	1995	RETRO SALOONS	1418
+M3	BMW	1997	RETRO SALOONS	382
+M3-GTR	BMW	2002	TRACK TOYS	565
+Z3 M Coupe	BMW	2002	RETRO SPORTS CARS	1268
+M5	BMW	2003	RETRO SALOONS	1367
+M3	BMW	2005	RETRO SALOONS	383
+M3	BMW	2008	SUPER SALOONS	1011
+Z4 M Coupe	BMW	2008	MODERN SPORTS CARS	1059
+M5	BMW	2009	SUPER SALOONS	1126
+M3 GTS	BMW	2010	TRACK TOYS	1598
+1 Series M Coupe	BMW	2011	SUPER SALOONS	1385
+X5 M	BMW	2011	SPORTS UTILITY HEROES	1350
+X5 M Forza Edition	BMW	2011	EXTREME TRACK TOYS	3556
+M5	BMW	2012	SUPER SALOONS	1388
+M6 Coupe	BMW	2013	GT CARS	2018
+M4 Coupe	BMW	2014	SUPER SALOONS	2154
+i8	BMW	2015	MODERN SUPERCARS	2133
+X6 M	BMW	2015	SPORTS UTILITY HEROES	2431
+M2 Coupé	BMW	2016	SUPER SALOONS	2477
+M4 GTS	BMW	2016	TRACK TOYS	2628
+M5	BMW	2018	SUPER SALOONS	3071
+Z4 Roadster	BMW	2019	MODERN SPORTS CARS	3173
+M8 Competition Coupe	BMW	2020	GT CARS	3518
+M4 Competition Coupé	BMW	2021	SUPER SALOONS	3645
+BT62	Brabham	2019	EXTREME TRACK TOYS	3285
+Type 35 C	Bugatti	1926	VINTAGE RACERS	2066
+EB110 Super Sport	Bugatti	1992	RETRO SUPERCARS	1219
+Veyron Super Sport	Bugatti	2011	HYPERCARS	1328
+Chiron	Bugatti	2018	HYPERCARS	2624
+Divo	Bugatti	2019	EXTREME TRACK TOYS	3168
+GSX	Buick	1970	CLASSIC MUSCLE	1329
+Regal GNX	Buick	1987	RETRO MUSCLE	417
+ATS-V	Cadillac	2016	MODERN MUSCLE	2262
+CTS-V Sedan	Cadillac	2016	MODERN MUSCLE	2421
+Maverick X RS Turbo R	Can-Am	2018	UTV'S	2871
+Superlight R500	Caterham	2013	TRACK TOYS	1652
+Corvette	Chevrolet	1953	CLASSIC SPORTS CARS	1564
+Corvette Forza Edition	Chevrolet	1953	CLASSIC RACERS	3559
+150 Utility Sedan	Chevrolet	1955	RODS AND CUSTOMS	2507
+Bel Air	Chevrolet	1957	RODS AND CUSTOMS	1459
+Corvette	Chevrolet	1960	CLASSIC SPORTS CARS	1093
+Impala Super Sport 409	Chevrolet	1964	RODS AND CUSTOMS	1300
+Corvette Stingray 427	Chevrolet	1967	CLASSIC MUSCLE	312
+Camaro Super Sport Coupe	Chevrolet	1969	CLASSIC MUSCLE	289
+Nova Super Sport 396	Chevrolet	1969	CLASSIC MUSCLE	1429
+Camaro Z28	Chevrolet	1970	CLASSIC MUSCLE	1330
+Chevelle Super Sport 454	Chevrolet	1970	CLASSIC MUSCLE	299
+Corvette ZR-1	Chevrolet	1970	CLASSIC MUSCLE	315
+El Camino Super Sport 454	Chevrolet	1970	VANS AND UTILITY	1291
+Camaro Z28	Chevrolet	1979	CLASSIC MUSCLE	1064
+Monte Carlo Super Sport	Chevrolet	1988	RETRO MUSCLE	1575
+Corvette ZR-1	Chevrolet	1995	RETRO MUSCLE	2006
+Impala Super Sport	Chevrolet	1996	RETRO MUSCLE	1379
+Corvette Z06	Chevrolet	2002	RETRO MUSCLE	314
+Corvette ZR1	Chevrolet	2009	MODERN MUSCLE	1069
+Camaro Z/28	Chevrolet	2015	TRACK TOYS	2183
+Corvette Z06	Chevrolet	2015	MODERN MUSCLE	2177
+Camaro ZL1	Chevrolet	2017	MODERN MUSCLE	2739
+Colorado ZR2	Chevrolet	2017	PICK-UP & 4X4'S	2847
+Camaro ZL1 1LE	Chevrolet	2018	TRACK TOYS	3149
+Hot Wheels Copo Camaro	Chevrolet	2018	TRACK TOYS	3163
+Corvette ZR1	Chevrolet	2019	TRACK TOYS	3118
+Corvette Stingray Coupe	Chevrolet	2020	MODERN SUPERCARS	3369
+510	Datsun	1970	CULT CARS	1104
+Chevrolet Silverado 1500 Drift Truck	Deberti	2018	DRIFT CARS	3088
+Ford F-150 Prerunner	Deberti	2018	UNLIMITED OFFROAD	3109
+Jeep Wrangler Unlimited	Deberti	2018	UNLIMITED OFFROAD	3110
+Toyota Tacoma TRD "The Performance Truck"	Deberti	2019	DRIFT CARS	3441
+DMC-12	DeLorean	1982	RETRO SPORTS CARS	1270
+Dart Hemi Super Stock	Dodge	1968	CLASSIC MUSCLE	1332
+Charger Daytona HEMI	Dodge	1969	CLASSIC MUSCLE	1063
+Charger R/T	Dodge	1969	CLASSIC MUSCLE	513
+Charger R/T Forza Edition	Dodge	1969	TRACK TOYS	3561
+Challenger R/T	Dodge	1970	CLASSIC MUSCLE	639
+Coronet Super Bee	Dodge	1970	CLASSIC MUSCLE	1352
+Viper GTS ACR	Dodge	1999	RETRO MUSCLE	483
+Magnum SRT-8	Dodge	2008	MODERN MUSCLE	3169
+Viper SRT10 ACR	Dodge	2008	TRACK TOYS	1046
+SRT Viper GTS	Dodge	2013	MODERN MUSCLE	1562
+SRT Viper GTS Anniversary Edition	Dodge	2013	MODERN MUSCLE	3749
+Challenger SRT Hellcat	Dodge	2015	MODERN MUSCLE	2263
+Charger SRT Hellcat	Dodge	2015	MODERN MUSCLE	2468
+Viper ACR	Dodge	2016	TRACK TOYS	2544
+Challenger SRT Demon	Dodge	2018	MODERN MUSCLE	2909
+Durango SRT	Dodge	2018	SPORTS UTILITY HEROES	2839
+D8 GTO	Donkervoort	2013	TRACK TOYS	2105
+Speedster	Eagle	2012	MODERN SPORTS CARS	2908
+Exocet Off-Road	Exomotive	2018	UNLIMITED BUGGIES	3089
+Exocet Off-Road Forza Edition	Exomotive	2018	RALLY MONSTERS	3562
+#125 ABT Cupra XE	Extreme E	2022	UNLIMITED OFFROAD	3708
+#22 JBXE	Extreme E	2022	UNLIMITED OFFROAD	3709
+#23 Genesys Andretti United	Extreme E	2022	UNLIMITED OFFROAD	3710
+#42 XITE Racing Team	Extreme E	2022	UNLIMITED OFFROAD	3711
+#44 X44	Extreme E	2022	UNLIMITED OFFROAD	3712
+#5 Veloce Racing	Extreme E	2022	UNLIMITED OFFROAD	3713
+#55 Acciona | Sainz XE Team	Extreme E	2022	UNLIMITED OFFROAD	3714
+#58 McLaren Racing	Extreme E	2022	UNLIMITED OFFROAD	3727
+#6 Rosberg X Racing	Extreme E	2022	UNLIMITED OFFROAD	3715
+#99 Chip Ganassi Racing GMC Hummer EV	Extreme E	2022	UNLIMITED OFFROAD	3733
+250 California	Ferrari	1957	RARE CLASSICS	1271
+250 Testa Rossa	Ferrari	1957	CLASSIC RACERS	1154
+250 GT Berlinetta Lusso	Ferrari	1962	RARE CLASSICS	1578
+250 GTO	Ferrari	1962	CLASSIC RACERS	249
+#24 Ferrari Spa 330 P4	Ferrari	1967	CLASSIC RACERS	2793
+365 GTB/4	Ferrari	1968	RARE CLASSICS	1318
+Dino 246 GT	Ferrari	1969	RARE CLASSICS	326
+288 GTO	Ferrari	1984	RETRO SUPERCARS	358
+F40	Ferrari	1987	RETRO SUPERCARS	340
+F40 Competizionne	Ferrari	1989	EXTREME TRACK TOYS	1023
+512 TR	Ferrari	1992	RETRO SUPERCARS	255
+F355 Berlinetta	Ferrari	1994	RETRO SUPERCARS	253
+F50	Ferrari	1995	RETRO SUPERCARS	342
+F50 GT	Ferrari	1996	EXTREME TRACK TOYS	1020
+575M Maranello	Ferrari	2002	RETRO SUPERCARS	257
+Enzo Ferrari	Ferrari	2002	RETRO SUPERCARS	333
+360 Challenge Stradale	Ferrari	2003	RETRO SUPERCARS	297
+FXX	Ferrari	2005	EXTREME TRACK TOYS	1006
+430 Scuderia	Ferrari	2007	MODERN SUPERCARS	1022
+458 Italia	Ferrari	2009	MODERN SUPERCARS	1131
+599 GTO	Ferrari	2010	SUPER GT	1319
+599XX	Ferrari	2010	EXTREME TRACK TOYS	1171
+599XX Evolution	Ferrari	2012	EXTREME TRACK TOYS	1599
+458 Speciale	Ferrari	2013	TRACK TOYS	2184
+LaFerrari	Ferrari	2013	HYPERCARS	2034
+California T	Ferrari	2014	SUPER GT	2194
+FXX K	Ferrari	2014	EXTREME TRACK TOYS	2371
+488 GTB	Ferrari	2015	MODERN SUPERCARS	2467
+F12tdf	Ferrari	2015	SUPER GT	2577
+#25 Corse Clienti 488 Challenge	Ferrari	2017	TRACK TOYS	3112
+812 Superfast	Ferrari	2017	SUPER GT	2974
+GTC4Lusso	Ferrari	2017	SUPER GT	3122
+J50	Ferrari	2017	MODERN SUPERCARS	3226
+FXX-K Evo	Ferrari	2018	EXTREME TRACK TOYS	3311
+Portofino	Ferrari	2018	SUPER GT	3225
+488 Pista	Ferrari	2019	TRACK TOYS	3227
+Monza SP2	Ferrari	2019	SUPER GT	3312
+F8 Tributo	Ferrari	2020	MODERN SUPERCARS	3595
+SF90 Stradale	Ferrari	2020	HYPERCARS	3367
+De Luxe Five-Window Coupe	Ford	1932	RODS AND CUSTOMS	2372
+De Luxe Five-Window Coupe Forza Edition	Ford	1932	UNLIMITED BUGGIES	
+De Luxe Coupe	Ford	1940	RODS AND CUSTOMS	1530
+Super Deluxe Station Wagon	Ford	1946	RODS AND CUSTOMS	2504
+F-100	Ford	1956	RODS AND CUSTOMS	1581
+Anglia 105E	Ford	1959	CULT CARS	2979
+GT40 Mk I	Ford	1964	CLASSIC RACERS	2980
+Mustang GT Coupe	Ford	1965	CLASSIC MUSCLE	1355
+Transit	Ford	1965	VANS AND UTILITY	3126
+#2 GT40 Mk II	Ford	1966	CLASSIC RACERS	2792
+Lotus Cortina	Ford	1966	CLASSIC RACERS	1486
+Racing Escort MK1	Ford	1967	CLASSIC RALLY	3183
+Mustang GT 2+2 Fastback	Ford	1968	CLASSIC MUSCLE	2614
+Mustang Boss 302	Ford	1969	CLASSIC MUSCLE	1668
+GT70	Ford	1970	CLASSIC RALLY	3167
+Mustang Mach 1	Ford	1971	CLASSIC MUSCLE	1320
+Falcon XA GT-HO	Ford	1972	CLASSIC MUSCLE	2585
+Capri RS3100	Ford	1973	CLASSIC SPORTS CARS	1529
+Escort RS1600	Ford	1973	CLASSIC RALLY	1580
+Bronco	Ford	1975	PICK-UP & 4X4'S	2187
+#5 Escort RS1800 MkII	Ford	1977	CLASSIC RALLY	3184
+Escort RS1800	Ford	1977	CLASSIC RALLY	1302
+Fiesta XR2	Ford	1981	RETRO HOT HATCH	2158
+RS200 Evolution	Ford	1985	RALLY MONSTERS	1108
+Escort RS Turbo	Ford	1986	RETRO HOT HATCH	2981
+Mustang SVO	Ford	1986	RETRO MUSCLE	3181
+Sierra Cosworth RS500	Ford	1987	RETRO SALOONS	1293
+Escort RS Cosworth	Ford	1992	RETRO RALLY	1272
+SVT Cobra R	Ford	1993	RETRO MUSCLE	1041
+Supervan 3	Ford	1994	TRACK TOYS	3170
+Racing Puma	Ford	1999	RETRO RALLY	3228
+Racing Puma Forza Edition	Ford	1999	RALLY MONSTERS	3564
+SVT Cobra R	Ford	2000	RETRO MUSCLE	405
+Focus RS	Ford	2003	HOT HATCH	2019
+GT	Ford	2005	RETRO SUPERCARS	348
+Focus RS	Ford	2009	SUPER HOT HATCH	1086
+Crown Victoria Police Interceptor	Ford	2010	RETRO MUSCLE	2649
+F-150 SVT Raptor	Ford	2011	PICK-UP & 4X4'S	1460
+Transit SuperSportVan	Ford	2011	VANS AND UTILITY	1477
+Shelby GT500	Ford	2013	MODERN MUSCLE	1654
+#11 Rockstar F-150 Trophy Truck	Ford	2014	UNLIMITED OFFROAD	2517
+Fiesta ST	Ford	2014	HOT HATCH	2011
+FPV Limited Edition Pursuit Ute	Ford	2014	VANS AND UTILITY	2551
+Ranger T6 Rally Raid	Ford	2014	OFFROAD	2145
+Falcon GT F 351	Ford	2015	MODERN MUSCLE	2580
+Mustang GT	Ford	2015	MODERN MUSCLE	2155
+Shelby GT350R	Ford	2016	TRACK TOYS	2400
+#14 Rahal Letterman Lanigan Racing GRC Fiesta	Ford	2017	RALLY MONSTERS	2937
+#25 'Brocky' Ultra4 Bronco RTR	Ford	2017	UNLIMITED OFFROAD	3128
+F-150 Raptor	Ford	2017	PICK-UP & 4X4'S	2397
+Focus RS	Ford	2017	SUPER HOT HATCH	2357
+GT	Ford	2017	MODERN SUPERCARS	2363
+M-Sport Fiesta RS	Ford	2017	RALLY MONSTERS	3051
+#25 Mustang RTR	Ford	2018	DRIFT CARS	3093
+#88 Mustang RTR	Ford	2018	DRIFT CARS	3151
+Mustang RTR Spec 5	Ford	2018	MODERN MUSCLE	3108
+Ranger Raptor	Ford	2019	PICK-UP & 4X4'S	3174
+#2069 Ford Performance Bronco R	Ford	2020	OFFROAD	3489
+#2069 Ford Performance Bronco R "Welcome Pack"	Ford	2020	OFFROAD	3684
+Mustang Shelby GT500	Ford	2020	MODERN MUSCLE	3277
+Super Duty F-450 DRW PLATINUM	Ford	2020	PICK-UP & 4X4'S	3476
+Bronco	Ford	2021	PICK-UP & 4X4'S	3489
+Mustang Mache E 1400	Ford	2021	TRACK TOYS	3598
+#98 BMW 325i	Formula Drift	1989	DRIFT CARS	3037
+#34 Toyota Supra MKIV	Formula Drift	1995	DRIFT CARS	3411
+#777 Nissan 240SX	Formula Drift	1997	DRIFT CARS	3000
+#43 Dodge Viper SRT10	Formula Drift	2006	DRIFT CARS	3003
+#117 599 GTB Fiorano	Formula Drift	2007	DRIFT CARS	3249
+#99 Mazda RX-8	Formula Drift	2009	DRIFT CARS	3400
+#777 Chevrolet Corvette	Formula Drift	2013	DRIFT CARS	3232
+#13 Ford Mustang	Formula Drift	2015	DRIFT CARS	2996
+#530 HSV Maloo GEN-F	Formula Drift	2016	DRIFT CARS	2997
+#357 Chevrolet Corvette	Formula Drift	2017	DRIFT CARS	3446
+#64 Nissan 370Z	Formula Drift	2018	DRIFT CARS	3247
+#411 Toyota Corolla Hatchback	Formula Drift	2019	DRIFT CARS	3524
+#151 Toyota GR Supra	Formula Drift	2020	DRIFT CARS	3523
+#91 BMW M2	Formula Drift	2020	DRIFT CARS	3551
+Nissan "Gold Leader" Datsun 280Z	Forsberg Racing	1975	RETRO SPORTS CARS	3529
+Toyota Gumout 2JZ CAMRY Stock Car	Forsberg Racing	2010	TRACK TOYS	3528
+Nissan ‘SafariZ’ 370Z Rally Tribute	Forsberg Racing	2014	RALLY MONSTERS	3531
+F9	Funco Motorsports	2018	UNLIMITED BUGGIES	2935
+Jimmy	GMC	1970	PICK-UP & 4X4'S	2613
+Vandura G-1500	GMC	1983	VANS AND UTILITY	1531
+VDK Commodore Group A	HDT	1985	RETRO MUSCLE	2584
+Venom GT	Hennessey	2012	HYPERCARS	1532
+VelociRaptor 6x6	Hennessey	2019	PICK-UP & 4X4'S	3189
+Venom F5	Hennessey	2021	HYPERCARS	3600
+HQ Monaro GTS 350	Holden	1973	CLASSIC MUSCLE	2417
+Sandman HQ panel van	Holden	1974	VANS AND UTILITY	2510
+Torana A9X	Holden	1977	CLASSIC MUSCLE	1533
+Civic RS	Honda	1974	RETRO HOT HATCH	1568
+Civic CRX Mugen	Honda	1984	RETRO HOT HATCH	2119
+CR-X SiR	Honda	1991	RETRO HOT HATCH	320
+NSX-R	Honda	1992	RETRO SPORTS CARS	412
+Prelude Si	Honda	1994	RETRO HOT HATCH	2121
+Civic Type R	Honda	1997	RETRO HOT HATCH	1273
+S2000	Honda	2003	MODERN SPORTS CARS	427
+Civic Type R	Honda	2004	RETRO HOT HATCH	302
+NSX-R	Honda	2005	RETRO SPORTS CARS	411
+NSX-R GT	Honda	2005	RETRO SPORTS CARS	569
+Civic Type R	Honda	2007	HOT HATCH	625
+S2000 CR	Honda	2009	MODERN SPORTS CARS	2005
+Civic Coupe	Honda	2016	RALLY MONSTERS	3069
+Civic Type R	Honda	2016	SUPER HOT HATCH	2163
+Civic Type R	Honda	2018	SUPER HOT HATCH	2870
+Chevrolet Bel Air	Hoonigan	1955	RODS AND CUSTOMS	2728
+Ford "Hoonicorn" Mustang	Hoonigan	1965	DRIFT CARS	2734
+GYMKHANA 10 Ford Hoonicorn Mustang	Hoonigan	1965	DRIFT CARS	3006
+Chevrolet Napalm Nova	Hoonigan	1972	CLASSIC MUSCLE	2729
+GYMKHANA 10 Ford F-150 "Hoonitruck"	Hoonigan	1977	DRIFT CARS	2982
+Ford Escort RS1800	Hoonigan	1978	RALLY MONSTERS	2730
+Ford RS200 Evolution	Hoonigan	1986	RALLY MONSTERS	3119
+GYMKHANA 10 Ford Escort Cosworth Group A	Hoonigan	1991	RALLY MONSTERS	2984
+Rauh-Welt Begriff Porsche 911 Turbo	Hoonigan	1991	RETRO SUPERCARS	2736
+Mazda RX-7 Twerkstallion	Hoonigan	1992	DRIFT CARS	2732
+Ford Escort RS Cosworth WRC “Cossie V2”	Hoonigan	1994	RALLY MONSTERS	3370
+GYMKHANA 10 Ford Focus RS RX	Hoonigan	2016	RALLY MONSTERS	3115
+Ford F-5 Dually Custom Hot Rod	Hot Wheels	1949	RODS AND CUSTOMS	3252
+Nash Metropolitan Custom	Hot Wheels	1957	RODS AND CUSTOMS	3407
+Twin Mill	Hot Wheels	1969		2750
+Deora II	Hot Wheels	2000	RODS AND CUSTOMS	3703
+Ford Mustang	Hot Wheels	2005	TRACK TOYS	2576
+Bone Shaker	Hot Wheels	2011	RODS AND CUSTOMS	2575
+Bad to the Blade	Hot Wheels	2012	EXTREME TRACK TOYS	3704
+Rip Rod	Hot Wheels	2012	UNLIMITED BUGGIES	2751
+Baja Bone Shaker	Hot Wheels	2013	UNLIMITED OFFROAD	3702
+2JetZ	Hot Wheels	2018	RODS AND CUSTOMS	3405
+GEN-F GTS	HSV	2014	MODERN MUSCLE	2131
+Limited Edition GEN-F GTS Maloo	HSV	2014	VANS AND UTILITY	2422
+H1 Alpha	HUMMER	2006	PICK-UP & 4X4'S	1345
+Veloster N	Hyundai	2019	SUPER HOT HATCH	2872
+Q60 Concept	Infiniti	2015	SUPER SALOONS	2437
+Scout 800A	International	1970	PICK-UP & 4X4'S	2558
+ZeroUno	ItalDesign	2018	HYPERCARS	3194
+D-Type	Jaguar	1956	CLASSIC RACERS	1301
+Mk II 3.8	Jaguar	1959	CLASSIC RACERS	2559
+E-type	Jaguar	1961	RARE CLASSICS	336
+Lightweight E-Type	Jaguar	1964	CLASSIC RACERS	2992
+XJ13	Jaguar	1966	CLASSIC RACERS	3415
+Sport XJR-15	Jaguar	1991	RETRO SUPERCARS	3287
+XJ220	Jaguar	1993	RETRO SUPERCARS	489
+XJ220S TWR	Jaguar	1993	RETRO SUPERCARS	3293
+C-X75	Jaguar	2010	MODERN SUPERCARS	3055
+XKR-S	Jaguar	2012	GT CARS	1496
+F-Type R Coupé	Jaguar	2015	GT CARS	2162
+XE-S	Jaguar	2015	SUPER SALOONS	2570
+XFR-S	Jaguar	2015	SUPER SALOONS	2185
+XKR-S	Jaguar	2015	TRACK TOYS	2235
+F-TYPE Project 7	Jaguar	2016	TRACK TOYS	2492
+F-PACE S	Jaguar	2017	SPORTS UTILITY HEROES	2571
+I-PACE	Jaguar	2018	SPORTS UTILITY HEROES	3164
+CJ5 Renegade	Jeep	1976	PICK-UP & 4X4'S	2511
+Wrangler Rubicon	Jeep	2012	PICK-UP & 4X4'S	1522
+Grand Cherokee SRT	Jeep	2014	SPORTS UTILITY HEROES	2108
+Trailcat	Jeep	2016	UNLIMITED OFFROAD	2742
+Grand Cherokee Trackhawk	Jeep	2018	SPORTS UTILITY HEROES	2841
+Gladiator Rubicon	Jeep	2020	PICK-UP & 4X4'S	3255
+CC8S	Koenigsegg	2002	HYPERCARS	294
+CCGT	Koenigsegg	2008	EXTREME TRACK TOYS	1007
+Agera	Koenigsegg	2011	HYPERCARS	1397
+One:1	Koenigsegg	2015	HYPERCARS	2188
+Regera	Koenigsegg	2016	HYPERCARS	2526
+Agera RS	Koenigsegg	2017	HYPERCARS	2910
+Jesko	Koenigsegg	2020	HYPERCARS	3315
+X-Bow R	KTM	2013	TRACK TOYS	1653
+X-Bow GT4	KTM	2018	EXTREME TRACK TOYS	3035
+Miura P400	Lamborghini	1967	RARE CLASSICS	637
+Espada 400 GT	Lamborghini	1973	RETRO SUPERCARS	3191
+LM 002	Lamborghini	1986	PICK-UP & 4X4'S	2176
+Countach LP5000 QV	Lamborghini	1988	RETRO SUPERCARS	316
+Diablo SV	Lamborghini	1997	RETRO SUPERCARS	325
+Diablo GTR	Lamborghini	1999	EXTREME TRACK TOYS	324
+Reventón	Lamborghini	2008	MODERN SUPERCARS	1125
+Murciélago LP 670-4 SV	Lamborghini	2010	MODERN SUPERCARS	1173
+Gallardo LP 570-4 Superleggera	Lamborghini	2011	MODERN SUPERCARS	1322
+Sesto Elemento	Lamborghini	2011	EXTREME TRACK TOYS	1392
+Sesto Elemento Forza Edition	Lamborghini	2011	EXTREME TRACK TOYS	2941
+Aventador J	Lamborghini	2012	HYPERCARS	1583
+Aventador LP700-4	Lamborghini	2012	HYPERCARS	1398
+Gallardo LP 570-4 Spyder Performante	Lamborghini	2012	MODERN SUPERCARS	1601
+Veneno	Lamborghini	2013	HYPERCARS	2042
+Huracán LP 610-4	Lamborghini	2014	MODERN SUPERCARS	2164
+Urus	Lamborghini	2014	SPORTS UTILITY HEROES	1625
+Aventador Superveloce	Lamborghini	2016	HYPERCARS	2479
+Centenario LP 770-4	Lamborghini	2016	HYPERCARS	2616
+Aventador SVJ	Lamborghini	2018	HYPERCARS	3289
+Huracán Performante	Lamborghini	2018	TRACK TOYS	3217
+Huracán EVO	Lamborghini	2020	MODERN SUPERCARS	3371
+Series III	Land Rover	1972	PICK-UP & 4X4'S	2560
+Range Rover	Land Rover	1973	PICK-UP & 4X4'S	2985
+Defender 90	Land Rover	1997	PICK-UP & 4X4'S	2135
+Range Rover Sport SVR	Land Rover	2015	SPORTS UTILITY HEROES	2494
+Range Rover Velar First Edition	Land Rover	2018	SPORTS UTILITY HEROES	3136
+Defender 110 X	Land Rover	2020	SPORTS UTILITY HEROES	3414
+SC300	Lexus	1997	RETRO SPORTS CARS	1351
+LFA	Lexus	2010	MODERN SUPERCARS	1260
+RC F	Lexus	2015	SUPER SALOONS	2175
+RC F Track Edition	Lexus	2020	TRACK TOYS	3546
+Rally Fighter	Local Motors	2014	UNLIMITED OFFROAD	2146
+#6 Penske Sunoco T70 MkIIIB	Lola	1969	CLASSIC RACERS	2423
+Elan Sprint	Lotus	1971	CLASSIC SPORTS CARS	330
+Elise GT1	Lotus	1997	RETRO SUPERCARS	2825
+Elise Series 1 Sport 190	Lotus	1999	RETRO SPORTS CARS	1376
+Exige S	Lotus	2012	MODERN SPORTS CARS	1523
+3-Eleven	Lotus	2016	TRACK TOYS	2541
+Evija	Lotus	2020	HYPERCARS	3449
+#100 Cyan Racing 03	Lynk&Co	2020	TRACK TOYS	3552
+O3+	Lynk&Co	2021	SUPER SALOONS	3677
+8CTF	Maserati	1939	VINTAGE RACERS	2068
+MC12 Versione Corsa	Maserati	2008	EXTREME TRACK TOYS	3082
+Gran Turismo S	Maserati	2010	GT CARS	1304
+Gran Turismo S Forza Edition	Maserati	2010	TRACK TOYS	2788
+Levante S	Maserati	2017	SPORTS UTILITY HEROES	2865
+Savanna RX-7	Mazda	1990	RETRO SPORTS CARS	423
+323 GT-R	Mazda	1992	RETRO RALLY	2209
+MX-5 Miata	Mazda	1994	RETRO SPORTS CARS	1110
+RX-7	Mazda	1997	RETRO SPORTS CARS	424
+RX-7 Spirit R Type-A	Mazda	2002	RETRO SPORTS CARS	425
+Mazdaspeed MX-5	Mazda	2005	RETRO SPORTS CARS	2171
+RX-8 R3	Mazda	2011	MODERN SPORTS CARS	1426
+MX-5	Mazda	2013	MODERN SPORTS CARS	2004
+MX-5	Mazda	2016	MODERN SPORTS CARS	2267
+F1	McLaren	1993	RETRO SUPERCARS	1314
+F1 GT	McLaren	1997	RETRO SUPERCARS	338
+P1	McLaren	2013	HYPERCARS	1667
+570S Coupé	McLaren	2015	MODERN SUPERCARS	2472
+650S Coupé	McLaren	2015	MODERN SUPERCARS	2189
+650S Spider	McLaren	2015	MODERN SUPERCARS	3087
+600LT Coupé	McLaren	2018	TRACK TOYS	3153
+720S Coupé	McLaren	2018	MODERN SUPERCARS	2846
+Senna	McLaren	2018	HYPERCARS	2988
+720S Spider	McLaren	2019	MODERN SUPERCARS	3154
+Speedtail	McLaren	2019	HYPERCARS	3156
+GT	McLaren	2020	SUPER GT	3437
+620R	McLaren	2021	TRACK TOYS	3655
+765LT	McLaren	2021	TRACK TOYS	3484
+GT S	Mercedes-AMG	2015	SUPER GT	2242
+C 63 S Coupé	Mercedes-AMG	2016	SUPER SALOONS	2471
+GT R	Mercedes-AMG	2017	SUPER GT	2654
+E 63 S	Mercedes-AMG	2018	SUPER SALOONS	3250
+GT 4-Door Coupé	Mercedes-AMG	2018	SUPER SALOONS	3064
+Mercedes-AMG ONE	Mercedes-AMG	2021	HYPERCARS	3650
+Mercedes-AMG ONE Forza Edition	Mercedes-AMG	2021		
+SSK	Mercedes-Benz	1929	RARE CLASSICS	3026
+W154	Mercedes-Benz	1939	VINTAGE RACERS	2069
+300 SL Coupé	Mercedes-Benz	1954	RARE CLASSICS	251
+300 SLR	Mercedes-Benz	1955	CLASSIC RACERS	1559
+AMG Hammer Coupe	Mercedes-Benz	1987	RETRO SALOONS	3176
+190E 2.5-16 Evolution II	Mercedes-Benz	1990	RETRO SALOONS	1296
+AMG CLK GTR	Mercedes-Benz	1998	RETRO SUPERCARS	568
+AMG CLK GTR Forza Edition	Mercedes-Benz	1998	EXTREME TRACK TOYS	2948
+SLS AMG	Mercedes-Benz	2011	SUPER GT	1202
+C 63 AMG Coupé Black Series	Mercedes-Benz	2012	SUPER SALOONS	1500
+SLK 55 AMG	Mercedes-Benz	2012	MODERN SPORTS CARS	1525
+A 45 AMG	Mercedes-Benz	2013	SUPER HOT HATCH	1658
+E 63 AMG	Mercedes-Benz	2013	SUPER SALOONS	2021
+G 65 AMG	Mercedes-Benz	2013	PICK-UP & 4X4'S	1627
+G 63 AMG 6x6	Mercedes-Benz	2014	PICK-UP & 4X4'S	3107
+Unimog U5023	Mercedes-Benz	2014	TRUCKS	2986
+#24 Tankpool24 Racing Truck	Mercedes-Benz	2015	TRUCKS	2424
+#24 Tankpool24 Racing Truck Forza Edition	Mercedes-Benz	2015	UNLIMITED OFFROAD	2947
+X-Class	Mercedes-Benz	2018	PICK-UP & 4X4'S	3063
+Cyclone Spoiler	Mercury	1970	CLASSIC MUSCLE	3206
+Manx	Meyers	1968	CULT CARS	2416
+Manx Forza Edition	Meyers	1968	TRACK TOYS	3570
+Metro 6R4	MG	1986	RALLY MONSTERS	2147
+Xpower SV-R	MG	2005	RETRO SPORTS CARS	3271
+MG3	MG	2015	HOT HATCH	2173
+Cooper S	Mini	1965	CLASSIC RALLY	1662
+Cooper S Forza Edition	Mini	1965	SUPER HOT HATCH	2699
+John Cooper Works	Mini	2009	HOT HATCH	1098
+John Cooper Works GP	Mini	2012	HOT HATCH	2003
+X-Raid ALL4 Racing Countryman	Mini	2013	OFFROAD	2148
+X-Raid John Cooper Works Buggy	Mini	2018	OFFROAD	3132
+John Cooper Works GP	Mini	2021	SUPER HOT HATCH	3534
+John Cooper Works Countryman ALL4	Mini	20180	SPORTS UTILITY HEROES	3131
+Starion ESI-R	Mitsubishi	1988	RETRO SPORTS CARS	1297
+Eclipse GSX	Mitsubishi	1995	RETRO SPORTS CARS	327
+GTO	Mitsubishi	1997	RETRO SPORTS CARS	357
+Lancer Evolution VI GSR	Mitsubishi	1999	RETRO RALLY	375
+Lancer Evolution VIII MR	Mitsubishi	2004	MODERN RALLY	378
+Lancer Evolution IX MR	Mitsubishi	2006	MODERN RALLY	374
+Lancer Evolution X GSR	Mitsubishi	2008	MODERN RALLY	1009
+Lancer Evolution X GSR "Welcome Pack"	Mitsubishi	2008	MODERN RALLY	3683
+3 Wheeler	Morgan	2014	CULT CARS	2562
+Minor 1000	Morris	1953	CULT CARS	2911
+Minor 1000 Forza Edition	Morris	1953	TRACK TOYS	2964
+Minor Series II Traveler	Morris	1953	VANS AND UTILITY	3116
+Mini-Traveller	Morris	1965	VANS AND UTILITY	3142
+MT900 GT3	Mosler	2006	EXTREME TRACK TOYS	3495
+MT900S	Mosler	2010	EXTREME TRACK TOYS	1246
+Napier-Railton	Napier	1933	VINTAGE RACERS	2989
+EP9	Nio	2016	HYPERCARS	3366
+Fairlady Z 432	Nissan	1969	CLASSIC SPORTS CARS	343
+Skyline 2000GT-R	Nissan	1971	CLASSIC SPORTS CARS	1042
+Skyline H/T 2000GT-R	Nissan	1973	CLASSIC SPORTS CARS	2270
+Skyline GTS-R (HR31)	Nissan	1987	RETRO SPORTS CARS	2512
+Pulsar GTI-R	Nissan	1990	RETRO RALLY	3257
+Silvia CLUB K's	Nissan	1992	RETRO SPORTS CARS	439
+240SX SE	Nissan	1993	RETRO SPORTS CARS	1282
+Skyline GT-R V-Spec	Nissan	1993	RETRO SPORTS CARS	444
+Fairlady Z Version S Twin Turbo	Nissan	1994	RETRO SPORTS CARS	345
+Silvia K's	Nissan	1994	RETRO SPORTS CARS	440
+NISMO GT-R LM	Nissan	1995	RETRO SPORTS CARS	2738
+Skyline GT-R V-Spec	Nissan	1997	RETRO SPORTS CARS	1043
+R390 (GT1)	Nissan	1998	RETRO SUPERCARS	567
+Silvia K's Aero	Nissan	1998	RETRO SPORTS CARS	2659
+Silvia Spec-R	Nissan	2000	RETRO SPORTS CARS	441
+Skyline GT-R V-Spec II	Nissan	2002	RETRO SPORTS CARS	445
+Fairlady Z	Nissan	2003	RETRO SPORTS CARS	344
+Fairlady Z Forza Edition	Nissan	2003	UNLIMITED OFFROAD	2951
+Pickup #23 Rally Raid	Nissan	2004	UNLIMITED OFFROAD	2744
+370Z	Nissan	2010	MODERN SPORTS CARS	1103
+GT-R Black Edition (R35)	Nissan	2012	MODERN SUPERCARS	2002
+Titan Warrior Concept	Nissan	2016	PICK-UP & 4X4'S	2662
+GT-R (R35)	Nissan	2017	MODERN SUPERCARS	2618
+Sentra Nismo	Nissan	2018	SUPER SALOONS	2874
+370Z Nismo	Nissan	2019	MODERN SPORTS CARS	3307
+GT-R Nismo (R35)	Nissan	2020	TRACK TOYS	3622
+Toronado	Oldmobile	1966	CLASSIC MUSCLE	3201
+Manta 400	Opel	1984	RALLY MONSTERS	2420
+Zonda Cinque Roadster	Pagani	2009	HYPERCARS	1369
+Zonda R	Pagani	2010	EXTREME TRACK TOYS	1175
+Huayra BC	Pagani	2016	HYPERCARS	2647
+Huayra BC Forza Edition	Pagani	2016	EXTREME TRACK TOYS	3572
+P50	Peel	1962	CULT CLASSICS	2987
+Trident	Peel	1965	CULT CLASSICS	3005
+The Cholla	Penhall	2011	UNLIMITED BUGGIES	2515
+205 Turbo 16	Peugeot	1984	RETRO RALLY	1591
+205 Rallye	Peugeot	1991	RETRO HOT HATCH	3180
+207 Super 2000	Peugeot	2007	RALLY MONSTERS	615
+Barracuda Formula-S	Plymouth	1968	CLASSIC MUSCLE	281
+Cuda 426 Hemi	Plymouth	1971	CLASSIC MUSCLE	1277
+RZR XP 1000 EPS	Polaris	2015	UTV'S	2521
+GTO	Pontiac	1965	CLASSIC MUSCLE	1285
+Firebird Trans Am	Pontiac	1977	CLASSIC MUSCLE	1276
+Firebird Trans Am GTA	Pontiac	1987	RETRO MUSCLE	1045
+Firebird Trans Am GTA Forza Edition	Pontiac	1987	TRACK TOYS	3057
+550A Spyder	Porsche	1955	CLASSIC RACERS	1281
+356 A 1600 Super	Porsche	1959	RARE CLASSICS	3036
+356 C Cabriolet Emory Special	Porsche	1960	CLASSIC SPORTS CARS	3150
+#3 917 LH	Porsche	1970	CLASSIC RACERS	2549
+914/6	Porsche	1970	CLASSIC SPORTS CARS	266
+#23 917/20	Porsche	1971	CLASSIC RACERS	2849
+911 Carrera RS	Porsche	1973	RARE CLASSICS	260
+911 Turbo 3.3	Porsche	1982	RETRO SUPERCARS	265
+#185 959 Prodrive Rally Raid	Porsche	1985	RALLY MONSTERS	3031
+959	Porsche	1987	RETRO SUPERCARS	269
+#65 Rothsport Racing 911 'Desert Flyer'	Porsche	1989	RALLY MONSTERS	3188
+944 Turbo	Porsche	1989	RETRO SPORTS CARS	268
+911 Reimagined by Singer – DLS	Porsche	1990	MODERN SUPERCARS	3248
+968 Turbo S	Porsche	1993	RETRO SPORTS CARS	2534
+911 Carrera 2 by Gunther Werks	Porsche	1995	MODERN SPORTS CARS	3160
+911 GT2	Porsche	1995	RETRO SUPERCARS	261
+911 GT1 Strassenversion	Porsche	1998	RETRO SUPERCARS	641
+Carrera GT	Porsche	2003	RETRO SUPERCARS	292
+911 GT3	Porsche	2004	RETRO SUPERCARS	262
+911 Sport Classic	Porsche	2010	MODERN SPORTS CARS	1234
+911 GT2 RS	Porsche	2012	TRACK TOYS	1539
+911 GT3 RS 4.0	Porsche	2012	TRACK TOYS	2297
+911 Turbo S	Porsche	2014	MODERN SUPERCARS	2289
+918 Spyder	Porsche	2014	HYPERCARS	2290
+Cayman GTS	Porsche	2015	MODERN SPORTS CARS	2293
+911 GT3 RS	Porsche	2016	TRACK TOYS	2528
+Cayman GT4	Porsche	2016	TRACK TOYS	2529
+Panamera Turbo	Porsche	2017	SUPER SALOONS	2741
+718 Cayman GTS	Porsche	2018	MODERN SPORTS CARS	3117
+911 GT2 RS	Porsche	2018	TRACK TOYS	2755
+Cayenne Turbo	Porsche	2018	SPORTS UTILITY HEROES	2773
+Macan LPR Rally Raid	Porsche	2018	OFFROAD	3187
+911 Carrera S	Porsche	2019	MODERN SPORTS CARS	3123
+911 GT3 RS	Porsche	2019	TRACK TOYS	3072
+911 GT3 RS Forza Edition	Porsche	2019	RALLY MONSTERS	3574
+911 Speedster	Porsche	2019	MODERN SPORTS CARS	3215
+Macan Turbo	Porsche	2019	SPORTS UTILITY HEROES	2295
+Taycan Turbo S	Porsche	2020	SUPER SALOONS	3445
+Taycan Turbo S "Welcome Pack"	Porsche	2020	SUPER SALOONS	3685
+911 GT3	Porsche	2021	TRACK TOYS	3667
+RXC Turbo	Radical	2015	EXTREME TRACK TOYS	2486
+Tachyon Speed	RAESR	2019	HYPERCARS	3196
+2500 Power Wagon	RAM	2017	PICK-UP & 4X4'S	2838
+Supervan III	Reliant	1972	CULT CARS	2563
+8 Gordini	Renault	1967	CLASSIC RALLY	3395
+4L Export	Renault	1968	CULT CARS	3261
+5 Turbo	Renault	1980	RETRO RALLY	634
+Clio Williams	Renault	1993	RETRO HOT HATCH	2149
+Mégane R26.R	Renault	2008	SUPER HOT HATCH	3129
+Clio R.S. 200 EDC	Renault	2013	HOT HATCH	2022
+MEGANE R.S.	Renault	2018	SUPER HOT HATCH	3134
+Concept Two	Rimac	2019	HYPERCARS	3140
+#37 Polaris RZR-Rockstar Energy Pro 2 Truck	RJ Anderson	2016	UNLIMITED OFFROAD	2663
+S7	Saleen	2004	RETRO SUPERCARS	432
+S1	Saleen	2018	MODERN SUPERCARS	3276
+962CR	Schuppan	1993	RETRO SUPERCARS	3288
+Cobra 427 S/C	Shelby	1965	RARE CLASSICS	306
+Cobra Daytona Coupe	Shelby	1965	CLASSIC RACERS	1155
+#23 Yokohama Alpha	SIERRA Cars	2020	EXTREME TRACK TOYS	3539
+RX3	SIERRA Cars	2021	UTV'S	3540
+Legacy RS	Subaru	1990	RETRO RALLY	1382
+Impreza 22B-STi Version	Subaru	1998	RETRO RALLY	363
+IMPREZA WRX STi	Subaru	2004	MODERN RALLY	364
+IMPREZA WRX STI	Subaru	2005	MODERN RALLY	365
+IMPREZA WRX STI	Subaru	2008	MODERN RALLY	1060
+BRZ	Subaru	2013	MODERN SPORTS CARS	1655
+WRX STI	Subaru	2015	MODERN RALLY	2168
+WRX STI	Subaru	2015	MODERN RALLY	2168
+WRX STI ARX Supercar	Subaru	2018	RALLY MONSTERS	3241
+STI 209	Subaru	2019	MODERN RALLY	3412
+2000GT	Toyota	1968	RARE CLASSICS	247
+Celica GT	Toyota	1974	CLASSIC SPORTS CARS	1592
+FJ40	Toyota	1979	PICK-UP & 4X4'S	2566
+Sprinter Trueno GT Apex	Toyota	1985	RETRO SPORTS CARS	455
+MR2 SC	Toyota	1989	RETRO SPORTS CARS	1395
+Celica GT-Four RC ST185	Toyota	1992	RETRO RALLY	1517
+Supra 2.0 GT	Toyota	1992	RETRO SPORTS CARS	460
+#1 T100 Baja Truck	Toyota	1993	UNLIMITED OFFROAD	2636
+Celica GT-Four ST205	Toyota	1994	RETRO RALLY	1034
+Supra RZ	Toyota	1998	RETRO SPORTS CARS	461
+Supra RZ "Welcome Pack"	Toyota	1998	RETRO SPORTS CARS	3681
+Celica Sport Specialty II	Toyota	2003	RETRO SPORTS CARS	295
+Hilux Arctic Trucks AT38	Toyota	2007	PICK-UP & 4X4'S	2656
+86	Toyota	2013	MODERN SPORTS CARS	2007
+Land Cruiser Arctic Trucks AT37	Toyota	2016	PICK-UP & 4X4'S	2743
+4Runner TRD Pro	Toyota	2019	PICK-UP & 4X4'S	3373
+Tacoma TRD Pro	Toyota	2019	PICK-UP & 4X4'S	3374
+GR Supra	Toyota	2020	MODERN SPORTS CARS	3402
+Tundra RTD Pro	Toyota	2020	PICK-UP & 4X4'S	3419
+Cerbera Speed 12	TVR	1998	RETRO SUPERCARS	296
+Sagaris	TVR	2005	RETRO SPORTS CARS	433
+Griffith	TVR	2018	MODERN SPORTS CARS	2993
+Evolution Coupe 1020	Ultima	2015	EXTREME TRACK TOYS	2569
+Lotus Carlton	Vauxhall	1990	RETRO SALOONS	291
+Monaro VXR	Vauxhall	2005	MODERN MUSCLE	397
+Corsa VXR	Vauxhall	2016	HOT HATCH	2427
+Beetle	Volkswagen	1963	CULT CARS	1435
+Beetle Forza Edition	Volkswagen	1963	TRACK TOYS	3577
+Type 2 De Luxe	Volkswagen	1963	CULT CARS	2151
+Class 5/1600 Baja Bug	Volkswagen	1969	BUGGIES	2568
+#1107 Desert Dingo Racing Stock Bug	Volkswagen	1970	BUGGIES	2258
+Scirocco S	Volkswagen	1981	RETRO HOT HATCH	1380
+Pickup LX	Volkswagen	1982	VANS AND UTILITY	3235
+Golf GTI	Volkswagen	1983	RETRO HOT HATCH	1995
+Golf Gti 16v Mk2	Volkswagen	1992	RETRO HOT HATCH	353
+Corrado VR6	Volkswagen	1995	RETRO HOT HATCH	309
+GTI VR6 Mk3	Volkswagen	1998	RETRO HOT HATCH	1383
+Golf R32	Volkswagen	2003	HOT HATCH	354
+Golf R	Volkswagen	2010	SUPER HOT HATCH	1231
+Scirocco R	Volkswagen	2011	HOT HATCH	1428
+Golf R	Volkswagen	2014	SUPER HOT HATCH	2142
+#34 Volkswagen Andretti Rallycross Beetle	Volkswagen	2017	RALLY MONSTERS	3007
+Golf R	Volkswagen	2021	SUPER HOT HATCH	3413
+242 Turbo Evolution	Volvo	1983	CLASSIC RALLY	1299
+850 R	Volvo	1997	RETRO SALOONS	1387
+V60 Polestar	Volvo	2015	SUPER SALOONS	2586
+05RR	VUHL	2017	TRACK TOYS	2844
+MB Jeep	Willys	1945	PICK-UP & 4X4'S	2049
+P7	Xpeng	2020	SUPER SALOONS	3547
+TS1 	Zenvo	2016	HYPERCARS	2474
+TSR-S	Zenvo	2019	HYPERCARS	3212
