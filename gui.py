@@ -230,7 +230,7 @@ class MainWindow:
         self.suspension.update(fdp)
         self.wheelsize.update(fdp)
         self.laptimes.update(fdp)
-        self.carinfo.update(fdp, self.revlimit, self.gearstats.get_shiftlimit()) #shiftlimit
+        self.carinfo.update(fdp)
         self.lateralg.update(fdp)
         self.braketest.update(fdp)
         self.launchtest.update(fdp)

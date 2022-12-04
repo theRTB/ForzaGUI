@@ -82,7 +82,7 @@ class GUICarInfo:
         self.year_var.set(f'{self.year}')
         self.group_var.set(f'{self.group}')
 
-    def update(self, fdp, revlimit, shiftlimit):
+    def update(self, fdp):
         if self.car_ordinal != fdp.car_ordinal:
             self.car_ordinal = fdp.car_ordinal
             row = CarData.getinfo(self.car_ordinal)
@@ -91,7 +91,8 @@ class GUICarInfo:
                 self.reset()
                 return
             
-            self.update(row)
+            for key, value in row.items():
+                setattr(self, key, value)
     
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
