@@ -1,4 +1,4 @@
-Model	Maker	Year	Group	car_ordinal	confirmed	PI	drivetrain	num_cylinders	engine_max	engine_idle	revlimit	shiftlimit
+model	maker	year	group	car_ordinal	confirmed	PI	drivetrain	num_cylinders	engine_max	engine_idle	revlimit	shiftlimit
 Integra Type R	Acura	2001	RETRO HOT HATCH	368								
 RSX Type S	Acura	2002	RETRO HOT HATCH	422								
 NSX	Acura	2017	MODERN SUPERCARS	2352								
