@@ -16,22 +16,25 @@ from dragderivation import Trace
 
 from guicarinfo import CarData
 
-#example: stock NSX Acura
-car_ordinal = 2352
-car_performance_index = 831 
-filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
+def main ():
+    global window #trace, gearing, car_ordinal, car_performance_index
+    
+    #example: stock NSX Acura
+    # car_ordinal = 2352
+    # car_performance_index = 831 
+    # filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
-override_gearratio = [] #e.g.: [4.14, 2.67, 1.82, 1.33, 1.00, 0.8]
-final_ratio = 1
+    # override_gearratio = [] #e.g.: [4.14, 2.67, 1.82, 1.33, 1.00, 0.8]
+    # final_ratio = 1
+    # trace = Trace(fromfile=True, filename=filename)
+    
+    # if len(override_gearratio):
+    #     trace.gears = override_gearratio
+    #     trace.gears = [x*final_ratio for x in trace.gears]
 
-def main (): 
-    global trace, gearing
-    trace = Trace(fromfile=True, filename=filename)
-    if len(override_gearratio):
-        trace.gears = override_gearratio
-        trace.gears = [x*final_ratio for x in trace.gears]
-
-    gearing = Gearing(trace, final_ratio=final_ratio)
+#    gearing = Gearing(trace, None, final_ratio, car_ordinal, car_performance_index)
+    
+    window = Window()
 
 class Gear():
     def __init__(self, gear, trace, ax, update_backref, final_ratio=1):
@@ -65,6 +68,78 @@ class Gear():
         self.plot.set_xdata(x)  
         self.plot.set_ydata(y)
 
+import os
+import tkinter
+import tkinter.ttk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
+# suppress matplotlib warning while running in thread
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+class Window ():
+    width = 1700
+    height = 1200
+    
+    DEFAULTCAR = 'Acura NSX (2017) PI:831 MODERN SUPERCARS'
+    TRACE_DIR = 'traces/'    
+    
+    def __init__(self):
+        self.root = tkinter.Tk()
+     #   self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
+        
+        self.root.title("Interactive gearing for collected traces for ForzaGUI")
+        self.root.geometry(f"{Window.width}x{Window.height}")
+        
+        self.frame = tkinter.Frame(self.root)
+        
+        self.generate_carlist()
+        
+        self.combobox = tkinter.ttk.Combobox(self.frame, width=80,
+                                             exportselection=False, state='readonly',
+                                             values=sorted(self.carlist.keys()))
+        index = sorted(self.carlist.keys()).index(Window.DEFAULTCAR)
+        self.combobox.current(index)
+        self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
+        
+        self.fig = Figure(figsize=(16, 10), dpi=72)
+    
+        self.canvas = FigureCanvasTkAgg(self.fig,master=self.frame)
+        self.canvas.draw()
+        
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
+        self.toolbar.update()
+        
+        self.carname_changed()
+        
+        self.frame.pack(fill='both', expand=True)
+        
+        self.combobox.pack()
+        self.canvas.get_tk_widget().pack()
+        self.toolbar.pack(fill='x')
+        
+        self.root.mainloop()        
+    
+    def carname_changed(self, event=None):
+        self.fig.clf()
+        carname = self.combobox.get()
+        filename = self.carlist[carname]
+        trace = Trace(fromfile=True, filename=filename)
+        self.gearing = Gearing(trace, self.fig, title=carname)
+    
+    def generate_carlist(self):
+        self.carlist = {}
+        for entry in os.scandir(Window.TRACE_DIR):
+            filename = entry.name
+            ordinal = int(filename.split('_')[1][3:])
+            pi = int(filename.split('_')[2][2:-5])
+            
+            data = CarData.getinfo(ordinal)
+            if data is not None:
+                carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']}"
+                self.carlist[carname] = Window.TRACE_DIR + filename
+            else:
+                print(f'ordinal {ordinal} NOT FOUND')
+        
 class Gearing ():
     STEP_KMH = 25
     FINALRATIO_MIN = 2.2
@@ -73,9 +148,14 @@ class Gearing ():
     GEARRATIO_MAX = 6.00
     RATIO_STEP = 0.01
     
-    def __init__(self, trace, final_ratio=1, title=None):
-        self.fig, (self.ax, self.ax2) = plt.subplots(2,1)
-        self.fig.set_size_inches(16, 10)
+    def __init__(self, trace, fig=None, final_ratio=1, title=None,
+                 car_ordinal=None, car_performance_index=None):
+        if fig == None:
+            self.fig, (self.ax, self.ax2) = plt.subplots(2,1)
+            self.fig.set_size_inches(16, 10)
+        else:
+            self.fig = fig
+            self.ax, self.ax2 = self.fig.subplots(2,1)
         
         self.ax.grid()
         self.ax.set_ylabel("torque (N.m)")
@@ -106,9 +186,12 @@ class Gearing ():
         self.ax.set_xticklabels([int(x/val) for x in xticks])
         
         self.ax2.xaxis.tick_top()
-        self.ax2.set_xlim(0, rpmmax)      
+        self.ax2.set_xlim(0, rpmmax)     
         self.ax2.set_xticks(xticks)  
         self.ax2.set_xticklabels([])
+        yticks = list(range(-50, 1, 10))
+        self.ax2.set_yticks(yticks)  
+        self.ax2.set_yticklabels([f'{y}%' for y in yticks])
         
         # self.ax_top = self.ax.secondary_xaxis("top")
         # self.ax_top.set_xlabel("speed (km/h)")
@@ -117,8 +200,12 @@ class Gearing ():
         # self.ax_top.set_xticklabels([])
         
         if title is None:
-            data = CarData.getinfo(car_ordinal)
-            title = f"{data['maker']} {data['model']} ({data['year']}) PI:{car_performance_index} {data['group']}"
+            if car_ordinal is not None:
+                data = CarData.getinfo(car_ordinal)
+                title = f"{data['maker']} {data['model']} ({data['year']}) PI:{car_performance_index} {data['group']}"
+            else:
+                title = ''
+                print("we missing a title")
         
         self.ax.set_title(title)
         self.fig.tight_layout()
@@ -127,9 +214,6 @@ class Gearing ():
         self.__init__sliders()        
         self.__init__difference()
         self.ax.legend()
-
-        plt.ion()
-        plt.show()
 
     # def find_intersections(self):
     #     self.data = [graph.get_points() for graph in self.graphs]
@@ -152,43 +236,42 @@ class Gearing ():
         x_array, y_array = [], []
         for start, end, (x,y) in zip(intersections[:-1], intersections[1:], data):
             x_array.extend([rpm for rpm in x if rpm >= start and rpm <= end])
-            y_array.extend([torque - self.power_contour(rpm) for rpm, torque in zip(x,y) if rpm >= start and rpm <= end])
+            y_array.extend([100*(torque - self.power_contour(rpm)) / self.power_contour(rpm)
+                                for rpm, torque in zip(x,y) if rpm >= start and rpm <= end])
         return (x_array, y_array)
     
     def redraw_difference(self):
-        Y = 1
+#        Y = 1
         x_array, y_array = self.get_difference()
-        xmin, xmax = self.ax2.get_xlim()
+    #    xmin, xmax = self.ax2.get_xlim()
     #    self.diffplot.remove()
         self.fillplot.remove()
     #    self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
         self.fillplot = self.ax2.fill_between(x_array, y_array, color='b')
         
-        self.ax2.set_xlim(0, xmax)
+     #   self.ax2.set_xlim(0, xmax)
+     #   self.ax2.set_ylim(-100, 0)
         
-        ymin = np.argmax(self.graphs[0].get_points()[Y])        
-        self.ax2.set_ylim(y_array[ymin], 0)
-        
-        self.ax2.set_ylabel("torque lost vs optimal")
-        self.ax2.grid()       
+   #     self.ax2.set_ylabel("torque lost vs optimal")
+   #     self.ax2.grid()       
         
     def __init__difference(self):
-        Y = 1
+#        Y = 1
         x_array, y_array = self.get_difference()
   #      self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
         self.fillplot = self.ax2.fill_between(x_array, y_array, color='b')
         
-        ymin = np.argmax(self.graphs[0].get_points()[Y])
+      #  ymin = np.argmax(self.graphs[0].get_points()[Y])
         xmin, xmax = self.ax2.get_xlim()
         self.ax2.set_xlim(0, xmax)
-        self.ax2.set_ylim(y_array[ymin], 0)
-        self.ax2.set_ylabel("torque lost vs optimal")
+        self.ax2.set_ylim(-50, 0)
+        self.ax2.set_ylabel("percentage of torque lost vs power curve")
         self.ax2.grid()
                 
     def __init__power_contour(self):
         i = self.trace.power.argmax()
         peak_power_torque = self.trace.torque[i]
-        peak_power_rpm = self.trace.rpm[i]   
+        peak_power_rpm = self.trace.rpm[i]
         
         self.power_contour = lambda rpm: peak_power_torque*peak_power_rpm/rpm
         rpm_max = int(2*self.trace.rpm[-1])
@@ -210,12 +293,12 @@ class Gearing ():
 
     def __init__sliders(self):
         # create space for sliders
-        plt.subplots_adjust(right=0.7)
+        self.fig.subplots_adjust(right=0.7)
 
         final_slider_limit, gear_slider_limit = self.slider_limits()
 
         #final gear slider
-        self.final_gear_ax = plt.axes([0.76, 0.90, 0.2, 0.03])
+        self.final_gear_ax = self.fig.add_axes([0.76, 0.90, 0.2, 0.03])
         self.final_gear_slider = Slider(
             ax=self.final_gear_ax,
             label='Final gear',
@@ -228,7 +311,7 @@ class Gearing ():
         self.final_gear_slider.on_changed(self.update_final_ratio)
         
         for graph, ratio in zip(self.graphs, self.trace.gears):
-            ax = plt.axes([0.76, 0.87-0.03*graph.gear, 0.2, 0.03])
+            ax = self.fig.add_axes([0.76, 0.87-0.03*graph.gear, 0.2, 0.03])
             slider = Slider(
                 ax=ax,
                 label=f'gear {graph.gear+1}',
@@ -250,7 +333,7 @@ class Gearing ():
             prev_graph = a
             
         # Create a `matplotlib.widgzets.Button` to reset the sliders to initial values.
-        self.ax_reset = plt.axes([0.72, 0.54, 0.1, 0.04])
+        self.ax_reset = self.fig.add_axes([0.72, 0.54, 0.1, 0.04])
         self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
 
         def reset(event):
