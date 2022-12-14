@@ -65,11 +65,12 @@ class GUIWheelsize:
         self.wheelsize_rear = statistics.median(self.wheelsize['rear'])
     
     def set_canvas(self, frame):
-        tkinter.Label(frame, text="wheelsize (cm)", bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).place(relx=0.0, rely=0.8, anchor=tkinter.NW)
-        tkinter.Label(frame, textvariable=self.wheelsize_var, bg=constants.background_color,
-                      fg=constants.text_color, font=('Helvetica 35 bold italic')).place(relx=0.0, rely=0.85,
-                                                                                        anchor=tkinter.NW)
+        self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
+                                   highlightthickness=True, highlightcolor=constants.text_color)
+        tkinter.Label(self.frame, text="wheelsize (cm)", bg=constants.background_color, fg=constants.text_color,
+                      font=('Helvetica 15 bold')).pack()
+        tkinter.Label(self.frame, textvariable=self.wheelsize_var, bg=constants.background_color,
+                      fg=constants.text_color, font=('Helvetica 20 bold italic')).pack()
     
     def reset(self):
         self.wheelsize = {'front':deque(maxlen=300), 'rear':deque(maxlen=300)}
