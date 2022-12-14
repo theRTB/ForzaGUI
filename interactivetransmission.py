@@ -13,8 +13,9 @@ from matplotlib.widgets import Slider, RangeSlider, Button
 import intersect
 
 from dragderivation import Trace
-
 from guicarinfo import CarData
+
+from pprint import pprint
 
 def main ():
     global window #trace, gearing, car_ordinal, car_performance_index
@@ -36,6 +37,8 @@ def main ():
     
     window = Window()
 
+#helper class for class Gearing
+#every gear drawn by Gearing 
 class Gear():
     def __init__(self, gear, trace, ax, update_backref, final_ratio=1):
         self.gear, self.trace = gear, trace
@@ -101,8 +104,7 @@ class Window ():
         self.combobox.current(index)
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
-        self.fig = Figure(figsize=(16, 10), dpi=72)
-    
+        self.fig = Figure(figsize=(16, 10), dpi=72)    
         self.canvas = FigureCanvasTkAgg(self.fig,master=self.frame)
         self.canvas.draw()
         
@@ -124,8 +126,17 @@ class Window ():
         carname = self.combobox.get()
         filename = self.carlist[carname]
         trace = Trace(fromfile=True, filename=filename)
+        
+        if len(trace.array) % 2 == 0:
+            last = trace.array[-1]
+            trace.array = trace.array[::4] + [last]
+        else:
+            trace.array = trace.array[::4]
+        trace.finish()
+        
         self.gearing = Gearing(trace, self.fig, title=carname)
     
+    #filename structure: 
     def generate_carlist(self):
         self.carlist = {}
         for entry in os.scandir(Window.TRACE_DIR):
@@ -241,27 +252,18 @@ class Gearing ():
         return (x_array, y_array)
     
     def redraw_difference(self):
-#        Y = 1
         x_array, y_array = self.get_difference()
-    #    xmin, xmax = self.ax2.get_xlim()
-    #    self.diffplot.remove()
+    
         self.fillplot.remove()
-    #    self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
         self.fillplot = self.ax2.fill_between(x_array, y_array, color='b')
-        
-     #   self.ax2.set_xlim(0, xmax)
-     #   self.ax2.set_ylim(-100, 0)
-        
-   #     self.ax2.set_ylabel("torque lost vs optimal")
-   #     self.ax2.grid()       
+        #    self.diffplot.remove()
+        #    self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
         
     def __init__difference(self):
-#        Y = 1
         x_array, y_array = self.get_difference()
-  #      self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
+        #     self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
         self.fillplot = self.ax2.fill_between(x_array, y_array, color='b')
         
-      #  ymin = np.argmax(self.graphs[0].get_points()[Y])
         xmin, xmax = self.ax2.get_xlim()
         self.ax2.set_xlim(0, xmax)
         self.ax2.set_ylim(-50, 0)
