@@ -15,7 +15,15 @@ import intersect
 from dragderivation import Trace
 from guicarinfo import CarData
 
-from pprint import pprint
+'''
+TODO:
+    add dragderivation for:
+        top speed
+        drag
+        suggest optimal ratio for final gear
+
+
+'''
 
 def main ():
     global window #trace, gearing, car_ordinal, car_performance_index
@@ -79,6 +87,7 @@ from matplotlib.figure import Figure
 # suppress matplotlib warning while running in thread
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
+
 class Window ():
     width = 1700
     height = 1200
@@ -127,11 +136,9 @@ class Window ():
         filename = self.carlist[carname]
         trace = Trace(fromfile=True, filename=filename)
         
-        if len(trace.array) % 2 == 0:
-            last = trace.array[-1]
-            trace.array = trace.array[::4] + [last]
-        else:
-            trace.array = trace.array[::4]
+        #reduce point count by 75% for performance reasons
+        last = trace.array[-1]
+        trace.array = trace.array[:-1:4] + [last]
         trace.finish()
         
         self.gearing = Gearing(trace, self.fig, title=carname)
@@ -173,7 +180,7 @@ class Gearing ():
         
         self.trace = trace
         self.final_ratio = final_ratio
-        self.trace.gears = [g/final_ratio for g in self.trace.gears]                
+        self.trace.gears = [g/final_ratio for g in self.trace.gears]
         
         self.graphs = []
         for i, ratio in enumerate(self.trace.gears):
@@ -188,13 +195,13 @@ class Gearing ():
         rpmmax = math.ceil(self.trace.rpm[-1]/(self.graphs[-1].ratio*self.final_ratio)/valstep)*valstep
         xticks = np.arange(0,rpmmax+valstep,valstep)
         
-        ymax = max(self.trace.torque*self.graphs[0].ratio*self.final_ratio)
+        ymax = max(self.trace.torque*self.graphs[0].ratio*self.final_ratio)*1.01
         
         self.ax.set_ylim(0, ymax)
         self.ax.set_xlim(0, rpmmax)    
         self.ax.set_xticks(xticks)
         self.ax.set_xlabel("speed (km/h)")
-        self.ax.set_xticklabels([int(x/val) for x in xticks])
+        self.ax.set_xticklabels([math.ceil(x/val) for x in xticks])
         
         self.ax2.xaxis.tick_top()
         self.ax2.set_xlim(0, rpmmax)     
