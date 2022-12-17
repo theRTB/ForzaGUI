@@ -217,11 +217,10 @@ class GUILed:
         
         self.display_lights_var = tkinter.BooleanVar(value=True)
         self.display_gearnr_var = tkinter.BooleanVar(value=True)
-        
     
         self.__init__window(root)
-   #     self.__init__anotherwin(root)
         V._init_tkintervariables()
+   #     self.__init__anotherwin(root)
     
    #  def __init__anotherwin(self, root):
    #      self.testwin = tkinter.Toplevel(root)
@@ -400,14 +399,17 @@ class GUILed:
                                 
         self.update_leds(fdp)
 
-    def update_leds(self, fdp):
+    def update_leds(self, fdp=None):
+        gear = fdp.gear if fdp is not None else 1
+        rpm = fdp.current_engine_rpm if fdp is not None else 0
+            
         ledbar = STATES[self.state]
         for i in range(9):
             self.canvas.itemconfig(self.ledbar[i], fill=ledbar[i])
         
         #update last led to red if rpm is too low
         lastfill = ledbar[-1]
-        if fdp.current_engine_rpm <= self.downshift_limit[fdp.gear]:
+        if rpm <= self.downshift_limit[gear]:
             lastfill = Shiftlight.RED
         self.canvas.itemconfig(self.ledbar[-1], fill=lastfill)
 
@@ -487,5 +489,7 @@ class GUILed:
         self.gear_var.set('1')
         self.run_shiftleds = [False for x in range(11)]
         [state.set(0) for row in self.state_table for state in row]
+        self.rpm_table = []
+        self.calculate_state_triggers()
     
         
