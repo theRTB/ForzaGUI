@@ -182,6 +182,11 @@ class Gearing ():
         self.final_ratio = final_ratio
         self.trace.gears = [g/final_ratio for g in self.trace.gears]
         
+        #sort rpm and torque to be monotonically increasing on rpm
+        rpm, torque = zip(*sorted(zip(self.trace.rpm, self.trace.torque)))
+        self.trace.rpm = np.array(rpm)
+        self.trace.torque = np.array(torque)
+
         self.graphs = []
         for i, ratio in enumerate(self.trace.gears):
             self.graphs.append(Gear(i, trace, self.ax, self.update, final_ratio))
