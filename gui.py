@@ -82,7 +82,8 @@ TODO:
 - move torque graph to a frame inside the window?
   https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
 
-
+-make use of styles to remove constant references to bg/fg colors
+-make use of tkinter variables to remove awkward treeview assignments
 -remove forza dependency
 -figure out if socket can be closed cleanly
 -abstract away from the large list of plugins to a dictionary
