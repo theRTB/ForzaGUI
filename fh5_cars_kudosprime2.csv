@@ -92,7 +92,7 @@ Chiron	Bugatti	2018	HYPERCARS	2624
 Divo	Bugatti	2019	EXTREME TRACK TOYS	3168
 GSX	Buick	1970	CLASSIC MUSCLE	1329
 Regal GNX	Buick	1987	RETRO MUSCLE	417
-XTS Limousine	Cadillac	2013		2128
+XTS Limousine	Cadillac	2013	SUPER SALOONS	2128
 ATS-V	Cadillac	2016	MODERN MUSCLE	2262
 CTS-V Sedan	Cadillac	2016	MODERN MUSCLE	2421
 Maverick X RS Turbo R	Can-Am	2018	UTV'S	2871
@@ -389,7 +389,7 @@ Centenario LP 770-4	Lamborghini	2016	HYPERCARS	2616
 Aventador SVJ	Lamborghini	2018	HYPERCARS	3289
 Huracán Performante	Lamborghini	2018	TRACK TOYS	3217
 Huracán EVO	Lamborghini	2020	MODERN SUPERCARS	3371
-Sián Roadster	Lamborghini	2020		
+Sián Roadster	Lamborghini	2020	HYPERCARS	3608
 Series III	Land Rover	1972	PICK-UP & 4X4'S	2560
 Range Rover	Land Rover	1973	PICK-UP & 4X4'S	2985
 Defender 90	Land Rover	1997	PICK-UP & 4X4'S	2135
@@ -649,7 +649,7 @@ Class 5/1600 Baja Bug	Volkswagen	1969	BUGGIES	2568
 #1107 Desert Dingo Racing Stock Bug	Volkswagen	1970	BUGGIES	2258
 Scirocco S	Volkswagen	1981	RETRO HOT HATCH	1380
 Pickup LX	Volkswagen	1982	VANS AND UTILITY	3235
-Golf GTI	Volkswagen	1983	RETRO HOT HATCH	1995
+Golf GTI	Volkswagen	1983	RETRO HOT HATCH	2995
 Golf Gti 16v Mk2	Volkswagen	1992	RETRO HOT HATCH	353
 Corrado VR6	Volkswagen	1995	RETRO HOT HATCH	309
 GTI VR6 Mk3	Volkswagen	1998	RETRO HOT HATCH	1383
