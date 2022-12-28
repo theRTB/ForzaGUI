@@ -209,6 +209,7 @@ class MainWindow:
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the Sweep (F8) button")
                 self.trace.finish()
+                self.add_carinfo_to_trace(fdp)
                 self.trace.writetofile(f"traces/trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
                 self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
@@ -239,7 +240,6 @@ class MainWindow:
         
         #update display variables
         self.display_car_info(fdp)
-
 
     def display_car_info(self, fdp):
         self.acceleration_var.set(f"{str(round(fdp.accel / 255 * 100, 1))}%")
@@ -273,7 +273,6 @@ class MainWindow:
     def reset_car_info(self):
         """reset car info and tree view
         """
-        
         # reset info variables
         for key in self.infovar_tree.keys():
             self.infotree.item(self.infovar_tree[key], values='-')
@@ -283,7 +282,6 @@ class MainWindow:
         self.acceleration_var.set("0.0%")
         self.brake_var.set("0.0%")
         self.steer_var.set("0")
-        
                         
         self.map.reset()
         self.ledbar.reset()
@@ -329,6 +327,16 @@ class MainWindow:
             self.rpmtorque_handler(None)
         else:
             self.logger.info("File does not exist")
+    
+    def add_carinfo_to_trace(self, fdp):
+        carinfo = {}
+        carinfo = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
+        carinfo['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][carinfo['drivetrain_type']]
+        if config['plugins']['wheelsize']['enabled']:
+            carinfo['wheelsize_front'] = self.wheelsize.wheelsize_front_var.get()
+            carinfo['wheelsize_rear'] = self.wheelsize.wheelsize_rear_var.get()
+        carinfo['shiftdelay'] = self.gearstats.shiftdelay_median
+        self.trace.add_to_carinfo(carinfo)
 
     def set_car_info_frame(self):
         """set car info frame
