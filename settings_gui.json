@@ -32,11 +32,11 @@
             }
         },
         "wheelsize": {
-            "enabled": false,
+            "enabled": true,
             "frame": {
-                "anchor": "nw",
-                "relx": 0.0,
-                "rely": 0.0
+                "anchor": "se",
+                "relx": 1.0,
+                "rely": 1.0
             }
         },
         "laptimes": {
