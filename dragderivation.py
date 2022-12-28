@@ -343,14 +343,17 @@ class DragDerivation():
         return top_ratio, top_speed
     
     @classmethod
-    def draw_torquelosttodrag(cls, ax, rpmmax, torque_adj, speed, speed_gradient, gears, gearratio_collected, initial_ratio, C, CUT, *args, **kwargs):
-        maxspeed = math.ceil(speed[-1]/gears[-1]*gearratio_collected)
-        scalefactor = rpmmax/maxspeed
+    def draw_torquelosttodrag(cls, ax, step_kmh, torque_adj, speed, speed_gradient, gears, gearratio_collected, initial_ratio, C, CUT, *args, **kwargs):
+        maxspeed = math.ceil(speed[-1]/gears[-1]*gearratio_collected/step_kmh)*step_kmh
+        xmin, xmax = ax.get_xlim()
+        scalefactor = xmax/maxspeed
         
+        CUT = 0 #do not remove unused part of raw data
         ax.plot(speed[CUT:]*scalefactor, [x - y*initial_ratio for x, y in zip(torque_adj[CUT:], speed_gradient[CUT:])], label='raw data torque lost')    
         maxspeedarray = np.arange(maxspeed)
         torquelost_fitted = [C*x*x for x in maxspeedarray]
         ax.plot(maxspeedarray*scalefactor, torquelost_fitted, label='torque lost to drag')
+                
         ax.legend()
         
     @classmethod

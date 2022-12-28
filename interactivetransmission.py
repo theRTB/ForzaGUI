@@ -191,13 +191,15 @@ class Window ():
 
         #reduce point count by 75% for performance reasons
         last = trace.array[-1]
-        trace.array = trace.array[:-1:4] + [last]
+        start = trace.array[:Trace.REMOVE_FROM_START]
+        trace.array = start + trace.array[Trace.REMOVE_FROM_START:-1:4] + [last]
         trace.finish()
+
 
         self.gearing = Gearing(trace, self.fig, title=carname)
         self.drag = DragDerivation(trace=None, filename=filename)
 
-        self.drag.draw_torquelosttodrag(ax=self.gearing.ax, rpmmax=self.gearing.rpmmax, **self.drag.__dict__)
+        self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
         
         self.car_name_var.set(self.combobox.get())
         peak_power_index = np.argmax(self.drag.power)
