@@ -7,6 +7,7 @@ Created on Sun Oct  2 12:56:58 2022
 from scipy import interpolate
 #from scipy.misc import derivative
 from scipy.optimize import curve_fit
+import sys
 import statistics
 import math
 #from scipy.signal import butter, lfilter#, freqz
@@ -56,6 +57,10 @@ import json
 #example: stock NSX Acura
 car_ordinal = 2352
 car_performance_index = 831 
+
+if len(sys.argv) > 2:
+    car_ordinal = sys.argv[1]
+    car_performance_index = sys.argv[2]
 filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
 
 def main():
@@ -71,7 +76,7 @@ def main():
                             drag.initial_ratio, drag.C, drag.CUT)
     
     draw_rpm_time(drag, drag.gear_collected, gears, drag.geardata)
-
+    plt.show()
     
 
 def draw_rpm_time(trace, collectedingear, gears, geardata):
@@ -91,6 +96,7 @@ class Trace():
     
     REMOVE_FROM_START = 10 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
     DEFAULTFILENAME = "rpmtorqueraw.txt"
+    CURRENT_VERSION = 1
     
     def __init__(self, gear_collected=None, gears=[], fromfile=False, filename=None):
         if fromfile:
@@ -102,10 +108,15 @@ class Trace():
             self.array = []
             self.gear_collected = gear_collected
             self.gears = [g for g in gears if g != 0] #strip unused gears
+            self.carinfo = {}
+            self.version = Trace.CURRENT_VERSION
     
     def add(self, fdp):
         item = (fdp.current_engine_rpm, fdp.torque, fdp.power, fdp.speed, fdp.acceleration_z)
         self.array.append(item)
+    
+    def add_to_carinfo(self, variables):
+        self.carinfo.update(variables)
     
     def finish(self):
         array = self.array[Trace.REMOVE_FROM_START:]
@@ -118,37 +129,52 @@ class Trace():
     def readfromfile(self, filename=DEFAULTFILENAME):
         with open(filename) as file:
             raw = json.load(file)
-            self.gear_collected = raw[0]
-            self.gears = raw[1]
-            self.array = raw[2]
+            if type(raw) == list: #old style trace
+                self.gear_collected = raw[0]
+                self.gears = raw[1]
+                self.array = raw[2]
+                self.carinfo = {}
+                self.version = 0
+            elif type(raw) == dict:
+                self.gear_collected = raw['gear_collected']
+                self.gears = raw['gears']
+                self.array = raw['array']
+                self.carinfo = raw['carinfo']
+                self.version = raw['version']                
         self.finish()
 
     def writetofile(self, filename=DEFAULTFILENAME):
+        filterlist = ['gear_collected', 'gears', 'array', 'carinfo', 'version']
+        output = {key:val for key,val in self.__dict__.items() if key in filterlist}
+        with open(filename, "w") as file:
+            json.dump(output, file)
+            
+    def legacy_writetofile(self, filename=DEFAULTFILENAME):
         with open(filename, "w") as file:
             json.dump([self.gear_collected, self.gears, self.array], file)
 
-    def legacy_readfromfile(self, filename=DEFAULTFILENAME):
-        array = []
-        with open(filename) as raw:
-            array = raw.read().split("), (")
+    # def legacy_readfromfile(self, filename=DEFAULTFILENAME):
+    #     array = []
+    #     with open(filename) as raw:
+    #         array = raw.read().split("), (")
         
-        #manipulate raw input to be readable
-        array[0]= array[0][2:]
-        array[-1]= array[0][:-2]
-        array = array[1:-1]
-        array = [x.split(', ') for x in array]
+    #     #manipulate raw input to be readable
+    #     array[0]= array[0][2:]
+    #     array[-1]= array[0][:-2]
+    #     array = array[1:-1]
+    #     array = [x.split(', ') for x in array]
         
-        #convert all data to float
-        self.array = [[float(p) for p in point] for point in array]
+    #     #convert all data to float
+    #     self.array = [[float(p) for p in point] for point in array]
 
-    def legacy_writetofile(self, filename=DEFAULTFILENAME):
-        array = list(zip(self.rpm, 
-                    self.torque, 
-                    self.power/Trace.factor_power, 
-                    self.speed/Trace.factor_speed,
-                    self.accel))
-        with open(filename, "w") as file:
-             file.write(str(array))
+    # def legacy_writetofile(self, filename=DEFAULTFILENAME):
+    #     array = list(zip(self.rpm, 
+    #                 self.torque, 
+    #                 self.power/Trace.factor_power, 
+    #                 self.speed/Trace.factor_speed,
+    #                 self.accel))
+    #     with open(filename, "w") as file:
+    #          file.write(str(array))
     
         
 #from https://stackoverflow.com/questions/46909373/how-to-find-the-exact-intersection-of-a-curve-as-np-array-with-y-0/46911822#46911822
@@ -160,6 +186,8 @@ class DragDerivation():
     MAXCUT = 120+1 #120 frames or 2 seconds
     TIC = 1/60 #seconds
     MAXTIME = 90 #seconds
+    MAGIC_CUTOFF = 20
+    MODIFIER_ROUNDS = 2 #iterate over modifier in find_winner
     
     def __init__(self, gears=None, final_drive=1, trace=None, gear_collected=None, filename=None):
         #self.gears = [g/final_drive for g in gears]
@@ -175,6 +203,9 @@ class DragDerivation():
         self.speed = trace.speed
         self.accel = trace.accel
         self.gears = trace.gears
+        self.carinfo = trace.carinfo
+        
+        #self.torque = DragDerivation.convert_to_wheeltorque(self.torque, trace.carinfo)
         
         self.gearratio_collected = self.gears[self.gear_collected-1]
         
@@ -194,6 +225,17 @@ class DragDerivation():
         self.initial_ratio = winner['initial_ratio']
         self.C = winner['C']
     
+    @classmethod
+    def convert_to_wheeltorque(cls, torque, carinfo, awd_diff=0.6, *args, **kwargs):
+        if carinfo['drivetrain_type'] == 'RWD':
+            factor = float(carinfo['wheelsize_rear']) / 100
+        if carinfo['drivetrain_type'] == 'FWD':
+            factor = float(carinfo['wheelsize_front']) / 100
+        if carinfo['drivetrain_type'] == 'AWD':
+            factor = (1-awd_diff)*float(carinfo['wheelsize_front'])/100 + awd_diff*float(carinfo['wheelsize_rear'])/100
+            
+        return torque/factor
+    
     #consider replacing speed and speed_gradient with rpm and rpm_gradient
     @classmethod
     def derive_drag_stats(cls, CUT, torque_adj, speed, speed_gradient, ratio_modifier=1, *args, **kwargs):
@@ -202,8 +244,8 @@ class DragDerivation():
         points = [(s, t - a*initial_ratio) for t, s, a in zip(torque_adj, 
                                                               speed,
                                                               speed_gradient)][CUT:]
-        C_all = [ y / (x * x) for x,y in points]
-        C = statistics.mean(C_all[-20:])
+        C_all = [ y / (x * x ) for x,y in points]
+        C = statistics.mean(C_all[-DragDerivation.MAGIC_CUTOFF:])
         
         lstsq = sum([(y - C*x*x)**2 for x,y in points])
     
@@ -217,20 +259,20 @@ class DragDerivation():
         winner = min(stats, key=lambda x: x['lstsq'])
         if draw_plot: #draw plot of relative positions of each calculation with a specific CUT
             fig, ax = plt.subplots(1)
-            pprint(sorted([(x['lstsq'], x['C'], x['CUT']) for x in stats], reverse=True)[-20:])
+            pprint(sorted([(x['lstsq'], x['C'], x['CUT']) for x in stats], reverse=True)[-DragDerivation.MAGIC_CUTOFF:])
             ax.scatter([x['lstsq'] for x in stats], [x['C'] for x in stats], s=2)
             for stat in stats:
                 ax.annotate(stat['CUT'], (stat['lstsq'], stat['C']))        
-        return winner
+        #return winner
     
         #after deriving an initial good guess, modifier finds the impact of drag on the initial ratio
-        #we assume this is 0%, but is closer to 0.7% or whereabouts
-        #running a second pass does result in a slightly better fit, but the subsequent
-        #calculated modifier is worse so it does not seem to work for convergence
-        # modifier = 1 - (C * speed[CUT] ** 2) / torque_adj[CUT]
-        # stats = [DragDerivation.derive_drag_stats(CUT, torque_adj, speed, speed_gradient, modifier) for CUT in range(MAXCUT)]
-        # winner = min(stats, key=lambda x: x['lstsq'])
-        # return winner
+        #we assume this is 0%, but is closer to 0.5-2.5% or whereabouts
+        #this method does not necessarily converge, it may oscillate
+        for x in range(DragDerivation.MODIFIER_ROUNDS):
+            modifier = 1 - (winner['C'] * speed[winner['CUT']] ** 2) / torque_adj[winner['CUT']]
+            stats = [DragDerivation.derive_drag_stats(CUT, torque_adj, speed, speed_gradient, modifier) for CUT in range(DragDerivation.MAXCUT)]
+            winner = min(stats, key=lambda x: x['lstsq'])
+        return winner
     
     @classmethod
     def top_speed_by_drag_of_gearratio(self, torque, speed, gearratio, gearratio_collected, C, do_print=False, *args, **kwargs): 
@@ -263,9 +305,13 @@ class DragDerivation():
     
     @classmethod
     def top_speed_by_drag(cls, torque, speed, gears, gearratio_collected, C, *args, **kwargs):
-        return max([x['top_speed'] for x in 
-                    DragDerivation.top_speed_by_drag_all_gears(torque, speed, 
-                                                               gears, gearratio_collected, C)])
+        top_speeds = [x['top_speed'] for x in 
+                      DragDerivation.top_speed_by_drag_all_gears(torque, speed, 
+                                                               gears, gearratio_collected, C)]
+        if len(top_speeds):
+            return max(top_speeds)
+        return speed[-1]/gears[-1]*gearratio_collected
+    
     @classmethod
     def plot_torquevsdrag_atgearratio(cls, torque, speed, gearratio, gearratio_collected, C, *args, **kwargs):
         fig, ax = plt.subplots(1)
@@ -278,23 +324,35 @@ class DragDerivation():
         ax.plot(range(maxspeed), torquelost_fitted, label='torque lost to drag')
     
     @classmethod
-    def optimal_final_gear_ratio(cls, torque, speed, gearratio_collected, C, *args, **kwargs):
+    def optimal_final_gear_ratio(cls, torque, speed, gearratio_collected, C, drawgraph=False, *args, **kwargs):
         ratios = np.linspace(0.5, 8.5, 2000+1)
         top_speeds = [DragDerivation.top_speed_by_drag_of_gearratio(torque, speed, gearratio, gearratio_collected, C) for gearratio in ratios]
         
-        fig, ax = plt.subplots(1)
         top_ratio, top_speed = max(zip(ratios, top_speeds), key= lambda x: x[1])
         
-        ax.plot(ratios, top_speeds)
-        ax.set_xlabel('gear ratio')
-        ax.set_ylabel('calculated top speed (km/h)')
-    
-        ymin, ymax = ax.get_ylim()
-        ax.vlines(top_ratio, 0, ymax, linestyle=':')
-        ax.set_title(f"Highest top speed: {top_speed:.1f} km/h at gear ratio {top_ratio:.4f}")
+        if drawgraph:
+            fig, ax = plt.subplots(1)
+            ax.plot(ratios, top_speeds)
+            ax.set_xlabel('gear ratio')
+            ax.set_ylabel('calculated top speed (km/h)')
+        
+            ymin, ymax = ax.get_ylim()
+            ax.vlines(top_ratio, 0, ymax, linestyle=':')
+            ax.set_title(f"Highest top speed: {top_speed:.1f} km/h at gear ratio {top_ratio:.4f}")
         
         return top_ratio, top_speed
     
+    @classmethod
+    def draw_torquelosttodrag(cls, ax, rpmmax, torque_adj, speed, speed_gradient, gears, gearratio_collected, initial_ratio, C, CUT, *args, **kwargs):
+        maxspeed = math.ceil(speed[-1]/gears[-1]*gearratio_collected)
+        scalefactor = rpmmax/maxspeed
+        
+        ax.plot(speed[CUT:]*scalefactor, [x - y*initial_ratio for x, y in zip(torque_adj[CUT:], speed_gradient[CUT:])], label='raw data torque lost')    
+        maxspeedarray = np.arange(maxspeed)
+        torquelost_fitted = [C*x*x for x in maxspeedarray]
+        ax.plot(maxspeedarray*scalefactor, torquelost_fitted, label='torque lost to drag')
+        ax.legend()
+        
     @classmethod
     def draw_torquegraph(cls, torque, torque_adj, speed, speed_gradient, gears, gearratio_collected, initial_ratio, C, CUT, *args, **kwargs):
         fig, (ax1, ax2) = plt.subplots(2)
