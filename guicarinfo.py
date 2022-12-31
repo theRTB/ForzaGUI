@@ -39,7 +39,7 @@ class GUICarInfoDummy:
 class CarData():
     firstrow = []
     data = []
-    filename = 'fh5_cars_kudosprime2.csv'
+    filename = 'fh5_cars_kudosprime2.tsv'
     
     if exists(filename):
         with open(filename, encoding='ISO-8859-1') as rawcsv:
@@ -60,7 +60,7 @@ class GUICarInfo:
     def __init__(self, logger):
         self.logger = logger
         
-        self.carinfo_var = tkinter.StringVar()
+        #self.carinfo_var = tkinter.StringVar()
 
         self.car_ordinal = None
         
