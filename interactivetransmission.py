@@ -158,10 +158,12 @@ class Window ():
         trace = Trace(fromfile=True, filename=filename)
 
         #reduce point count by 75% for performance reasons
+        decimator = int(len(trace.array) / 125)
         last = trace.array[-1]
         start = trace.array[:Trace.REMOVE_FROM_START]
-        trace.array = start + trace.array[Trace.REMOVE_FROM_START:-1:8] + [last]
+        trace.array = start + trace.array[Trace.REMOVE_FROM_START:-1:decimator] + [last]
         trace.finish()
+        print(len(trace.rpm))
 
         self.gearing = Gearing(trace, self.fig, title=carname)
         self.drag = DragDerivation(trace=None, filename=filename)
@@ -199,7 +201,7 @@ class Window ():
         self.true_top_speed_ratio_var.set(round(gear_ratio, 3))
 
         shift_delay = trace.carinfo.get('shiftdelay', 0)
-        shift_delay = f"±{round(shift_delay/60, 2)}" if shift_delay != 0 else 'N/A'
+        shift_delay = f"±{shift_delay/60:.3f}" if shift_delay != 0 else 'N/A'
         self.shiftdelay_var.set(shift_delay)
 
     #filename structure:
@@ -279,7 +281,7 @@ class Gearing ():
         
         self.differencegraph = DifferenceGraph(ax2, self.gears, self.power_contour, 
                                                self.rpmperkmh, self.xmax, self.xticks)
-        self.integral_text = self.fig.text(0.06, 0.44, "Transmission efficiency: 100%")
+        self.integral_text = self.fig.text(0.06, 0.44, "Transmission efficiency: 100% in range")
         self.print_integral()
 
     def __init__graph(self, trace, final_ratio, title, car_ordinal, car_performance_index):
@@ -363,7 +365,7 @@ class Gearing ():
        #print(x, y)
        integral = np.trapz(y, x)
        percentage = 100*integral/maximum
-       self.integral_text.set_text(f"Transmission efficiency: {percentage:5.1f}%")
+       self.integral_text.set_text(f"Transmission efficiency: {percentage:5.1f}% in range")
 
     def update_rpmlimit(self, value):
         self.sliders.rpmlimit = value
@@ -382,6 +384,7 @@ class Gearing ():
 
     def redraw_difference(self):
         self.differencegraph.redraw_difference()
+        self.print_integral()
         
     def run(self):
         pass
@@ -467,7 +470,8 @@ class Sliders ():
             closedmin=True,
             closedmax=True,
             valinit=(self.lower, self.upper),
-            valstep=1
+            valstep=1,
+            valfmt = "%4.0f" #override default to avoid 1.001 as value
         )
     
     def final_ratio_onchanged(self, func):
