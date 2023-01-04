@@ -54,7 +54,7 @@ DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p sc
                  "distance_from_revlimit_ms": 5, #in frames
                  "distance_from_revlimit_pct": .99,   #99.0% of rev limit
                  "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
-                 "state_dropdown_delay": 0, #dropping state only allowed after x frames
+                 # "state_dropdown_delay": 0, #dropping state only allowed after x frames
                  "led_height": 40, #in pixels
                  "led_width": 40,  #in pixels
                  "sequence": 'linear'} #linear or sides
@@ -157,7 +157,7 @@ class V():
     distance_from_revlimit_ms = Variable('Distance from revlimit', config['distance_from_revlimit_ms'], 'Int', 'frames')
     distance_from_revlimit_pct = Variable('Distance from revlimit', config['distance_from_revlimit_pct'], 'Double', 'pct revlimit')
     hysteresis_pct_revlimit = Variable('Hysteresis downwards', config['hysteresis_pct_revlimit'], 'Double', 'pct revlimit')
-    state_dropdown_delay = Variable('State dropdown delay', config['state_dropdown_delay'], 'Int', 'frames')  
+    # state_dropdown_delay = Variable('State dropdown delay', config['state_dropdown_delay'], 'Int', 'frames')  
     shiftlight_x = Variable('Shiftlight location x', config['shiftlight_x'], 'Int', 'pixels')
     shiftlight_y = Variable('Shiftlight location y', config['shiftlight_y'], 'Int', 'pixels')
     
@@ -233,6 +233,7 @@ class GUILed:
    #      self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
    #      self.canvas.pack()
     
+    #create window with true red canvas and transparantcolor true red
     def __init__window(self, root):
         self.window = tkinter.Toplevel(root)
         self.window.wm_attributes("-topmost", 1) #force always on top
@@ -282,6 +283,7 @@ class GUILed:
         y = self.window.winfo_y() + deltay
         self.window.geometry(f"+{x}+{y}")
 
+    #TODO: remove revlimit from function, derive from trace
     def set_rpmtable(self, rpmtable, revlimit, trace):
         self.logger.info(f"revlimit {int(revlimit)} gear_collected {trace.gear_collected}")
         
@@ -318,6 +320,7 @@ class GUILed:
     def calculate_state_triggers(self):
         for gear, rpm in enumerate(self.rpmtable):
             if rpm == 0: #rpmtable has initial 0 and 0 for untested gears
+                self.run_shiftleds[gear] = False
                 continue
             self.run_shiftleds[gear] = True
                         
@@ -360,7 +363,7 @@ class GUILed:
         self.logger.info("update button hit!")
         with open(FILENAME_SETTINGS, 'w') as file:
             config.update(V._to_config())
-            json.dump(config, file)
+            json.dump(config, file, indent=4)
 
     def update (self, fdp):
         gear = fdp.gear
@@ -381,27 +384,27 @@ class GUILed:
         
         #loop over state triggers in reverse order
         for state, shiftrpm in reversed(list(enumerate(self.state_table[fdp.gear]))):
-            if self.rpm_var.get() > shiftrpm.get():
+            if fdp.current_engine_rpm >= shiftrpm.get():
                 break
         
         #drop down in state only if drop in rpm is higher than hysteresis value
         #alternatively, drop down in state after x frames
         if state < self.state:
-            if self.rpm_var.get() <= self.state_table[fdp.gear][self.state].get() - self.hysteresis_rpm:
+            if fdp.current_engine_rpm <= self.state_table[fdp.gear][self.state].get() - self.hysteresis_rpm:
                 self.state = state
-            elif self.countdowntimer < V.state_dropdown_delay.get():
-                self.countdowntimer += 1
-            else:
-                self.state = state
+            # elif self.countdowntimer < V.state_dropdown_delay.get():
+            #     self.countdowntimer += 1
+            # else:
+            #     self.state = state
         else:
-            self.countdowntimer = V.state_dropdown_delay.get()
+            # self.countdowntimer = V.state_dropdown_delay.get()
             self.state = state
                                 
         self.update_leds(fdp)
 
     def update_leds(self, fdp=None):
         gear = fdp.gear if fdp is not None else 1
-        rpm = fdp.current_engine_rpm if fdp is not None else 0
+        rpm = fdp.current_engine_rpm if fdp is not None else -1
             
         ledbar = STATES[self.state]
         for i in range(9):
@@ -481,15 +484,14 @@ class GUILed:
 
     def reset(self):
         self.state = 0
-        self.dropdowntimer = V.state_dropdown_delay.get()
+        # self.dropdowntimer = V.state_dropdown_delay.get()
         self.update_leds()
         
         self.update_rpm_var = True
-        self.rpm_var.set("0000")
+        self.rpm_var.set(0)
         self.gear_var.set('1')
         self.run_shiftleds = [False for x in range(11)]
         [state.set(0) for row in self.state_table for state in row]
-        self.rpm_table = []
+        self.rpmtable = [0 for x in range(11)]
+        self.revlimit = 0
         self.calculate_state_triggers()
-    
-        
