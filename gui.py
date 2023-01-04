@@ -163,18 +163,15 @@ class MainWindow:
                             'drivetrain_type', 'num_cylinders', 
                             'engine_max_rpm', 'engine_idle_rpm')
         
+        self.extravarlist = ['revlimit', 'peak_power_kw', 'peak_torque_Nm', 'aspiration']
+        
         self.infovar_tree = {}
         self.infovar_car_ordinal = None
         self.infovar_car_performance_index = None
         
         #self.prevrev = 0
         self.prevrev_torque = 0
-        self.shiftlimit = 0
-        self.revlimit_counter = 0
         self.revlimit = 0
-
-        self.peak_power = None
-        self.peak_torque = None
 
         self.collect_rpm = 0    
         self.trace = None
@@ -214,9 +211,10 @@ class MainWindow:
                 self.add_carinfo_to_trace(fdp)
                 self.trace.writetofile(f"traces/trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
-                self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
-                self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
-                self.revlimit = fdp.current_engine_rpm
+                self.revlimit = self.trace.rpm[-1] #fdp.current_engine_rpm
+                self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
+                self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
+                self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
         self.prevrev_torque = fdp.current_engine_rpm
 
         # if fdp.power < 0 and fdp.accel > 0:
@@ -250,14 +248,7 @@ class MainWindow:
         self.acceleration_var.set(f"{str(round(fdp.accel / 255 * 100, 1))}%")
         self.brake_var.set(f"{str(round(fdp.brake / 255 * 100, 1))}%")
         self.steer_var.set(f"{fdp.steer}")
-        
-        if self.revlimit_counter == 240: #limit update frequency to once per four seconds
-            self.infotree.item(self.revlimit_var, values=('revlimit',int(self.revlimit)))
-            self.revlimit_counter = 0
-        else:
-            self.revlimit_counter += 1
-    #    self.infotree.item(self.shiftlimit_var, values=('shiftlimit','-'))#int(self.revlimit)))
-        
+                
         self.suspension.display()
         self.wheelsize.display()
         self.laptimes.display()
@@ -268,19 +259,17 @@ class MainWindow:
         #self.launchtest.display()
      
     def update_car_info_infovars(self, fdp):
-        infovarlist_fdp = fdp.to_list(self.infovarlist)
-        for i, value in enumerate(infovarlist_fdp):
-            key = self.infovarlist[i]
-            if key == "drivetrain_type":
-                value = ['FWD', 'RWD', 'AWD'][value]
-            self.infotree.item(self.infovar_tree[key], values=(key,value))
+        infovars = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
+        infovars['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][infovars['drivetrain_type']]
+        for key, value in infovars.items():
+            self.infotree.set(key, column='var_value', value=value)
 
     def reset_car_info(self):
         """reset car info and tree view
         """
         # reset info variables
-        for key in self.infovar_tree.keys():
-            self.infotree.item(self.infovar_tree[key], values='-')
+        for key in self.infotree.get_children():
+            self.infotree.set(key, column='var_value', value='-')
         self.infovar_car_ordinal = None
 
         # reset accel and brake
@@ -302,13 +291,9 @@ class MainWindow:
         #self.prevrev = 0
         self.prevrev_torque = 0
         self.revlimit = 0
-        self.revlimit_counter = 0
-        self.shiftlimit = 0
         
         self.car_ordinal = 0
         self.car_performance_index = 0
-        self.infotree.item(self.peak_power, values=('peak_power_kw', '-'))
-        self.infotree.item(self.peak_torque, values=('peak_torque_Nm', '-'))
       
         self.collect_rpm = 0
         self.trace = None
@@ -320,14 +305,15 @@ class MainWindow:
         filename = f"traces/trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
         if os.path.exists(filename):
             self.trace = Trace(fromfile=True, filename=filename)
-            self.revlimit = self.trace.rpm[-1]
-            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
-            self.gearstats.display()
             self.logger.info(f"loaded file {filename}")
             #self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
             self.trace.finish()
-            self.infotree.item(self.peak_power, values=('peak_power_kw', round(max(self.trace.power))))
-            self.infotree.item(self.peak_torque, values=('peak_torque_Nm', round(max(self.trace.torque))))
+            self.revlimit = self.trace.rpm[-1]
+            self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
+            self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
+            self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
+            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
+            self.gearstats.display()
             self.rpmtorque_handler(None)
         else:
             self.logger.info("File does not exist")
@@ -362,7 +348,6 @@ class MainWindow:
 
 
         columns = ('var_name', 'var_value')
-        
         self.infotree = tkinter.ttk.Treeview(self.car_info_frame, columns=columns, show='headings', style='Treeview')
         
         self.infotree.heading('var_name', text="Variable")
@@ -371,20 +356,23 @@ class MainWindow:
         self.infotree.column('var_value', width=40, anchor=tkinter.CENTER)
         
         for var in self.infovarlist:
-            self.infovar_tree[var] = self.infotree.insert('', tkinter.END, text=var, values=(var,'-'))
-            
-        self.revlimit_var = self.infotree.insert('', tkinter.END, text='revlimit', values=('revlimit','-'))
-        self.shiftlimit_var = self.infotree.insert('', tkinter.END, text='shiftlimit', values=('shiftlimit','-'))
-        self.peak_power = self.infotree.insert('', tkinter.END, text='peak_power_kw', values=('peak_power_kw','-'))
-        self.peak_torque = self.infotree.insert('', tkinter.END, text='peak_torque_Nm', values=('peak_torque_Nm','-'))
+            self.infotree.insert('', tkinter.END, iid=var, values=(var,'-'))
         
-        self.infotree.pack(fill="both", expand=True)
-        tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, bg=constants.background_color, fg=constants.text_color).pack()
+        for var in self.extravarlist:
+            self.infotree.insert('', tkinter.END, iid=var, values=(var,'-'))
+        
+        button = tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, 
+                            bg=constants.background_color, fg=constants.text_color,
+                            onvalue=1, offvalue=0)
 
         self.load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
-        self.load_data_button.pack()
         self.load_data_button.bind('<Button-1>', self.load_data)
+        
+        
+        self.infotree.pack(fill="both", expand=True)
+        button.pack()
+        self.load_data_button.pack()
 
         self.car_info_frame.grid(row=0, column=0, sticky='news')
         
