@@ -17,9 +17,6 @@ from guicarinfo import CarData
 
 '''
 TODO:
-    - add metric of power lost vs optimal
-    - maybe add slider of vmin and vmax for metric of power lost vs optimal
-    - add redline slider that limits each gear to x rpm maximum
     - add awd slider for center diff (current assumption is 60%)
     - override slider to add ability to enter ratio
     - add relative ratio between ratios
@@ -29,6 +26,7 @@ TODO:
     - split matplotlib drawings into separate canvases
     - maybe replace matplotlib slider with tkinter slider
     - investigate status bar not displaying x axis
+    - add dump to excel file for all variables
 '''
 
 def main ():
@@ -157,15 +155,16 @@ class Window ():
         filename = self.carlist[carname]
         trace = Trace(fromfile=True, filename=filename)
 
-        #reduce point count by 75% for performance reasons
+        #reduce point count to roughly 125-150 for performance reasons
         decimator = int(len(trace.array) / 125)
         last = trace.array[-1]
         start = trace.array[:Trace.REMOVE_FROM_START]
         trace.array = start + trace.array[Trace.REMOVE_FROM_START:-1:decimator] + [last]
         trace.finish()
-        print(len(trace.rpm))
 
-        self.gearing = Gearing(trace, self.fig, title=carname)
+        final_ratio = Sliders.average_final_ratio(trace.gears)
+
+        self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, title=carname)
         self.drag = DragDerivation(trace=None, filename=filename)
 
         self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
@@ -285,9 +284,6 @@ class Gearing ():
         self.print_integral()
 
     def __init__graph(self, trace, final_ratio, title, car_ordinal, car_performance_index):
-        self.ax.grid()
-        self.ax.set_ylabel("torque (Nm)")
-
         self.trace = trace
         self.final_ratio = final_ratio
         self.trace.gears = [g/final_ratio for g in self.trace.gears]
@@ -317,8 +313,11 @@ class Gearing ():
         self.ax.set_xlim(0, self.xmax)
         self.ax.set_xticks(self.xticks)
         self.ax.set_xlabel("speed (km/h)")
+        self.ax.set_ylabel("torque (Nm)")
         self.ax.set_xticklabels([math.ceil(x/self.rpmperkmh) for x in self.xticks])
         self.ax.legend()
+        self.ax.grid()
+
         
         #display coords in toolbar when cursor in gearing graph
         self.ax.format_coord = lambda x,y: f'Speed:{x/self.rpmperkmh:5.1f} km/h, Torque:{y:5.0f} Nm'
@@ -459,8 +458,8 @@ class Sliders ():
         
         #default to peak power in first and last gear
         i = trace.power.argmax()
-        self.lower = trace.rpm[i]/gears[0].ratio/rpmperkmh
-        self.upper = trace.rpm[i]/gears[-1].ratio/rpmperkmh
+        self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
+        self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
         self.integral_ax = fig.add_axes([0.06, 0.45, 0.2, 0.03])
         self.integral_slider = RangeSlider(
             ax=self.integral_ax,
@@ -499,6 +498,12 @@ class Sliders ():
                                     'valmax': Sliders.GEARRATIO_MAX}
 
         return (final_slider_settings, gear_slider_settings)
+    
+    @classmethod
+    def average_final_ratio(cls, gears):
+        upper_limit = min(gears[-1]/.48, 6.1)
+        lower_limit = max(gears[0]/6, 2.2)
+        return (upper_limit + lower_limit) / 2
 
 class DifferenceGraph():
     PERCENTAGELOST_MAX = -30
