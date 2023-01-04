@@ -87,6 +87,8 @@ TODO:
 -remove forza dependency
 -figure out if socket can be closed cleanly
 -abstract away from the large list of plugins to a dictionary
+-rewrite treeview usage
+-rewrite optimal shift rpm to use intersections not interpolated graphs
 
 NOTES
 fdp.dist_traveled seems broken for freeroam
@@ -223,10 +225,13 @@ class MainWindow:
         #     self.prevrev = fdp.current_engine_rpm
         
         if self.infovar_car_ordinal != fdp.car_ordinal:
+            self.reset_car_info()
             self.infovar_car_ordinal = fdp.car_ordinal
             self.infovar_car_performance_index = fdp.car_performance_index
             self.update_car_info_infovars(fdp)
-        
+            self.torquegraph_var.set(0)
+            self.load_data(None)
+            
         self.map.update(fdp)
         self.ledbar.update(fdp)     
         self.suspension.update(fdp)
@@ -289,7 +294,6 @@ class MainWindow:
         self.wheelsize.reset()
         self.laptimes.reset()
         self.carinfo.reset()
-        self.laptimes.reset()
         self.lateralg.reset()
         self.gearstats.reset()
         self.braketest.reset()
@@ -393,25 +397,22 @@ class MainWindow:
         self.car_perf_frame.grid(row=0, column=1, sticky='news', columnspan=2)
         self.car_perf_frame.update() #is this necessary?
 
-
         self.frame_basic = tkinter.Frame(self.car_perf_frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
+        opts = {'bg':constants.background_color, 'fg':constants.text_color}
         # place acceleration information text
-        tkinter.Label(self.frame_basic, text="Accel", bg=constants.background_color, fg=constants.text_color, 
-                      font=('Helvetica 15 bold')).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.acceleration_var, bg=constants.background_color, width=6, anchor=tkinter.E,
-                      fg=constants.text_color, font=('Helvetica 35 bold italic')).pack()
+        tkinter.Label(self.frame_basic, text="Accel", font=('Helvetica 15 bold'), **opts).pack()
+        tkinter.Label(self.frame_basic, textvariable=self.acceleration_var, width=6, 
+                      anchor=tkinter.E, font=('Helvetica 35 bold italic'), **opts).pack()
 
         # place brake information test
-        tkinter.Label(self.frame_basic, text="Brake", bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.brake_var, bg=constants.background_color, width=6, anchor=tkinter.E,
-                      fg=constants.text_color, font=('Helvetica 35 bold italic')).pack()
+        tkinter.Label(self.frame_basic, text="Brake", **opts, font=('Helvetica 15 bold')).pack()
+        tkinter.Label(self.frame_basic, textvariable=self.brake_var, width=6, 
+                      anchor=tkinter.E, font=('Helvetica 35 bold italic'), **opts).pack()
         
-        tkinter.Label(self.frame_basic, text="Steer", bg=constants.background_color, fg=constants.text_color,
-                      font=('Helvetica 15 bold')).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.steer_var, bg=constants.background_color, width=6, anchor=tkinter.E,
-                      fg=constants.text_color, font=('Helvetica 30 bold italic')).pack()
+        tkinter.Label(self.frame_basic, text="Steer", **opts, font=('Helvetica 15 bold')).pack()
+        tkinter.Label(self.frame_basic, textvariable=self.steer_var, width=6, 
+                      anchor=tkinter.E, font=('Helvetica 30 bold italic'), **opts).pack()
                                              
         self.map.set_canvas(self.car_perf_frame)
         self.suspension.set_canvas(self.car_perf_frame)
