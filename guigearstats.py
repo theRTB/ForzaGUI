@@ -17,6 +17,14 @@ import math
 MAXGEARS = 10
 GEARLIST = range(MAXGEARS+1)
 
+'''
+TODO:
+    - update shiftdelay to be more accurate
+    - a full shift is longer than the distance between 
+
+
+'''
+
 class GUIGearStatsDummy:
     def __init__(self, logger):
         self.gatherratios = False
@@ -40,7 +48,6 @@ class GUIGearStatsDummy:
         pass
 
 class GUIGearStats:
-    columns = ('gear','ratio', 'optimalshift', 'lastshift')
     def __init__(self, logger):
         self.logger = logger
         
@@ -75,7 +82,7 @@ class GUIGearStats:
         if self.counter == 60:
             self.counter = 0
             for gear in GEARLIST:
-                self.treeview.item(self.gear_tree[gear], 
+                self.treeview.item(gear, 
                                    values=(gear if gear > 0 else 'R', 
                                            round(self.gearratios[gear], 3), 
                                            int(self.optimal_shiftrpm[gear]) if gear != 0 and gear != 10 else '-', 
@@ -164,8 +171,10 @@ class GUIGearStats:
                         fieldbackground=constants.background_color)
         style.map('Treeview', background=[('selected', '#BFBFBF')], foreground=[('selected', 'black')],
                   fieldbackground=[('selected', 'black')])
-                    
-        self.treeview = tkinter.ttk.Treeview(frame, columns=GUIGearStats.columns, style='Treeview', show=["headings"])
+        
+        
+        columns = ('gear','ratio', 'optimalshift', 'lastshift')
+        self.treeview = tkinter.ttk.Treeview(frame, columns=columns, style='Treeview', show=["headings"])
         self.treeview.heading('#0', text='\n\n')
         self.treeview.heading('gear', text='Gear', anchor=tkinter.CENTER)
         self.treeview.heading('ratio', text='Ratio', anchor=tkinter.CENTER)
@@ -177,7 +186,7 @@ class GUIGearStats:
         self.treeview.column('lastshift', width=55, anchor=tkinter.CENTER)
         
         for i in GEARLIST:
-            self.gear_tree[i] = self.treeview.insert('', tkinter.END, values=('R' if i==0 else i, "-", "-", "-"))
+            self.treeview.insert('', tkinter.END, iid=i, values=('R' if i==0 else i, "-", "-", "-"))
         
         self.treeview.pack(fill="both", expand=True)
         
