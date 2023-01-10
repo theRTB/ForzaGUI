@@ -2,7 +2,7 @@
 
 ### GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
 
-Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), launching this application has caused FH5 to crash instantly. The only known workaround is to compile into a separate exe using pyinstaller. Development has slowed due to this aberrant behavior.
+**Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), launching this application has caused FH5 to crash instantly. A basic python shell seems to be fine, but any call to tkinter or matplotlib is problematic. The only known workaround is to compile into a separate exe using pyinstaller. Development has slowed due to this aberrant behavior.**
 
 Launching `gui.py settings_gui_ledonly.json` provides a separate always-on-top movable shiftlight window with optional gear number. The GUI has been simplified to primarily show variables related to the shift lights and can be edited to adjust the illumination live. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
 
