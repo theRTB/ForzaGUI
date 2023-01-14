@@ -349,12 +349,13 @@ class DragDerivation():
         scalefactor = xmax/maxspeed
         
         CUT = 0 #do not remove unused part of raw data
-        ax.plot(speed[CUT:]*scalefactor, [x - y*initial_ratio for x, y in zip(torque_adj[CUT:], speed_gradient[CUT:])], label='raw data torque lost')    
+        line1, = ax.plot(speed[CUT:]*scalefactor, [x - y*initial_ratio for x, y in zip(torque_adj[CUT:], speed_gradient[CUT:])], label='raw data torque lost')    
         maxspeedarray = np.arange(maxspeed)
         torquelost_fitted = [C*x*x for x in maxspeedarray]
-        ax.plot(maxspeedarray*scalefactor, torquelost_fitted, label='torque lost to drag')
-                
-        ax.legend()
+        line2, = ax.plot(maxspeedarray*scalefactor, torquelost_fitted, label='torque lost to drag')
+        
+        first_legend = ax.legend(handles=[line1, line2], loc='lower right', fontsize=8)
+        ax.add_artist(first_legend)
         
     @classmethod
     def draw_torquegraph(cls, torque, torque_adj, speed, speed_gradient, gears, gearratio_collected, initial_ratio, C, CUT, *args, **kwargs):
@@ -453,9 +454,6 @@ class DragDerivation():
             ax.set_xlabel('speed km/h')
             ax.set_ylabel('accel G')
         return geararrays
-    
-        
-        
 
 if __name__ == "__main__":
     main()

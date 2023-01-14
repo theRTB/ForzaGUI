@@ -8,8 +8,9 @@ Created on Fri Oct 28 18:48:33 2022
 import numpy as np
 import math
 import statistics
+import matplotlib as mpt
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, RangeSlider, Button
+from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
 import intersect
 
 from dragderivation import Trace, DragDerivation
@@ -19,14 +20,15 @@ from guicarinfo import CarData
 TODO:
     - add awd slider for center diff (current assumption is 60%)
     - override slider to add ability to enter ratio
-    - add relative ratio between ratios
     - add information on shifts
     - add duration for gear at full throttle and no traction issues
     - investigate torque output during a shift
     - split matplotlib drawings into separate canvases
     - maybe replace matplotlib slider with tkinter slider
-    - investigate status bar not displaying x axis
     - add dump to excel file for all variables
+
+moving the matplotlib sliders into their own canvas resulted in the main canvas
+not updating. May be due to a lack of an update call.
 '''
 
 def main ():
@@ -61,9 +63,16 @@ from matplotlib.figure import Figure
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
+SEPARATE_SLIDERS = False
+
 class Window ():
     width = 1500
     height = 1000
+
+    graph_width = 1000
+    graph_height = 1000
+    
+    slider_height = 600
 
     DEFAULTCAR = 'Acura NSX (2017) PI:831 MODERN SUPERCARS'
     TRACE_DIR = 'traces/'
@@ -85,11 +94,10 @@ class Window ():
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
         px = 1/plt.rcParams['figure.dpi'] # pixel in inches
-        self.fig = Figure(figsize=(Window.width*px, (Window.height-72)*px))
-    #    self.fig = Figure(figsize=(16, 10), dpi=72)
+        self.fig = Figure(figsize=(Window.width*px, (Window.height-72)*px), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.draw() #should be called every update, doesn't seem to be required at all?
-
+        self.fig_slider=None
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
 
@@ -99,7 +107,9 @@ class Window ():
 
         self.frame.pack(fill='both', expand=True)
         self.combobox.pack()
-        self.canvas.get_tk_widget().pack(fill='both', expand=True)#, anchor=tkinter.W)
+        if SEPARATE_SLIDERS:
+            self.canvas_slider.get_tk_widget().pack(side='left', anchor=tkinter.N)#fill='both', expand=True)#, anchor=tkinter.W)
+        self.canvas.get_tk_widget().pack(side='right')#fill='both', expand=True)#, anchor=tkinter.W)
         self.toolbar.pack(fill='x')
 
         self.root.mainloop()
@@ -164,9 +174,9 @@ class Window ():
 
         final_ratio = Sliders.average_final_ratio(trace.gears)
 
-        self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, title=carname)
+        self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, title=carname, fig_slider=self.fig_slider)
+        
         self.drag = DragDerivation(trace=None, filename=filename)
-
         self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
         
         self.car_name_var.set(self.combobox.get())
@@ -259,7 +269,8 @@ class Gear():
 class Gearing ():
     STEP_KMH = 25
     
-    def __init__(self, trace, fig=None, final_ratio=1, title=None, car_ordinal=None, car_performance_index=None):
+    def __init__(self, trace, fig=None, final_ratio=1, title=None, fig_slider=None,
+                 car_ordinal=None, car_performance_index=None):
         if fig == None:
             self.fig, (self.ax, ax2) = plt.subplots(2,1, gridspec_kw={'height_ratios': [2,1]})
             self.fig.set_size_inches(16, 10)
@@ -268,15 +279,27 @@ class Gearing ():
             self.ax, ax2 = self.fig.subplots(2,1, gridspec_kw={'height_ratios': [2,1]})
 
         self.__init__graph(trace, final_ratio, title, car_ordinal, car_performance_index)
+        self.__init__power_contour()
+        
+        #force add legend to axis due to extra legend being added later
+        #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
+        self.legend = self.ax.legend()
+        self.ax.add_artist(self.legend)
         
         self.fig.tight_layout()
-
-        self.__init__power_contour()
-        self.sliders = Sliders(self.fig, self.final_ratio, self.gears, 
-                               self.trace, self.xmax, self.rpmperkmh)
+        
+        separate_fig = True
+        if fig_slider == None:
+            fig_slider = self.fig
+            separate_fig = False
+            
+        self.sliders = Sliders(fig_slider, self.final_ratio, self.gears, 
+                               self.trace, self.xmax, self.rpmperkmh, separate_fig)
         self.sliders.final_ratio_onchanged(self.update_final_ratio)
         self.sliders.rpmlimit_onchanged(self.update_rpmlimit)
         self.sliders.integral_onchanged(self.update_integral)
+        
+        self.shiftrpm = ShiftRPM(self.fig, self.ax, self.gears, self.legend)
         
         self.differencegraph = DifferenceGraph(ax2, self.gears, self.power_contour, 
                                                self.rpmperkmh, self.xmax, self.xticks)
@@ -308,16 +331,14 @@ class Gearing ():
         self.xticks = np.arange(0,self.xmax+valstep,valstep)
 
         ymax = max(self.trace.torque*self.gears[0].ratio*self.final_ratio)*1.01
-
         self.ax.set_ylim(0, ymax)
         self.ax.set_xlim(0, self.xmax)
         self.ax.set_xticks(self.xticks)
         self.ax.set_xlabel("speed (km/h)")
         self.ax.set_ylabel("torque (Nm)")
         self.ax.set_xticklabels([math.ceil(x/self.rpmperkmh) for x in self.xticks])
-        self.ax.legend()
+        
         self.ax.grid()
-
         
         #display coords in toolbar when cursor in gearing graph
         self.ax.format_coord = lambda x,y: f'Speed:{x/self.rpmperkmh:5.1f} km/h, Torque:{y:5.0f} Nm'
@@ -380,10 +401,13 @@ class Gearing ():
 
     def update(self, value):
         self.redraw_difference()
+        for text, gear, next_gear in zip(self.sliders.rel_ratios_text, self.gears[:-1], self.gears[1:]):
+            text.set_text(f'{gear.ratio/next_gear.ratio:.2f}')
 
     def redraw_difference(self):
         self.differencegraph.redraw_difference()
         self.print_integral()
+        self.shiftrpm.redraw()
         
     def run(self):
         pass
@@ -394,15 +418,30 @@ class Sliders ():
     GEARRATIO_MIN = 0.48
     GEARRATIO_MAX = 6.00
     RATIO_STEP = 0.01
-    
-    def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh):
-        # create space for sliders
-        fig.subplots_adjust(left=0.35)
+    xmin = 0.05
+    xmax = 0.36
+    ypixels = 1000-72 #see Window for these sizes
+
+    axes = {'final_gear':            [0.05, 0.90,          0.2, 0.03],
+            'gears':       lambda g: [0.05, 0.87-0.035*g,  0.2, 0.03],
+            'rel_ratios':  lambda g: [0.28, 0.8625-0.035*g],
+            'reset':                 [0.08, 0.51,          0.2, 0.03],
+            'rpmlimit':              [0.05, 0.48,          0.2, 0.03],
+            'integral':              [0.05, 0.45,          0.2, 0.03]
+            }
+
+    def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, separate_fig=False):
+        if separate_fig:
+            Sliders.xmin, Sliders.xmax = 0.2, 1.1
+            print("we separate fig")
+        else:
+            # create space for sliders
+            fig.subplots_adjust(left=Sliders.xmax)
 
         final_slider_limit, gear_slider_limit = self.slider_limits(final_ratio)
 
         #sliders must have a reference to stay interactive
-        self.final_gear_ax = fig.add_axes([0.06, 0.90, 0.2, 0.03])
+        self.final_gear_ax = fig.add_axes(Sliders.axes['final_gear'])
         self.final_gear_slider = Slider(
             ax=self.final_gear_ax,
             label='Final gear',
@@ -415,7 +454,7 @@ class Sliders ():
         )
 
         for gear, ratio in zip(gears, trace.gears):
-            ax = fig.add_axes([0.06, 0.87-0.03*gear.gear, 0.2, 0.03])
+            ax = fig.add_axes(Sliders.axes['gears'](gear.gear))
             slider = Slider(
                 ax=ax,
                 label=f'gear {gear.gear+1}',
@@ -428,6 +467,12 @@ class Sliders ():
             gear.add_slider(ax, slider) #for resetting
             gear.slider.on_changed(gear.update)
 
+        self.rel_ratios_text = []
+        for gear, next_gear in zip(gears[:-1], gears[1:]):
+            text = fig.text(*Sliders.axes['rel_ratios'](gear.gear), 
+                                          f'{gear.ratio/next_gear.ratio:.2f}')
+            self.rel_ratios_text.append(text)
+
         #connect sliders: the ratio per slider must be between previous and next gear's ratios
         prev_gear = None
         for a, next_gear in zip(gears, gears[1:]+[None]):
@@ -436,7 +481,7 @@ class Sliders ():
             prev_gear = a
 
         # Create a `matplotlib.widgzets.Button` to reset the sliders to initial values.
-        self.ax_reset = fig.add_axes([0.08, 0.54, 0.1, 0.04]) #0.72
+        self.ax_reset = fig.add_axes(Sliders.axes['reset']) #0.72
         self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
         def reset(event):
             self.final_gear_slider.reset()
@@ -446,7 +491,7 @@ class Sliders ():
         self.button.on_clicked(reset)
         
         #limit rpm/torque graph to the defined rpm limit (think redline limit for automatic transmission)
-        self.rpmlimit_ax = fig.add_axes([0.06, 0.48, 0.2, 0.03])
+        self.rpmlimit_ax = fig.add_axes(Sliders.axes['rpmlimit'])
         self.rpmlimit_slider = Slider(
             ax=self.rpmlimit_ax,
             label='RPM limit',
@@ -458,15 +503,19 @@ class Sliders ():
         
         #default to peak power in first and last gear
         i = trace.power.argmax()
-        self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
-        self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
-        self.integral_ax = fig.add_axes([0.06, 0.45, 0.2, 0.03])
+        if len(gears) == 1:
+            self.lower = 1
+            self.upper = xmax/rpmperkmh
+        else:
+            self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
+            self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
+        self.integral_ax = fig.add_axes(Sliders.axes['integral'])
         self.integral_slider = RangeSlider(
             ax=self.integral_ax,
             label='Integral\nlimits',
             valmin=0,
             valmax=xmax/rpmperkmh,
-            closedmin=True,
+            closedmin=False,
             closedmax=True,
             valinit=(self.lower, self.upper),
             valstep=1,
@@ -482,9 +531,6 @@ class Sliders ():
     def integral_onchanged(self, func):
         self.integral_slider.on_changed(func)
 
-    #TODO:
-    #   - pick default ratio (3-4) instead of 1
-    #   - determine valid min/max of final ratio based on first/last gear
     def slider_limits(self, final_ratio):
         if final_ratio == 1:
             final_slider_settings = {'valmin': Sliders.FINALRATIO_MIN / Sliders.FINALRATIO_MAX,
@@ -498,12 +544,67 @@ class Sliders ():
                                     'valmax': Sliders.GEARRATIO_MAX}
 
         return (final_slider_settings, gear_slider_settings)
-    
+        
     @classmethod
     def average_final_ratio(cls, gears):
-        upper_limit = min(gears[-1]/.48, 6.1)
-        lower_limit = max(gears[0]/6, 2.2)
+        upper_limit = min(gears[-1]/Sliders.GEARRATIO_MIN, Sliders.FINALRATIO_MAX) 
+        lower_limit = max(gears[0]/Sliders.GEARRATIO_MAX, Sliders.FINALRATIO_MIN)
         return (upper_limit + lower_limit) / 2
+
+class ShiftRPM ():
+    checkbutton_ax = [0.01, 0.35, 0.10, 0.14]
+    DEFAULTSTATE = True
+    
+    def __init__(self, fig, ax_graph, gears, legend):
+        self.fig = fig
+        self.ax_graph = ax_graph
+        self.gears = gears
+        self.legend = legend
+                
+        self.ax = fig.add_axes(ShiftRPM.checkbutton_ax) 
+        self.ax.axis('off') #remove black border around axis
+        self.buttons = CheckButtons(self.ax, ["Display shift RPM lines"], actives=[ShiftRPM.DEFAULTSTATE])
+        self.buttons.on_clicked(self.set_visibility)
+        
+        _, self.ymax = self.ax_graph.get_ylim()
+        intersections = self.get_intersections()
+        self.vlines = [ax_graph.vlines(i, 0.0, self.ymax, linestyle=':') 
+                                   for i, g in zip(intersections, self.gears)]
+        
+        # for i, g in zip(intersections, self.gears):
+        #     g.plot.set_label(f"Gear {g.gear+1}, shift at {i * g.final_ratio * g.ratio:5.0f} rpm")
+
+        self.set_visibility(None)
+        
+    def set_visibility(self, _):
+        toggle = all(self.buttons.get_status()) #assumes single checkbutton
+        for vline in self.vlines:
+            vline.set_visible(toggle)
+        
+        self.redraw()
+        
+        self.fig.canvas.draw_idle()
+
+    def redraw(self):
+        intersections = self.get_intersections()      
+        
+        for i, g, t in zip(intersections, self.gears, self.legend.get_texts()):
+            t.set_text(f"Gear {g.gear+1}, shift at {i * g.final_ratio * g.ratio:5.0f} rpm")
+
+        if not all(self.buttons.get_status()):#assumes single checkbutton
+            return
+
+        for x, vline in zip(intersections, self.vlines):
+            vline.set_segments( [np.array([[x, 0.0],[x, self.ymax]])])
+        
+    def get_intersections(self):
+        X = 0
+        data = [graph.get_points() for graph in self.gears]
+        intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
+        intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]
+    #    intersections = [i*g.ratio*g.final_ratio for i,g in zip(intersections, self.gears)]
+        
+        return intersections
 
 class DifferenceGraph():
     PERCENTAGELOST_MAX = -30
@@ -514,6 +615,7 @@ class DifferenceGraph():
         self.ax = ax
         self.gears = gears
         self.power_contour = power_contour
+        self.rpmperkmh = rpmperkmh
         
         self.fillplot = None
         self.redraw_difference()
@@ -538,7 +640,7 @@ class DifferenceGraph():
         data = [graph.get_points() for graph in self.gears]
         intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
         intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]
-
+        
         min_rpm = data[0][X][0] #initial rpm of first gear
         max_rpm = data[-1][X][-1] #final rpm of final gear
         intersections = [min_rpm] + intersections + [max_rpm]
@@ -561,8 +663,6 @@ class DifferenceGraph():
         self.fillplot = self.ax.fill_between(x_array, y_array, color='b')
         #    self.diffplot.remove()
         #    self.diffplot, = self.ax2.plot(x_array, y_array, 'b')
-        
-       # self.print_integral()
 
 if __name__ == "__main__":
     main()
