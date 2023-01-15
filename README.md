@@ -76,9 +76,11 @@ Settings file for the shiftlights. Most settings apart from led_height, led_widt
 
 Original GUI code by https://github.com/Juice-XIJ/forza_auto_gear
 
-![example GUI](example.png)
-![example GUI ledonly](gui_ledonly_AcuraNSX_stock.png)
-![example ingame ledbar](ingameledbar_AcuraNSX_stock.png)
-![example torque graph per gear](example_AcuraNSX_stock.png)
-![example drag corrected torque per gear](drag_corrected_torque_AcuraNSX_stock.png)
-![example derived speed over time per gear](speed_per_gear_AcuraNSX_stock.png)
+![example GUI](images/example.png)
+![example GUI ledonly](images/gui_ledonly_AcuraNSX_stock.png)
+![example ingame ledbar](images/ingameledbar_AcuraNSX_stock.png)
+![example ingame alternate ledbar](images/ingameledbar_AcuraNSX_stock_v2.png)
+![example torque graph per gear](images/example_AcuraNSX_stock.png)
+![example interactive transmission](images/interactivetransmission_AcuraNSX_stock.PNG)
+![example drag corrected torque per gear](images/drag_corrected_torque_AcuraNSX_stock.png)
+![example derived speed over time per gear](images/speed_per_gear_AcuraNSX_stock.png)
