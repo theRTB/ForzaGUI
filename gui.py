@@ -185,9 +185,6 @@ class MainWindow:
         Args:
             fdp: fdp
         """
-        if not self.forza5.isRunning:
-            return
-        
         if fdp.gear == 11: #gear 11 is neutral, hit when triggering events in the map
             return         #this breaks various hardcoded array limits
         
@@ -222,7 +219,7 @@ class MainWindow:
         # elif fdp.power >= 0:
         #     self.prevrev = fdp.current_engine_rpm
         
-        if self.infovar_car_ordinal != fdp.car_ordinal:
+        if fdp.car_ordinal != 0 and self.infovar_car_ordinal != fdp.car_ordinal:
             self.reset_car_info()
             self.infovar_car_ordinal = fdp.car_ordinal
             self.infovar_car_performance_index = fdp.car_performance_index

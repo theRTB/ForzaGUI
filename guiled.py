@@ -366,6 +366,11 @@ class GUILed:
             json.dump(config, file, indent=4)
 
     def update (self, fdp):
+        self.update_lights_visibility(fdp)
+        
+        if fdp.is_race_on == 0:
+            return
+        
         gear = fdp.gear
         if gear == 0:
             gear = 'R'
@@ -397,7 +402,7 @@ class GUILed:
             # else:
             #     self.state = state
         else:
-            # self.countdowntimer = V.state_dropdown_delay.get()
+            # self.countdowntimer = V.state_dropdown_delay.get() 
             self.state = state
                                 
         self.update_leds(fdp)
@@ -412,15 +417,22 @@ class GUILed:
         
         #update last led to red if rpm is too low
         lastfill = ledbar[-1]
-        if rpm <= self.downshift_limit[gear]:
+        if rpm > -1 and rpm <= self.downshift_limit[gear]:
             lastfill = Shiftlight.RED
         self.canvas.itemconfig(self.ledbar[-1], fill=lastfill)
 
-    def update_lights_visibility(self):
-        if self.display_lights_var.get():
-            self.window.deiconify()
-        else:
+    def update_lights_visibility(self, fdp=None):
+        is_race_on = (fdp.is_race_on==1) if fdp is not None else False
+        user_toggle = self.display_lights_var.get()
+        window_visible = (self.window.state() == 'normal')
+        if window_visible and not(user_toggle and is_race_on):
             self.window.withdraw()
+        elif user_toggle and is_race_on:
+            self.window.deiconify()
+        # if self.display_lights_var.get():
+        #     self.window.deiconify()
+        # else:
+        #     self.window.withdraw()
             
     def update_gearnr_visibility(self):
         if self.display_gearnr_var.get():

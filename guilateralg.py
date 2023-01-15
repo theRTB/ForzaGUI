@@ -189,6 +189,9 @@ class GUILateralG:
                 
 
     def update(self, fdp):
+        if fdp.is_race_on == 0:
+            return
+        
         self.accelx_deque.append(fdp.acceleration_x/G)
         self.accely_deque.append(fdp.acceleration_y/G)
         self.accelz_deque.append(fdp.acceleration_z/G)

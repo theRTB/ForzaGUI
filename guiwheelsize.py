@@ -47,7 +47,7 @@ class GUIWheelsize:
         #self.wheelsize_var.set(f"{self.wheelsize_front * 100:.2f} {self.wheelsize_rear * 100:.2f}")
 
     def update(self, fdp):
-        if not self.tracking_var.get():
+        if not self.tracking_var.get() or fdp.is_race_on == 0:
             return
         
         diameter = {x:0 for x in ['FL', 'FR', 'RL', 'RR']}

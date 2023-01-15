@@ -75,6 +75,8 @@ class GUISuspension:
             tire.cur_var.set(f"{tire.cur*100: >2.2f}") 
 
     def update(self, fdp):
+        if fdp.is_race_on == 0:
+            return
         for x in TIRES:
             tire = self.suspension[x]
             val = getattr(fdp, f"suspension_travel_meters_{x}")

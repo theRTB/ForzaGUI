@@ -83,7 +83,7 @@ class GUICarInfo:
         self.group_var.set(f'{self.group}')
 
     def update(self, fdp):
-        if self.car_ordinal != fdp.car_ordinal:
+        if self.car_ordinal != 0 and self.car_ordinal != fdp.car_ordinal:
             self.car_ordinal = fdp.car_ordinal
             row = CarData.getinfo(self.car_ordinal)
             

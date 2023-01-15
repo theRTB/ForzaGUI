@@ -153,6 +153,9 @@ class GUIGearStats:
         self.optimal_shiftrpm = [r for r in rpmtable] + [0]
 
     def update(self, fdp):
+        if fdp.is_race_on == 0:
+            return
+        
         self.gear = fdp.gear
         
         if self.gatherratios:

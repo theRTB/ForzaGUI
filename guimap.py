@@ -50,6 +50,9 @@ class GUIMap:
                 (z - self.z_offset)/self.z_scale)
 
     def update(self, fdp):
+        if fdp.is_race_on == 0:
+            return
+        
         x = fdp.position_x + 10000#(fdp.position_x + 10000)/16000.0
         y = fdp.position_y
         z = -fdp.position_z + 6000#(-fdp.position_z + 6000)/11000.0
