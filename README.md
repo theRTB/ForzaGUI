@@ -2,7 +2,7 @@
 
 ### GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
 
-**Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), launching this application has caused FH5 to crash instantly. A basic python shell seems to be fine, but any call to tkinter or matplotlib is problematic. The only known workaround is to compile into a separate exe using pyinstaller. Development has slowed due to this aberrant behavior.**
+**Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), launching this application as a script has caused FH5 to crash instantly. A basic python shell seems to be fine, but any call to tkinter or matplotlib is problematic. The only known workaround is to compile into a separate exe using pyinstaller. Development has slowed due to this aberrant behavior.**
 
 Launching `gui.py settings_gui_ledonly.json` provides a separate always-on-top movable shiftlight window with optional gear number. The GUI has been simplified to primarily show variables related to the shift lights and can be edited to adjust the illumination live. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
 
@@ -28,8 +28,11 @@ Current focus is on making an accurate shiftled display. Work has been put into 
 
 ### Steps for collecting data per car tune:
 - Press F10 to start monitoring
+- Optional: Coast at low speed (~10km/h) at high gear to measure wheel size (avoid inputs)
+  - Untick Tracking on wheel radius
 - Press F9 to enable ratio collecting
   - Drive around a bit per gear until number stabilizes in Ratio column bottom right
+  - AWD cars with different front/rear wheel sizes will have a floating ratio and are not quite right yet
 - Press F9 to stop ratio collecting
 - Head to the main drag strip at the main Horizon Festival
   - Upgrade tire compound if car is traction limited, to slick or even drag if necessary
@@ -44,7 +47,7 @@ Current focus is on making an accurate shiftled display. Work has been put into 
 - Press and hold W (default keyboard key for accel)
 - Release W after engine hits rev limit
 - Click the Sweep button
-- The data is saved. On restarts of the GUI click **Load torque/ratios** after clicking Connect (or pressing F10)
+- The data is saved. The GUI will automatically try to load the data file based on car ordinal and PI number on restarts.
 
 As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
 
@@ -69,7 +72,7 @@ Settings file for the shiftlights. Most settings apart from led_height, led_widt
 * distance_from_revlimit_ms: distance in frames from hitting rev limit. Due to the cost of hitting rev limit, we force a minimum distance in time and absolute value. Optimal shift rpm is shifted according to this number. Defaults to 5 frames.
 * distance_from_revlimit_pct": distance as a percentage of rev limit. The optimal shift rpm is shifted lower if it is closer than x% to rev limit. Defaults to 99% as 0.99.
 * hysteresis_pct_revlimit: Shiftlight state is only allowed to drop after live rpm has dropped by this value (taken as a percentage of rev limit) below state trigger rpm. Defaults to 5% as 0.05.
-* state_dropdown_delay: After going up in state, state may not drop for x frames. Defaults to 0 currently.
+* state_dropdown_delay: After going up in state, state may not drop for x frames. Defaults to 0 currently. Non-functional at the moment.
 * led_height: Vertical size of LED rectangles in shiftlight window. Defaults to 40 pixels
 * led_width": Horizontal size of LED rectangles in shiftlight window. Defaults to 40 pixels
 * sequence": Pattern style. *"linear"* is left to right (McLaren pattern), *"sides"* is sides to center (Porsche pattern). Defaults to *"linear"*
