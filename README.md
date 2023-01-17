@@ -10,7 +10,9 @@ This was a project never originally intended for public view, a hobby project fo
 
 There are various 'plugins' that offer telemetry readouts or derivations but may not be readily enabled unless the code responsible for placing the frames is updated. The plugins that are not currently active may not function or cause performance degradation.
 
-Current focus is on making an accurate shiftled display. Work has been put into deriving information for an accurate progression of speed over time per gear, this will be used to derive more accurate triggers on rpm values to progress LED states. See dragderivation.py for various methods to derive top speeds, speed over time, and the impact of drag on modified engine torque. This applies to the torque value after multiplying with the gear ratio and multiplying the speed to match the ratio.
+Current focus is to derive drag and transmission efficiency to fully quantify drag comparisons between cars.
+
+Previous focus was on making an accurate shiftled display. Work has been put into deriving information for an accurate progression of speed over time per gear, this will be used to derive more accurate triggers on rpm values to progress LED states. See dragderivation.py for various methods to derive top speeds, speed over time, and the impact of drag on modified engine torque. This applies to the torque value after multiplying with the gear ratio and multiplying the speed to match the ratio.
 
 ### Examples of telemetry displayed, derived numbers and graphs:
 - acceleration, brake, steering input
@@ -50,6 +52,9 @@ Current focus is on making an accurate shiftled display. Work has been put into 
 - The data is saved. The GUI will automatically try to load the data file based on car ordinal and PI number on restarts.
 
 As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
+
+### Interactive Gearing
+A secondary application to dynamically alter gearing ratios for a given trace for a given car. Derives gearing efficiency relative to a perfect transmission and interactively determines optimal shift rpms (but does not yet take the impact of reduced/negative boost from turbo into account). The RPM limit is useful in determining the impact of automatic shifting, which always happens at redline when accelerating normally. Top speed is derived from comparing derived drag to the peak power curve. The wheel drag value is halfway there for comparing drag between cars, it is missing transmission efficiency for now. Final gear is an approximation, there is no way to derive final gear from just telemetry.
 
 ### Configuration
 Configuration is done through editing the json files that are regenerated with defaults when deleted. There are no input checks, the GUI will just break if input variables are not as expected. The script accepts a specific configuration file by providing the filename as first argument.
