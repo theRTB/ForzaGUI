@@ -5,14 +5,18 @@ Created on Fri Oct 28 18:48:33 2022
 @author: RTB
 """
 
-import numpy as np
+import os
+import tkinter
+import tkinter.ttk
 import math
 import statistics
-import matplotlib as mpt
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
 import intersect
-
+import matplotlib.pyplot as plt
+import numpy as np
+#from functools import partial
+from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.figure import Figure
 from dragderivation import Trace, DragDerivation
 from guicarinfo import CarData
 
@@ -26,9 +30,12 @@ TODO:
     - split matplotlib drawings into separate canvases
     - maybe replace matplotlib slider with tkinter slider
     - add dump to excel file for all variables
+    - consider https://matplotlib.org/stable/api/scale_api.html#matplotlib.scale.FuncScale
 
 moving the matplotlib sliders into their own canvas resulted in the main canvas
-not updating. May be due to a lack of an update call.
+not updating. May be due to a lack of an update call:
+        self.canvas.draw() seems to be far slower than fig.canvas.draw_idle()
+        self.canvas.draw() #should be called every update, doesn't seem to be required at all?
 '''
 
 def main ():
@@ -52,29 +59,24 @@ def main ():
 
     window = Window()
     
-
-
-import os
-import tkinter
-import tkinter.ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib.figure import Figure
 # suppress matplotlib warning while running in thread
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
-SEPARATE_SLIDERS = False
 
 class Window ():
     width = 1500
-    height = 1000
+    height = 970
 
     graph_width = 1000
-    graph_height = 1000
+    graph_height = 900
     
-    slider_height = 600
+    slider_height = 500
+    slider_width = 500
+    
+    frameinfo_height = 350
 
-    DEFAULTCAR = 'Acura NSX (2017) PI:831 MODERN SUPERCARS'
+    DEFAULTCAR = 'Acura NSX (2017) PI:831 MODERN SUPERCARS o2352'
     TRACE_DIR = 'traces/'
 
     def __init__(self):
@@ -82,11 +84,12 @@ class Window ():
     #    self.root.tk.call('tk', 'scaling', 1.5) #Spyder console fix for DPI too low
         self.root.title("Interactive gearing for collected traces for ForzaGUI")
         self.root.geometry(f"{Window.width}x{Window.height}")
-        self.frame = tkinter.Frame(self.root)
 
+        self.frame = tkinter.Frame(self.root)
+        
         self.generate_carlist()
 
-        self.combobox = tkinter.ttk.Combobox(self.frame, width=80,
+        self.combobox = tkinter.ttk.Combobox(self.root, width=80,
                                              exportselection=False, state='readonly',
                                              values=sorted(self.carlist.keys()))
         index = sorted(self.carlist.keys()).index(Window.DEFAULTCAR)
@@ -94,73 +97,44 @@ class Window ():
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
         px = 1/plt.rcParams['figure.dpi'] # pixel in inches
-        self.fig = Figure(figsize=(Window.width*px, (Window.height-72)*px), dpi=100)
+        self.fig = Figure(figsize=(Window.graph_width*px, (Window.graph_height)*px), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.canvas.draw() #should be called every update, doesn't seem to be required at all?
-        self.fig_slider=None
+        self.fig_slider = Figure(figsize=(Window.slider_width*px, (Window.slider_height)*px), dpi=100)
+        self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, master=self.frame)
+        
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
 
-        self.__init__frame_info()
+        self.frame_info = tkinter.Frame(self.frame)
+        self.info = InfoFrame(self.frame_info)
 
-        self.carname_changed()
-
-        self.frame.pack(fill='both', expand=True)
+        self.carname_changed() #force initial update to default car
+        
+        self.frame.grid_rowconfigure(0, minsize=Window.slider_height, weight=Window.slider_height)
+        self.frame.grid_rowconfigure(1, minsize=Window.frameinfo_height, weight=Window.frameinfo_height)
+        self.frame.grid_columnconfigure(0, minsize=Window.slider_width, weight=Window.slider_width)
+        self.frame.grid_columnconfigure(1, minsize=Window.graph_width, weight=Window.graph_width)
+        
         self.combobox.pack()
-        if SEPARATE_SLIDERS:
-            self.canvas_slider.get_tk_widget().pack(side='left', anchor=tkinter.N)#fill='both', expand=True)#, anchor=tkinter.W)
-        self.canvas.get_tk_widget().pack(side='right')#fill='both', expand=True)#, anchor=tkinter.W)
+        self.frame.pack(fill='both', expand=True)
         self.toolbar.pack(fill='x')
+        
+        self.canvas_slider.get_tk_widget().grid(row=0, column=0)
+        self.frame_info.grid(row=1, column=0, sticky=tkinter.NW)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=2)
 
         self.root.mainloop()
-
-    def __init__frame_info(self):
-        self.frame_info = tkinter.Frame(self.frame)
-        self.frame_info.columnconfigure(5, weight=1000)
-        
-        self.car_name_var = tkinter.StringVar(value='')
-        self.peak_power_var = tkinter.DoubleVar(value=0)
-        self.peak_power_rpm_var = tkinter.IntVar(value=0)
-        self.peak_torque_var = tkinter.DoubleVar(value=0)
-        self.peak_torque_rpm_var = tkinter.IntVar(value=0)
-        self.revlimit_var = tkinter.DoubleVar(value=0.0)
-        self.drag_var = tkinter.DoubleVar(value=0.0)
-        self.drag_wheel_var = tkinter.DoubleVar(value=0.0)
-        self.top_speed_var = tkinter.DoubleVar(value=0.0)
-        self.true_top_speed_var = tkinter.DoubleVar(value=0.0)
-        self.true_top_speed_ratio_var = tkinter.StringVar(value=0.0)
-        self.drivetrain_var = tkinter.StringVar(value='N/A')
-        self.wheelsize_front_var = tkinter.DoubleVar(value=0.0)
-        self.wheelsize_rear_var = tkinter.DoubleVar(value=0.0)
-        self.shiftdelay_var = tkinter.DoubleVar(value=0.0)
-        table = [self.car_name_var, 
-                 ['Peak power:', self.peak_power_var, 'kW @', self.peak_power_rpm_var, 'rpm'], 
-                 ['Peak torque:', self.peak_torque_var, 'Nm @', self.peak_torque_rpm_var, 'rpm'],
-                 ['Revlimit:', self.revlimit_var, ''],
-                 ['Drag value:', self.drag_var, '(in C*100*v*v)'],
-                 ['Wheel drag value:', self.drag_wheel_var, '(C*100*v*v/wheelsize)'],
-                 ['Top speed:', self.top_speed_var, 'km/h'],
-                 ['\'True\' top speed:', self.true_top_speed_var, 'km/h @', self.true_top_speed_ratio_var, 'ratio'],
-                 ['Drivetrain:', self.drivetrain_var, ''],
-                 ['Wheel radius:', self.wheelsize_front_var, 'front', self.wheelsize_rear_var, 'rear (cm)'],
-                 ['Shift duration:', self.shiftdelay_var, 'seconds']                 
-            ]
-        
-        tkinter.Label(self.frame_info, textvariable=table[0]).grid(row=0, column=0, columnspan=6)
-        for i, row in enumerate(table[1:], start=1):
-            tkinter.Label(self.frame_info, text=row[0]).grid(row=i, column=0, sticky=tkinter.E)
-            tkinter.Label(self.frame_info, textvariable=row[1]).grid(row=i, column=1)
-            if len(row) == 3:
-                tkinter.Label(self.frame_info, text=row[2]).grid(row=i, column=2, columnspan=3, sticky=tkinter.W)
-            else:
-                tkinter.Label(self.frame_info, text=row[2]).grid(row=i, column=2, sticky=tkinter.W)
-                tkinter.Label(self.frame_info, textvariable=row[3]).grid(row=i, column=3)
-                tkinter.Label(self.frame_info, text=row[4]).grid(row=i, column=4, sticky=tkinter.W)   
-
-        self.frame_info.place(relx=0, rely=0.75, anchor=tkinter.W)
+    
+    def entry_validation(input, varname, maxval):
+        print(f'validating {input}')
+        if float(input) < 0 or len(input) > len(maxval):
+            return False
+        return True
 
     def carname_changed(self, event=None):
         self.fig.clf()
+        if self.fig_slider is not None:
+            self.fig_slider.clf()
         carname = self.combobox.get()
         filename = self.carlist[carname]
         trace = Trace(fromfile=True, filename=filename)
@@ -179,40 +153,9 @@ class Window ():
         self.drag = DragDerivation(trace=None, filename=filename)
         self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
         
-        self.car_name_var.set(self.combobox.get())
-        peak_power_index = np.argmax(self.drag.power)
-        self.peak_power_var.set(round(max(self.drag.power), 1))
-        self.peak_power_rpm_var.set(int(self.drag.rpm[peak_power_index]))
-        peak_torque_index = np.argmax(self.drag.torque)
-        self.peak_torque_var.set(round(max(self.drag.torque), 1))
-        self.peak_torque_rpm_var.set(int(self.drag.rpm[peak_torque_index]))
-     #  self.revlimit_var.set(int(25*round(self.drag.rpm[-1]/25, 0))) #round to nearest 25
-        self.revlimit_var.set(math.ceil(self.drag.rpm[-1]))
-        self.drivetrain_var.set(trace.carinfo.get('drivetrain_type', 'N/A'))
-        self.drag_var.set(round(100*self.drag.C, 4))
-        self.wheelsize_front = float(trace.carinfo.get('wheelsize_front', 0))
-        self.wheelsize_rear = float(trace.carinfo.get('wheelsize_rear', 0))        
-        self.wheelsize_front_var.set(self.wheelsize_front)
-        self.wheelsize_rear_var.set(self.wheelsize_rear)
+        self.info.carname_changed(carname, trace, self.drag)
         
-        drag_wheel = 'N/A'
-        if self.drivetrain_var.get() == 'FWD':
-            drag_wheel = round(100*100*self.drag.C/self.wheelsize_front, 4)
-        elif self.drivetrain_var.get() == 'RWD':
-            drag_wheel = round(10000*self.drag.C/self.wheelsize_rear, 4)
-        elif self.drivetrain_var.get() == 'AWD':
-            drag_wheel = round(10000*self.drag.C/(0.4*self.wheelsize_front + 0.6*self.wheelsize_rear), 4)
-        self.drag_wheel_var.set(drag_wheel)
-        self.top_speed_var.set(round(self.drag.top_speed_by_drag(**self.drag.__dict__), 1))
-
-        gear_ratio, top_speed = self.drag.optimal_final_gear_ratio(**self.drag.__dict__)
-        self.true_top_speed_var.set(round(top_speed, 1))
-        self.true_top_speed_ratio_var.set(round(gear_ratio, 3))
-
-        shift_delay = trace.carinfo.get('shiftdelay', 0)
-        shift_delay = f"±{shift_delay/60:.3f}" if shift_delay != 0 else 'N/A'
-        self.shiftdelay_var.set(shift_delay)
-
+        
     #filename structure:
     def generate_carlist(self):
         self.carlist = {}
@@ -223,10 +166,131 @@ class Window ():
 
             data = CarData.getinfo(ordinal)
             if data is not None:
-                carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']}"
+                carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']} o{ordinal}"
                 self.carlist[carname] = Window.TRACE_DIR + filename
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
+
+class InfoFrame():
+    def __init__(self, frame):
+        self.frame = frame
+        self.frame.columnconfigure(5, weight=1000)
+        
+        self.car_name_var = tkinter.StringVar(value='')
+        self.peak_power_var = tkinter.DoubleVar(value=0)
+        self.peak_power_rpm_var = tkinter.IntVar(value=0)
+        self.peak_torque_var = tkinter.DoubleVar(value=0)
+        self.peak_torque_rpm_var = tkinter.IntVar(value=0)
+        self.revlimit_var = tkinter.DoubleVar(value=0.0)
+        self.drag_var = tkinter.DoubleVar(value=0.0)
+        self.top_speed_var = tkinter.DoubleVar(value=0.0)
+        self.true_top_speed_var = tkinter.DoubleVar(value=0.0)
+        self.true_top_speed_ratio_var = tkinter.StringVar(value=0.0)
+        self.drivetrain_var = tkinter.StringVar(value='N/A')
+        self.wheelsize_front_var = tkinter.DoubleVar(value=0.0)
+        self.wheelsize_rear_var = tkinter.DoubleVar(value=0.0)
+        self.shiftdelay_var = tkinter.DoubleVar(value=0.0)
+        self.transmission_efficiency_var = tkinter.DoubleVar(value=0.0)
+        self.maximum_boost_var = tkinter.DoubleVar(value=0.0)
+        self.weight_var = tkinter.IntVar(value=1500)
+        self.center_diff_var = tkinter.DoubleVar(value=50)
+        self.max_boost_var = tkinter.DoubleVar(value=0.0)
+        
+        table = [self.car_name_var, 
+                 ['Peak power:', self.peak_power_var, 'kW @', self.peak_power_rpm_var, 'rpm'], 
+                 ['Peak torque:', self.peak_torque_var, 'Nm @', self.peak_torque_rpm_var, 'rpm'],
+                 ['Revlimit:', self.revlimit_var, ''],
+                 ['Drag value:', self.drag_var, ' (100*C*wheelsize*efficiency) '],
+                 ['Top speed:', self.top_speed_var, 'km/h'],
+                 ['\'True\' top speed:', self.true_top_speed_var, 'km/h @', self.true_top_speed_ratio_var, 'ratio'],
+                 ['Drivetrain:', self.drivetrain_var, ''],
+                 ['Wheel radius:', self.wheelsize_front_var, 'front', self.wheelsize_rear_var, 'rear (cm)'],
+                 ['Shift duration:', self.shiftdelay_var, 'seconds'],
+                 ['Drivetrain loss:', self.transmission_efficiency_var, '%'],
+                 ['Weight:', self.weight_var, 'kg'],
+                 ['Center diff:', self.center_diff_var, '% to rear'],
+                 ['Maximum boost:', self.maximum_boost_var, 'bar']
+            ]
+        
+    #    entry_centerdiff_validation = self.root.register(Window.entry_centerdiff_validation)
+        self.entries = {}
+        tkinter.Label(self.frame, textvariable=table[0]).grid(row=0, column=0, columnspan=6)
+        for i, row in enumerate(table[1:], start=1):
+            tkinter.Label(self.frame, text=row[0]).grid(row=i, column=0, sticky=tkinter.E)
+            if row[0] == 'Weight:' or row[0] == 'Center diff:':
+                self.entries[row[0]] = tkinter.Entry(self.frame, textvariable=row[1], width=5)
+                                                  #   validate='all', validatecommand=(entry_centerdiff_validation, '%P'))
+                self.entries[row[0]].grid(row=i, column=1)
+            else:
+                tkinter.Label(self.frame, textvariable=row[1]).grid(row=i, column=1)
+                
+            if len(row) == 3:
+                tkinter.Label(self.frame, text=row[2]).grid(row=i, column=2, columnspan=3, sticky=tkinter.W)
+            else:
+                tkinter.Label(self.frame, text=row[2]).grid(row=i, column=2, sticky=tkinter.W)
+                tkinter.Label(self.frame, textvariable=row[3]).grid(row=i, column=3)
+                tkinter.Label(self.frame, text=row[4]).grid(row=i, column=4, sticky=tkinter.W)
+
+    def carname_changed(self, carname, trace, drag):
+        self.car_name_var.set(carname)
+        peak_power_index = np.argmax(drag.power)
+        self.peak_power_var.set(round(max(drag.power), 1))
+        self.peak_power_rpm_var.set(int(drag.rpm[peak_power_index]))
+        peak_torque_index = np.argmax(drag.torque)
+        self.peak_torque_var.set(round(max(drag.torque), 1))
+        self.peak_torque_rpm_var.set(int(drag.rpm[peak_torque_index]))
+     #  self.revlimit_var.set(int(25*round(drag.rpm[-1]/25, 0))) #round to nearest 25
+        self.revlimit_var.set(math.ceil(drag.rpm[-1]))
+        self.drivetrain_var.set(trace.carinfo.get('drivetrain_type', 'N/A'))
+        #drag_var.set(round(100*drag.C, 4))
+        wheelsize_front = float(trace.carinfo.get('wheelsize_front', 0))
+        wheelsize_rear = float(trace.carinfo.get('wheelsize_rear', 0))        
+        self.wheelsize_front_var.set(wheelsize_front)
+        self.wheelsize_rear_var.set(wheelsize_rear)
+        
+        wheelsize = 'N/A'
+        if self.drivetrain_var.get() == 'FWD':
+            wheelsize = wheelsize_front
+            self.center_diff_var.set(0)
+            self.centerdiffentryenabled(False)
+        elif self.drivetrain_var.get() == 'RWD':
+            wheelsize = wheelsize_rear
+            self.center_diff_var.set(100)
+            self.centerdiffentryenabled(False)
+        elif self.drivetrain_var.get() == 'AWD':
+            wheelsize = 0.35*wheelsize_front + 0.65*wheelsize_rear
+            self.center_diff_var.set(65)
+            self.centerdiffentryenabled(True)
+        self.top_speed_var.set(round(drag.top_speed_by_drag(**drag.__dict__), 1))
+
+        gear_ratio, top_speed = drag.optimal_final_gear_ratio(**drag.__dict__)
+        self.true_top_speed_var.set(round(top_speed, 1))
+        self.true_top_speed_ratio_var.set(round(gear_ratio, 3))
+
+        shift_delay = trace.carinfo.get('shiftdelay', 0)
+        shift_delay = f"±{shift_delay/60:.3f}" if shift_delay != 0 else 'N/A'
+        self.shiftdelay_var.set(shift_delay)
+        
+        ordinal = int(carname.split(' ')[-1][1:]) #ugly
+        data = CarData.getinfo(ordinal)
+        self.weight_var.set(data['weight'])
+        efficiency = 1/statistics.mean((drag.torque_adj - drag.C*drag.speed*drag.speed)/wheelsize/drag.accel/self.weight_var.get()) if wheelsize != 'N/A' else 0
+        self.transmission_efficiency_var.set(f'{100 - efficiency:.0f}')
+        
+        self.drag_var.set(round(100* drag.C / wheelsize * efficiency, 1) if wheelsize != 'N/A' else 'N/A')
+        
+        if len(trace.data) > 0:
+            boost = [point.boost/14.7 for point in trace.data_to_fdp()]
+            self.maximum_boost_var.set(round(max(boost), 2))
+        else:
+            self.maximum_boost_var.set('N/A')
+    
+    def centerdiffentryenabled(self, enable=True):
+        if 'Center diff:' not in self.entries:
+            print("This should not happen")
+            return
+        state = tkinter.NORMAL if enable else tkinter.DISABLED
+        self.entries['Center diff:'].config(state=state)
 
 #helper class for class Gearing
 class Gear():
@@ -281,29 +345,29 @@ class Gearing ():
         self.__init__graph(trace, final_ratio, title, car_ordinal, car_performance_index)
         self.__init__power_contour()
         
-        #force add legend to axis due to extra legend being added later
-        #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
-        self.legend = self.ax.legend()
-        self.ax.add_artist(self.legend)
+        self.legend = self.ax.legend()  #force add legend to axis due to extra legend being added later
+        self.ax.add_artist(self.legend) #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
         
         self.fig.tight_layout()
         
         separate_fig = True
         if fig_slider == None:
             fig_slider = self.fig
-            separate_fig = False
-            
+            separate_fig = False            
         self.sliders = Sliders(fig_slider, self.final_ratio, self.gears, 
                                self.trace, self.xmax, self.rpmperkmh, separate_fig)
         self.sliders.final_ratio_onchanged(self.update_final_ratio)
         self.sliders.rpmlimit_onchanged(self.update_rpmlimit)
         self.sliders.integral_onchanged(self.update_integral)
         
-        self.shiftrpm = ShiftRPM(self.fig, self.ax, self.gears, self.legend)
+        self.shiftrpm = ShiftRPM(fig_slider, self.ax, self.gears, self.legend, self.fig.canvas.draw_idle)
         
         self.differencegraph = DifferenceGraph(ax2, self.gears, self.power_contour, 
                                                self.rpmperkmh, self.xmax, self.xticks)
-        self.integral_text = self.fig.text(0.06, 0.44, "Transmission efficiency: 100% in range")
+        
+        fig_text = fig_slider if fig_slider is not None else fig #TODO: move integral text to DifferenceGraph?
+        self.integral_text = fig_text.text(*Sliders.axes['integral_text'], "Gearing efficiency: 100% in range")
+            
         self.print_integral()
 
     def __init__graph(self, trace, final_ratio, title, car_ordinal, car_performance_index):
@@ -385,7 +449,8 @@ class Gearing ():
        #print(x, y)
        integral = np.trapz(y, x)
        percentage = 100*integral/maximum
-       self.integral_text.set_text(f"Transmission efficiency: {percentage:5.1f}% in range")
+       self.integral_text.set_text(f"Gearing efficiency: {percentage:5.1f}% in range")
+       self.fig.canvas.draw_idle()
 
     def update_rpmlimit(self, value):
         self.sliders.rpmlimit = value
@@ -406,8 +471,9 @@ class Gearing ():
 
     def redraw_difference(self):
         self.differencegraph.redraw_difference()
-        self.print_integral()
         self.shiftrpm.redraw()
+        self.print_integral()
+        #self.fig.canvas.draw_idle()
         
     def run(self):
         pass
@@ -420,20 +486,29 @@ class Sliders ():
     RATIO_STEP = 0.01
     xmin = 0.05
     xmax = 0.36
-    ypixels = 1000-72 #see Window for these sizes
 
     axes = {'final_gear':            [0.05, 0.90,          0.2, 0.03],
             'gears':       lambda g: [0.05, 0.87-0.035*g,  0.2, 0.03],
             'rel_ratios':  lambda g: [0.28, 0.8625-0.035*g],
             'reset':                 [0.08, 0.51,          0.2, 0.03],
             'rpmlimit':              [0.05, 0.48,          0.2, 0.03],
-            'integral':              [0.05, 0.45,          0.2, 0.03]
+            'integral':              [0.05, 0.45,          0.2, 0.03],
+            'integral_text':         [0.06, 0.44],
+            'checkbutton':           [0.01, 0.35, 0.10, 0.14]
             }
 
     def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, separate_fig=False):
         if separate_fig:
-            Sliders.xmin, Sliders.xmax = 0.2, 1.1
-            print("we separate fig")
+         #   Sliders.xmin, Sliders.xmax = 0.2, 1.1
+            Sliders.axes = {'final_gear':            [0.17, 0.95,           0.74, 0.025],
+                            'gears':       lambda g: [0.17, 0.90-0.06*g,    0.74, 0.025],
+                            'rel_ratios':  lambda g: [0.82, 0.87-0.06*g],
+                            'reset':                 [0.7, 0.27,            0.2, 0.08],
+                            'rpmlimit':              [0.18, 0.21,           0.7, 0.025],
+                            'integral':              [0.18, 0.17,           0.6, 0.025],
+                            'integral_text':         [0.21, 0.13],
+                            'checkbutton':           [0.21, 0.00, 0.2, 0.2]
+                            }
         else:
             # create space for sliders
             fig.subplots_adjust(left=Sliders.xmax)
@@ -552,16 +627,15 @@ class Sliders ():
         return (upper_limit + lower_limit) / 2
 
 class ShiftRPM ():
-    checkbutton_ax = [0.01, 0.35, 0.10, 0.14]
     DEFAULTSTATE = True
     
-    def __init__(self, fig, ax_graph, gears, legend):
+    def __init__(self, fig, ax_graph, gears, legend, draw_func=None):
         self.fig = fig
         self.ax_graph = ax_graph
         self.gears = gears
         self.legend = legend
                 
-        self.ax = fig.add_axes(ShiftRPM.checkbutton_ax) 
+        self.ax = fig.add_axes(Sliders.axes['checkbutton']) 
         self.ax.axis('off') #remove black border around axis
         self.buttons = CheckButtons(self.ax, ["Display shift RPM lines"], actives=[ShiftRPM.DEFAULTSTATE])
         self.buttons.on_clicked(self.set_visibility)
@@ -570,6 +644,8 @@ class ShiftRPM ():
         intersections = self.get_intersections()
         self.vlines = [ax_graph.vlines(i, 0.0, self.ymax, linestyle=':') 
                                    for i, g in zip(intersections, self.gears)]
+        
+        self.draw_func = draw_func
         
         # for i, g in zip(intersections, self.gears):
         #     g.plot.set_label(f"Gear {g.gear+1}, shift at {i * g.final_ratio * g.ratio:5.0f} rpm")
@@ -583,7 +659,10 @@ class ShiftRPM ():
         
         self.redraw()
         
-        self.fig.canvas.draw_idle()
+        if self.draw_func is None:
+            self.fig.canvas.draw_idle() #no longer works with sliders split to own canvas
+        else:
+            self.draw_func() #calls fig.canvas.draw_idle on graph canvas
 
     def redraw(self):
         intersections = self.get_intersections()      
