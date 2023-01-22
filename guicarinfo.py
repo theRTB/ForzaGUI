@@ -69,7 +69,7 @@ class GUICarInfo:
                     
     def display(self):    
         self.maker_var.set(f'{self.maker}')
-        self.model_var.set(f'{self.name}')
+        self.model_var.set(f'{self.model}')
         self.year_var.set(f'{self.year}')
         self.group_var.set(f'{self.group}')
 
@@ -108,7 +108,7 @@ class GUICarInfo:
     def reset(self):
         self.car_ordinal = None
         self.maker = "Please"      
-        self.name = "Update"
+        self.model = "Update"
         self.year = "the"
         self.group = "TSV"
                 
