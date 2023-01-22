@@ -17,6 +17,8 @@ import numpy as np
 #from numpy.polynomial import Polynomial as poly
 from pprint import pprint
 import json
+import base64
+from fdp import ForzaDataPacket
 
 
 #steps
@@ -68,7 +70,7 @@ def main():
     drag = DragDerivation(trace=None, filename=filename)
     gears = drag.gears
     
-    drag.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__)
+    drag.geardata = DragDerivation.derive_timespeed_all_gears(**drag.__dict__, drawgraph=True)
     DragDerivation.draw_timespeed_graphs(drag.gears, drag.geardata)
         
     drag.draw_torquegraph(drag.torque, drag.torque_adj, drag.speed, 
@@ -78,7 +80,6 @@ def main():
     draw_rpm_time(drag, drag.gear_collected, gears, drag.geardata)
     plt.show()
     
-
 def draw_rpm_time(trace, collectedingear, gears, geardata):
     lim = int(len(trace.rpm)/10) #find close fitting ratio for rpm/speed based on the last 10% of the sweep
     rpmspeedratio = np.average(trace.rpm[-lim:] / trace.speed[-lim:])
@@ -90,13 +91,25 @@ def draw_rpm_time(trace, collectedingear, gears, geardata):
         data['rpm'] = data['speed'] * (gearratio / gearratio_collected) * rpmspeedratio
         plt.plot(data['time'], data['rpm'])
 
+#version 0 is list based
+#version 1 is dict based but without raw data from fdp
+#version 2 is current: adds array of raw data from fdp
+#TODO: phase out Trace.array in favor of raw data
+
+#https://stackoverflow.com/questions/40000495/how-to-encode-bytes-in-json-json-dumps-throwing-a-typeerror
+#fdp.data is byte array, incompatible with json
+#encoded = base64.b64encode(b'data to be encoded')  # b'ZGF0YSB0byBiZSBlbmNvZGVk' (notice the "b")
+#data['bytes'] = encoded.decode('ascii')            # 'ZGF0YSB0byBiZSBlbmNvZGVk'
+
 class Trace():
     factor_power = 1/1000 #W to KW
     factor_speed = 3.6 #m/s to km/h
     
     REMOVE_FROM_START = 10 #start of a sweep has a rising edge not equivalent to the true engine torque, easier to remove
     DEFAULTFILENAME = "rpmtorqueraw.txt"
-    CURRENT_VERSION = 1
+    CURRENT_VERSION = 2
+    
+    WRITE_FILTER = ['gear_collected', 'gears', 'array', 'carinfo', 'version', 'data']
     
     def __init__(self, gear_collected=None, gears=[], fromfile=False, filename=None):
         if fromfile:
@@ -110,10 +123,12 @@ class Trace():
             self.gears = [g for g in gears if g != 0] #strip unused gears
             self.carinfo = {}
             self.version = Trace.CURRENT_VERSION
+            self.data = []
     
     def add(self, fdp):
         item = (fdp.current_engine_rpm, fdp.torque, fdp.power, fdp.speed, fdp.acceleration_z)
         self.array.append(item)
+        self.data.append(fdp.data) #raw packet data
     
     def add_to_carinfo(self, variables):
         self.carinfo.update(variables)
@@ -135,17 +150,22 @@ class Trace():
                 self.array = raw[2]
                 self.carinfo = {}
                 self.version = 0
+                self.data = []
             elif type(raw) == dict:
                 self.gear_collected = raw['gear_collected']
                 self.gears = raw['gears']
                 self.array = raw['array']
                 self.carinfo = raw['carinfo']
-                self.version = raw['version']                
+                self.version = raw['version']
+                self.data = [base64.b64decode(packet) for packet in raw.get('data', [])]
         self.finish()
+        
+    def data_to_fdp(self):
+        return [ForzaDataPacket(packet, packet_format='fh4') for packet in self.data]
 
     def writetofile(self, filename=DEFAULTFILENAME):
-        filterlist = ['gear_collected', 'gears', 'array', 'carinfo', 'version']
-        output = {key:val for key,val in self.__dict__.items() if key in filterlist}
+        output = {key:val for key,val in self.__dict__.items() if key in Trace.WRITE_FILTER}
+        output['data'] = [base64.b64encode(packet).decode('ascii') for packet in output['data']]
         with open(filename, "w") as file:
             json.dump(output, file)
             
@@ -402,9 +422,11 @@ class DragDerivation():
         
         if drawgraph:
             fig, ax = plt.subplots(1)
-            ax.plot(speed, speed_gradient*t)
-            ax.plot(speed, torque_adj)
-            ax.plot(speed, torque_adj - C*speed*speed)
+            ax.plot(speed, speed_gradient*t, label='accel*const')
+            ax.plot(speed, torque_adj, label='torque*ratio')
+            ax.plot(speed, torque_adj - C*speed*speed, label='torque*ratio-Cv^2')
+            ax.legend()
+            ax.grid()
             
         return t
     
@@ -446,7 +468,8 @@ class DragDerivation():
             
             geararrays.append(geardict)
             if drawgraph:
-                ax.plot(gear_x, gear_y/3.6/9.81, label=gear+1)
+                ax.plot(gear_x, gear_y/3.6/9.81, label=gear)
+                ax.legend()
         
         if drawgraph:
             ymin, ymax = ax.get_ylim()

@@ -87,6 +87,8 @@ class ForzaDataPacket:
         ## The format this data packet was created with:
         self.packet_format = packet_format
 
+        self.data = data #add raw data to object to save to Trace
+
         ## zip makes for convenient flexibility when mapping names to
         ## values in the data packet:
         if packet_format == 'sled':
