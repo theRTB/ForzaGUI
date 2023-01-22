@@ -59,31 +59,25 @@ class CarData():
 class GUICarInfo:
     def __init__(self, logger):
         self.logger = logger
-        
-        #self.carinfo_var = tkinter.StringVar()
-
-        self.car_ordinal = None
-        
-        self.maker = "Please"      
-        self.name = "Update"
-        self.year = "the"
-        self.group = "CSV"
-        
+                
         self.maker_var = tkinter.StringVar()
-        self.name_var = tkinter.StringVar()
+        self.model_var = tkinter.StringVar()
         self.year_var = tkinter.StringVar()
         self.group_var = tkinter.StringVar()
         
-        self.display()
+        self.reset()
                     
     def display(self):    
         self.maker_var.set(f'{self.maker}')
-        self.name_var.set(f'{self.name}')
+        self.model_var.set(f'{self.name}')
         self.year_var.set(f'{self.year}')
         self.group_var.set(f'{self.group}')
 
     def update(self, fdp):
-        if self.car_ordinal != 0 and self.car_ordinal != fdp.car_ordinal:
+        if self.car_ordinal == 0:
+            return
+        
+        if self.car_ordinal != fdp.car_ordinal:
             self.car_ordinal = fdp.car_ordinal
             row = CarData.getinfo(self.car_ordinal)
             
@@ -100,14 +94,14 @@ class GUICarInfo:
         
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 'font':('Helvetica 15 bold')}
         tkinter.Label(self.frame, text="Maker", **opts).grid(row=0)
-        tkinter.Label(self.frame, text="Name:", **opts).grid(row=1)
+        tkinter.Label(self.frame, text="Model:", **opts).grid(row=1)
         tkinter.Label(self.frame, text="Year:", **opts).grid(row=2)
         tkinter.Label(self.frame, text="Group:", **opts).grid(row=3)
         
         opts = {'bg':constants.background_color, 'justify':tkinter.LEFT, 'width':40,
                 'fg':constants.text_color, 'font':('Helvetica 15 bold')}
         tkinter.Entry(self.frame, textvariable=self.maker_var, **opts).grid(row=0, column=1)
-        tkinter.Entry(self.frame, textvariable=self.name_var, **opts).grid(row=1, column=1)
+        tkinter.Entry(self.frame, textvariable=self.model_var, **opts).grid(row=1, column=1)
         tkinter.Entry(self.frame, textvariable=self.year_var, **opts).grid(row=2, column=1)
         tkinter.Entry(self.frame, textvariable=self.group_var, **opts).grid(row=3, column=1)
     
@@ -116,10 +110,8 @@ class GUICarInfo:
         self.maker = "Please"      
         self.name = "Update"
         self.year = "the"
-        self.group = "CSV"
-        
-        #GUICarInfo.reloaddata() #re-add to CarData if necessary
-        
+        self.group = "TSV"
+                
         self.display()
         
 
