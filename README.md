@@ -31,7 +31,7 @@ Previous focus was on making an accurate shiftled display. Work has been put int
 ### Steps for collecting data per car tune:
 - Press F10 to start monitoring
 - Optional: Coast at low speed (~10km/h) at high gear to measure wheel size (avoid inputs)
-  - Untick Tracking on wheel radius
+  - After measuring untick Tracking on wheel radius
 - Press F9 to enable ratio collecting
   - Drive around a bit per gear until number stabilizes in Ratio column bottom right
   - AWD cars with different front/rear wheel sizes will have a floating ratio and are not quite right yet
@@ -55,6 +55,7 @@ As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and 
 
 ### Interactive Gearing
 A secondary application to dynamically alter gearing ratios for a given trace for a given car. Derives gearing efficiency relative to a perfect transmission and interactively determines optimal shift rpms (but does not yet take the impact of reduced/negative boost from turbo into account). The RPM limit is useful in determining the impact of automatic shifting, which always happens at redline when accelerating normally. Top speed is derived from comparing derived drag to the peak power curve. The wheel drag value is halfway there for comparing drag between cars, it is missing transmission efficiency for now. Final gear is an approximation, there is no way to derive final gear from just telemetry.
+![example interactive transmission](images/interactivetransmission_AcuraNSX_stock.PNG)
 
 ### Configuration
 Configuration is done through editing the json files that are regenerated with defaults when deleted. There are no input checks, the GUI will just break if input variables are not as expected. The script accepts a specific configuration file by providing the filename as first argument.
@@ -89,6 +90,5 @@ Original GUI code by https://github.com/Juice-XIJ/forza_auto_gear
 ![example ingame ledbar](images/ingameledbar_AcuraNSX_stock.png)
 ![example ingame alternate ledbar](images/ingameledbar_AcuraNSX_stock_v2.png)
 ![example torque graph per gear](images/example_AcuraNSX_stock.png)
-![example interactive transmission](images/interactivetransmission_AcuraNSX_stock.PNG)
 ![example drag corrected torque per gear](images/drag_corrected_torque_AcuraNSX_stock.png)
 ![example derived speed over time per gear](images/speed_per_gear_AcuraNSX_stock.png)
