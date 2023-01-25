@@ -6,6 +6,7 @@ import warnings
 import json #for importing config and data files
 import statistics
 import math
+import intersect
 
 from tkinter import scrolledtext
 from pynput.keyboard import Listener
@@ -16,7 +17,7 @@ import ctypes
 PROCESS_PER_MONITOR_DPI_AWARE = 2
 ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
 
-from scipy import interpolate
+#from scipy import interpolate
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -34,13 +35,12 @@ from guibraketest import GUIBraketest, GUIBraketestDummy
 from guilaunchtest import GUILaunchtest, GUILaunchtestDummy
 from guigearstats import GUIGearStats, GUIGearStatsDummy
 
-if not os.path.exists('traces'):
-    os.makedirs('traces')
-
 from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
 from logger import Logger, TextHandler
 
+if not os.path.exists('traces'):
+    os.makedirs('traces')
 
 FILENAME_SETTINGS = 'settings_gui.json'
 if len(sys.argv) > 1:
@@ -178,6 +178,10 @@ class MainWindow:
         self.rpmtable = [0 for x in range(1,11)]      
         
         self.torquegraph_var = tkinter.IntVar(value=0)
+        
+        self.filelogging_var = tkinter.IntVar(value=0)
+        self.file = None
+        self.fileheaderwritten = False
     
     def update_car_info(self, fdp):
         """update car info
@@ -238,6 +242,12 @@ class MainWindow:
         self.launchtest.update(fdp)
         self.gearstats.update(fdp)
         
+        if self.file is not None and fdp.is_race_on == 1:
+            if not self.fileheaderwritten:
+                self.file.write(fdp.get_tsv_header() + '\n')
+                self.fileheaderwritten = True
+            self.file.write(fdp.to_tsv() + '\n')
+        
         #update display variables
         self.display_car_info(fdp)
 
@@ -296,6 +306,13 @@ class MainWindow:
         self.trace = None
         
         self.rpmtable = [0 for x in range(11)]
+        
+        if self.file is not None:
+            self.file.close()
+        self.filelogging_var.set(0)
+        self.fileheaderwritten = False
+            
+        
 
     def load_data(self, event):
         #self.logger.info("Load data button was pressed!")
@@ -358,7 +375,12 @@ class MainWindow:
         for var in self.extravarlist:
             self.infotree.insert('', tkinter.END, iid=var, values=(var,'-'))
         
-        button = tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, 
+
+        button_logging = tkinter.Checkbutton(self.car_info_frame, text='File logging', variable=self.filelogging_var, 
+                            bg=constants.background_color, fg=constants.text_color, command=self.filelogging_toggled,
+                            onvalue=1, offvalue=0)
+        
+        button_torque = tkinter.Checkbutton(self.car_info_frame, text='Draw torque graph', variable=self.torquegraph_var, 
                             bg=constants.background_color, fg=constants.text_color,
                             onvalue=1, offvalue=0)
 
@@ -368,11 +390,22 @@ class MainWindow:
         
         
         self.infotree.pack(fill="both", expand=True)
-        button.pack()
+        button_logging.pack()
+        button_torque.pack()
         self.load_data_button.pack()
 
         self.car_info_frame.grid(row=0, column=0, sticky='news')
-        
+
+    def filelogging_toggled(self):
+        if self.filelogging_var.get() == 1:
+            writemode = 'a' if self.fileheaderwritten else 'w'
+            try:
+                self.file = open('log/fdp.tsv', writemode)
+            except:
+                self.logger.info("Cannot open log/fdp.tsv")
+        else:
+            self.file.close()
+
     def set_car_perf_frame(self):
         """set car perf frame
         """
@@ -446,9 +479,6 @@ class MainWindow:
                         ('Sweep', self.rpmtorque_handler, constants.analysis),
                         ('Reset', self.reset_handler, constants.auto_shift)]
         
-        # if config['plugins']['carinfo']['enabled']:
-        #     button_names.insert(0, ('Write CSV', self.writeback_handler, constants.writeback))
-
         for i, (name, func, shortcut) in enumerate(button_names):
             button = tkinter.Button(self.button_frame, text=f'{name} ({shortcut.name})',
                                     bg=constants.background_color, fg=constants.text_color, borderwidth=3,
@@ -533,21 +563,14 @@ class MainWindow:
         self.logger.info([round(g, 3) for g in gears])
         self.logger.info([round(r, 3) for r in ratios])
         
-        #find intersection point of the adjusted power graph per two subsequent gears if it exists
-        for i, ratio in enumerate(ratios):
-            f = interpolate.interp1d(rpm, power)
-            g = interpolate.interp1d([x*ratio for x in rpm], power)
-            if f(rpm[-1]) > g(rpm[-1]): #if the final point of gear x > gear x+1, return max
-                shiftrpm = int(rpm[-1])
-            else:
-                distances = [abs(f(x)-g(x)) for x in range(int(rpm[0]*ratio)+1, int(max(rpm)))]
-                index = distances.index(min(distances))
-                shiftrpm = int(index+rpm[0]*ratio+1)
-            self.rpmtable[i+1] = shiftrpm
-            self.logger.info(f"{i+1}: shift rpm {shiftrpm}, drop to {int(shiftrpm/ratio)}, "
+        X = 0
+        shiftrpms_new = [intersect.intersection(rpm, power, rpm*ratio, power)[X] for ratio in ratios]
+        shiftrpms_new = [i[X] if len(i) > 0 else rpm[-1] for i in shiftrpms_new]
+        for i, (shiftrpm, ratio) in enumerate(zip(shiftrpms_new, ratios)):
+            self.rpmtable[i+1] = int(round(shiftrpm, 0))
+            self.logger.info(f"{i+1}: shift rpm {self.rpmtable[i+1]}, drop to {int(shiftrpm/ratio)}, "
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
-
-        self.logger.info(list(enumerate(self.rpmtable)))
+        
         self.ledbar.set_rpmtable(self.rpmtable, self.revlimit, self.trace)
         self.gearstats.set_rpmtable(self.rpmtable)
         
@@ -566,9 +589,9 @@ class MainWindow:
         shiftrpms = self.rpmtable[1:] + [0]
         for i, (g, s) in enumerate(zip(gears, shiftrpms)):
             if i+1 == len(gears):
-                label = f'{i+1:>2}  maxspeed {rpm[-1]/val:5.1f}'
+                label = f'{i+1:>2}  maxspeed {rpm[-1]/val:5.0f}'
             else:
-                label = f'{i+1:>2} {s:>9} {gears[-1]*s/(val*g):>10.1f}'
+                label = f'{i+1:>2} {s:>9} {gears[-1]*s/(val*g):>10.0f}'
             ax.plot([gears[-1]*x/g for x in rpm], [t*g for t in torque], 
                     label=label)  
         
@@ -614,15 +637,6 @@ class MainWindow:
             event
         """
         self.reset_car_info()
-        
-    def writeback_handler(self, event):
-        """ run writeback callback
-        
-        Args:
-            event
-        """
-        #self.logger.info("Writing {}".format(self.carinfo.row))
-        self.carinfo.writeback()
 
     def exit_handler(self, event):
         """exit button callback
