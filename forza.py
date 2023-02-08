@@ -40,40 +40,14 @@ class Forza():
             update_car_gui_func (optional): callback to update car gui. Defaults to None.
         """
         try:
-            # file = open('log/rawfdp.log', 'w')
-            # headerwritten = False
-            #self.logger.debug(f'{self.test_gear.__name__} started')
             while self.isRunning:
                 fdp = helper.nextFdp(self.server_socket, self.packet_format)
                 if fdp is None:
                     continue
                     
-                # if not headerwritten:
-                #     file.write(fdp.get_tsv_header())
-                #     file.write("\n")
-                #     headerwritten = True
-                # file.write(fdp.to_tsv())
-                # file.write("\n")
-                
-          #      if fdp.is_race_on and fdp.current_engine_rpm > 0:
                 if update_car_gui_func is not None:
                     update_car_gui_func(fdp)
-                    # info = {
-                    #     'gear': fdp.gear,
-                    #     'rpm': round(fdp.current_engine_rpm, 1),
-                    #     'time': time.time(),
-                    #     'speed': fdp.speed * 3.6,
-                    #     'clutch': fdp.clutch,
-                    #     'power': fdp.power / 1000.0,
-                    #     'torque': fdp.torque,
-                    #     'car_ordinal':str(fdp.car_ordinal),
-                    #     'posx': fdp.position_x,
-                    #     'posy': fdp.position_y,
-                    #     'posz': fdp.position_z
-                        
-                    # }
-                    # self.logger.debug(info
-        #    file.close()
+
         except BaseException as e:
             self.logger.exception(e)
         finally:
