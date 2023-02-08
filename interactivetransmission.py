@@ -63,6 +63,21 @@ def main ():
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
+#unused lowpass filter code
+def butter_lowpass(cutoff, fs, order=5):
+    return butter(order, cutoff, fs=fs, btype='low', analog=False)
+
+def butter_lowpass_filter(data, cutoff, fs, order=5):
+    b, a = butter_lowpass(cutoff, fs, order=order)
+    y = lfilter(b, a, data)
+    return y
+
+#accel_filtered = butter_lowpass_filter(accel, cutoff, fs, order)
+
+# Filter requirements.
+order = 6  #higher is steeper, see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
+fs = 60.0       # sample rate, Hz
+cutoff = 5.00  # desired cutoff frequency of the filter, Hz
 
 class Window ():
     width = 1500
@@ -167,11 +182,15 @@ class Window ():
             data = CarData.getinfo(ordinal)
             if data is not None:
                 carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']} o{ordinal}"
-                self.carlist[carname] = Window.TRACE_DIR + filename
+                trace = Trace(fromfile=True, filename=Window.TRACE_DIR + filename)
+                if len(trace.data) > 0:
+                    self.carlist[carname] = Window.TRACE_DIR + filename
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
 
+from scipy.signal import butter, lfilter#, freqz
 class InfoFrame():
+    DEFAULT_CENTERDIFF = 70
     def __init__(self, frame):
         self.frame = frame
         self.frame.columnconfigure(5, weight=1000)
@@ -195,6 +214,9 @@ class InfoFrame():
         self.weight_var = tkinter.IntVar(value=1500)
         self.center_diff_var = tkinter.DoubleVar(value=50)
         self.max_boost_var = tkinter.DoubleVar(value=0.0)
+        self.max_slipratio_front_var = tkinter.StringVar(value='')
+        self.max_slipratio_rear_var = tkinter.StringVar(value='')
+        self.torque_limit_var = tkinter.IntVar(value=0)
         
         table = [self.car_name_var, 
                  ['Peak power:', self.peak_power_var, 'kW @', self.peak_power_rpm_var, 'rpm'], 
@@ -209,7 +231,9 @@ class InfoFrame():
                  ['Drivetrain loss:', self.transmission_efficiency_var, '%'],
                  ['Weight:', self.weight_var, 'kg'],
                  ['Center diff:', self.center_diff_var, '% to rear'],
-                 ['Maximum boost:', self.maximum_boost_var, 'bar']
+                 ['Maximum boost:', self.maximum_boost_var, 'bar'],
+                 ['Max slip ratio:', self.max_slipratio_front_var, '% front, ', self.max_slipratio_rear_var, '% rear'],
+                 ['Torque limit:', self.torque_limit_var, 'Nm']
             ]
         
     #    entry_centerdiff_validation = self.root.register(Window.entry_centerdiff_validation)
@@ -218,7 +242,7 @@ class InfoFrame():
         for i, row in enumerate(table[1:], start=1):
             tkinter.Label(self.frame, text=row[0]).grid(row=i, column=0, sticky=tkinter.E)
             if row[0] == 'Weight:' or row[0] == 'Center diff:':
-                self.entries[row[0]] = tkinter.Entry(self.frame, textvariable=row[1], width=5)
+                self.entries[row[0]] = tkinter.Entry(self.frame, textvariable=row[1], width=5, state=tkinter.DISABLED)
                                                   #   validate='all', validatecommand=(entry_centerdiff_validation, '%P'))
                 self.entries[row[0]].grid(row=i, column=1)
             else:
@@ -258,8 +282,9 @@ class InfoFrame():
             self.center_diff_var.set(100)
             self.centerdiffentryenabled(False)
         elif self.drivetrain_var.get() == 'AWD':
-            wheelsize = 0.35*wheelsize_front + 0.65*wheelsize_rear
-            self.center_diff_var.set(65)
+            wheelsize = ((1-InfoFrame.DEFAULT_CENTERDIFF/100)*wheelsize_front 
+                         + InfoFrame.DEFAULT_CENTERDIFF/100*wheelsize_rear)
+            self.center_diff_var.set(InfoFrame.DEFAULT_CENTERDIFF)
             self.centerdiffentryenabled(True)
         self.top_speed_var.set(round(drag.top_speed_by_drag(**drag.__dict__), 1))
 
@@ -275,20 +300,70 @@ class InfoFrame():
         data = CarData.getinfo(ordinal)
         self.weight_var.set(data['weight'])
         efficiency = 1/statistics.mean((drag.torque_adj - drag.C*drag.speed*drag.speed)/wheelsize/drag.accel/self.weight_var.get()) if wheelsize != 'N/A' else 0
-        self.transmission_efficiency_var.set(f'{100 - efficiency:.0f}')
+        self.transmission_efficiency_var.set(f'{100 - efficiency:.0f}' if wheelsize != 'N/A' else 'N/A')
         
         self.drag_var.set(round(100* drag.C / wheelsize * efficiency, 1) if wheelsize != 'N/A' else 'N/A')
         
         if len(trace.data) > 0:
-            boost = [point.boost/14.7 for point in trace.data_to_fdp()]
+            data = trace.data_to_fdp()
+            boost = [point.boost/14.7 for point in data]
             self.maximum_boost_var.set(round(max(boost), 2))
+            print(carname)
+            self.derive_max_slipratio(data, wheelsize_front, wheelsize_rear)
+            self.derive_max_torque(data, self.drivetrain_var.get(), drag)
         else:
             self.maximum_boost_var.set('N/A')
+
+    def derive_max_torque(self, data, drivetrain_type, drag):
+        if drivetrain_type == 'RWD':
+            tires = ['RL', 'RR']
+        elif drivetrain_type == 'FWD':
+            tires = ['FL', 'FR']
+        else: #AWD
+            return
+        ratio = drag.gearratio_collected
+        
+        max_torque = []
+        for p in data:
+            wheel_force = p.torque*ratio/2
+            max_torque.extend([wheel_force/getattr(p, f'tire_slip_ratio_{tire}') for tire in tires])
+        torque_limit = statistics.median(sorted(max_torque)[int(len(max_torque)/20):int(len(max_torque)/10)])
+        print(sorted(max_torque)[int(len(max_torque)/20):int(len(max_torque)/10)])
+        self.torque_limit_var.set(int(torque_limit))
+
+    def derive_max_slipratio(self, data, wheelsize_front, wheelsize_rear, drawgraph=False):
+        wheelsize = {'FL': wheelsize_front/100, 'FR': wheelsize_front/100,
+                     'RL': wheelsize_rear/100, 'RR': wheelsize_rear/100}
+        tiredata = {}
+        if drawgraph:
+            fig, ax = plt.subplots()
+        count = len(data)
+        ymin, ymax = 1, 0
+        for tire in ['FL', 'FR', 'RL', 'RR']:
+            val = [(wheelsize[tire] / (p.speed / getattr(p, f'wheel_rotation_speed_{tire}')) - 1) / getattr(p, f'tire_slip_ratio_{tire}') for p in data]
+            #val = butter_lowpass_filter(val, cutoff, fs, order)  
+            tiredata[tire] = statistics.median(val)
+            if drawgraph:
+                ax.plot([p.speed for p in data], val, label=tire)   
+            #ax.plot(sorted(val), label=tire)
+            val = sorted(val)
+            fifthpct = val[int(count/20)]
+            ninetyfifthpct = val[int(19*count/20)]
+            ymin = min(fifthpct, ymin)
+            ymax = max(ninetyfifthpct, ymax)
+            print(f'{tire} 5th pct {fifthpct:.3f} median {tiredata[tire]:.3f} 95th pct {ninetyfifthpct:.3f}')
+        
+        if drawgraph:
+            ax.legend()
+            ax.set_ylim(ymin-0.01, ymax+0.01)
+            plt.show()
+        
+        self.max_slipratio_front_var.set(f'{100*(tiredata["FL"]+tiredata["FR"])/2:.1f}')
+        self.max_slipratio_rear_var.set(f'{100*(tiredata["RL"]+tiredata["RR"])/2:.1f}')
+            
     
     def centerdiffentryenabled(self, enable=True):
-        if 'Center diff:' not in self.entries:
-            print("This should not happen")
-            return
+        enable = False #REMOVE AFTER IMPLEMENTING DYNAMIC CENTER DIFF
         state = tkinter.NORMAL if enable else tkinter.DISABLED
         self.entries['Center diff:'].config(state=state)
 
