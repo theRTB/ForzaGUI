@@ -17,6 +17,9 @@ import itertools
 import json
 from os.path import exists
 
+from collections import deque
+from itertools import groupby, dropwhile
+
 from dragderivation import Trace, DragDerivation
 
 '''
@@ -217,6 +220,9 @@ class GUILed:
         
         self.display_lights_var = tkinter.BooleanVar(value=True)
         self.display_gearnr_var = tkinter.BooleanVar(value=True)
+        
+        self.deque = deque(maxlen=150)
+        self.log_shifts_var = tkinter.BooleanVar(value=False)
     
         self.__init__window(root)
         V._init_tkintervariables()
@@ -228,6 +234,7 @@ class GUILed:
    #      HEIGHT = 500
    #      OFFSET_X = int(3840/2 - WIDTH/2)
    #      OFFSET_Y = int(2160/2 - HEIGHT/2)
+   
    # #     self.window.wm_attributes("-topmost", 1) #force always on top
    #      self.testwin.geometry(f"{WIDTH}x{HEIGHT}+{OFFSET_X}+{OFFSET_Y}")
    #      self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
@@ -377,6 +384,7 @@ class GUILed:
         elif gear == 11:
             gear == 'N'
         self.gear_var.set(f'{gear}')
+        
         if self.update_rpm_var: #update rate 30hz
             self.rpm_var.set(int(fdp.current_engine_rpm))
         self.update_rpm_var = not(self.update_rpm_var)
@@ -404,9 +412,26 @@ class GUILed:
         else:
             # self.countdowntimer = V.state_dropdown_delay.get() 
             self.state = state
+        
+        if self.log_shifts_var.get():
+            self.handle_state_statistics(self.state, fdp)
                                 
         self.update_leds(fdp)
 
+    def handle_state_statistics(self, state, fdp):
+        self.deque.appendleft((state, fdp))
+        if len(self.deque) == 1 or self.deque[0][1].gear <= self.deque[1][1].gear:
+            return
+        #gear changed, do work
+        #run back to last frame with positive boost (first frame of gear shift has -14.7 boost)
+        #cut off points until most recent frame with state 0 if it exists
+        #group consecutive states together, reverse the list
+        states = [s for s,x in dropwhile(lambda y: y[1].boost < 0, self.deque)]
+        states = states[:states.index(0)-1] if 0 in states else states
+        grouped = [f'{x}:{len(list(y)):2}' for x,y in groupby(reversed(states))]
+        self.logger.info('|'.join(grouped))
+        self.deque.clear()        
+        
     def update_leds(self, fdp=None):
         gear = fdp.gear if fdp is not None else 1
         rpm = fdp.current_engine_rpm if fdp is not None else -1
@@ -422,7 +447,7 @@ class GUILed:
         self.canvas.itemconfig(self.ledbar[-1], fill=lastfill)
 
     def update_lights_visibility(self, fdp=None):
-        is_race_on = (fdp.is_race_on==1) if fdp is not None else False
+        is_race_on = (fdp.is_race_on==1 and fdp.current_engine_rpm > math.ceil(fdp.engine_idle_rpm)) if fdp is not None else False
         user_toggle = self.display_lights_var.get()
         window_visible = (self.window.state() == 'normal')
         if window_visible and not(user_toggle and is_race_on):
@@ -464,13 +489,18 @@ class GUILed:
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1)
         
-        tkinter.Checkbutton(self.frame_config, text='Gear', variable=self.display_gearnr_var,
-                            bg=constants.background_color, fg=constants.text_color,
-                            command=self.update_gearnr_visibility).grid(row=row+1, column=2)
-        
         tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var,
                             bg=constants.background_color, fg=constants.text_color,
-                            command=self.update_lights_visibility).grid(row=row+1, column=3, columnspan=2)
+                            command=self.update_lights_visibility).grid(row=0, column=3)
+        
+        tkinter.Checkbutton(self.frame_config, text='Gear', variable=self.display_gearnr_var,
+                            bg=constants.background_color, fg=constants.text_color,
+                            command=self.update_gearnr_visibility).grid(row=1, column=3)
+        
+        tkinter.Checkbutton(self.frame_config, text='Log shifts', variable=self.log_shifts_var,
+                            bg=constants.background_color, fg=constants.text_color,
+                            command=self.update_gearnr_visibility).grid(row=row+1, column=2, columnspan=2)
+        
         
         self.frame_config.pack(fill='both', expand=True)
     
@@ -498,6 +528,8 @@ class GUILed:
         self.state = 0
         # self.dropdowntimer = V.state_dropdown_delay.get()
         self.update_leds()
+        
+        self.deque.clear()
         
         self.update_rpm_var = True
         self.rpm_var.set(0)
