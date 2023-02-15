@@ -9,9 +9,10 @@ import tkinter
 import tkinter.ttk
 import constants
 import math
-#import matplotlib.pyplot as plt
 import numpy as np
-import itertools
+
+#for the audio cue for shifting
+import winsound
 
 #for importing config
 import json
@@ -53,7 +54,8 @@ TODO:
 FILENAME_SETTINGS = 'settings_guiled.json'
 DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p screen, safe enough
                  "illumination_interval": 60, #must be divisible by 5
-                 "reaction_time": 10,  #frames within shift state until optimal shift rpm
+                 "reaction_time": 6,  #frames within shift state until optimal shift rpm
+                 "reaction_time_tone": 12,  #frames within shift state until optimal shift rpm (audio cue)
                  "distance_from_revlimit_ms": 5, #in frames
                  "distance_from_revlimit_pct": .99,   #99.0% of rev limit
                  "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
@@ -157,6 +159,7 @@ class Variable():
 class V(): 
     illumination_interval = Variable('Illumination interval', config['illumination_interval'], 'Int', 'frames')  #1.0 seconds
     reaction_time = Variable('Reaction time', config['reaction_time'], 'Int', 'frames')
+    reaction_time_tone = Variable('Audio cue delay', config['reaction_time_tone'], 'Int', 'frames')
     distance_from_revlimit_ms = Variable('Distance from revlimit', config['distance_from_revlimit_ms'], 'Int', 'frames')
     distance_from_revlimit_pct = Variable('Distance from revlimit', config['distance_from_revlimit_pct'], 'Double', 'pct revlimit')
     hysteresis_pct_revlimit = Variable('Hysteresis downwards', config['hysteresis_pct_revlimit'], 'Double', 'pct revlimit')
@@ -211,6 +214,9 @@ class GUILed:
         self.state_table = [[tkinter.IntVar() for x in range(0, len(STATES))] for y in range(11)]
         self.downshift_limit = [0]*11
         
+        self.audio_cue_rpm = [0 for x in range(11)]
+        self.beep_counter = 0
+        
         self.state = 0
         self.statedowntimer = 0
         
@@ -220,6 +226,7 @@ class GUILed:
         
         self.display_lights_var = tkinter.BooleanVar(value=True)
         self.display_gearnr_var = tkinter.BooleanVar(value=True)
+        self.play_beep_var = tkinter.BooleanVar(value=True)
         
         self.deque = deque(maxlen=150)
         self.log_shifts_var = tkinter.BooleanVar(value=False)
@@ -348,13 +355,16 @@ class GUILed:
             gear_table[STATE_REVLIMIT].set(revlimit_rpm)
             gear_table[STATE_OVERREV].set(overrev_rpm if overrev_rpm < revlimit_rpm else revlimit_rpm) #unhappy state
             gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), adjusted_rpm, self.geardata[gear]['rpm'])) #happy state
+            self.audio_cue_rpm[gear] = self.timeadjusted_rpm(V.reaction_time_tone.get(), adjusted_rpm, self.geardata[gear]['rpm']) #happy state
             interval = int(V.illumination_interval.get()/(STATE_SHIFT-1)) #STATE_SHIFT-1 is the number of states for the ramp up
             for state in range(STATE_SHIFT-1, 0, -1):
                 gear_table[state].set(self.timeadjusted_rpm(interval, gear_table[state+1].get(), self.geardata[gear]['rpm']))
                 
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
-        self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm:.0f} rpm steps")
-                
+        if any(self.run_shiftleds):
+            self.logger.info(f"hysteresis downwards at {self.hysteresis_rpm:.0f} rpm steps")
+            self.logger.info(f'audio cues at {self.audio_cue_rpm}')
+    
         #grey out gears that do not have a shift rpm
         for label_array, active in zip(self.trigger_labels, self.run_shiftleds[1:]):
             fg = constants.text_color if active else '#1A1A1A'
@@ -412,9 +422,22 @@ class GUILed:
         else:
             # self.countdowntimer = V.state_dropdown_delay.get() 
             self.state = state
-        
+
         if self.log_shifts_var.get():
             self.handle_state_statistics(self.state, fdp)
+            
+        if self.play_beep_var.get() and self.beep_counter <= 0:
+            if fdp.current_engine_rpm > self.audio_cue_rpm[gear]:
+                self.beep_counter = 20
+                try:
+                    winsound.PlaySound("audiocheck.net_sin_2500Hz_-3dBFS_0.2s.wav", 
+                                       winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+                except:
+                    self.logger.info("Sound failed to play")
+            elif fdp.current_engine_rpm < math.ceil(0.75*self.audio_cue_rpm[gear]):
+                self.beep_counter = 0
+        elif self.beep_counter > 0 and fdp.current_engine_rpm < self.audio_cue_rpm[gear]:
+            self.beep_counter -= 1
                                 
         self.update_leds(fdp)
 
@@ -489,17 +512,15 @@ class GUILed:
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1)
         
-        tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var,
-                            bg=constants.background_color, fg=constants.text_color,
-                            command=self.update_lights_visibility).grid(row=0, column=3)
-        
+     #   opts = {'bg':constants.background_color, 'fg':constants.text_color}
+        tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var, 
+                            command=self.update_lights_visibility, **opts).grid(row=0, column=3)
         tkinter.Checkbutton(self.frame_config, text='Gear', variable=self.display_gearnr_var,
-                            bg=constants.background_color, fg=constants.text_color,
-                            command=self.update_gearnr_visibility).grid(row=1, column=3)
+                            command=self.update_gearnr_visibility, **opts).grid(row=1, column=3)
+        tkinter.Checkbutton(self.frame_config, text='Tone', variable=self.play_beep_var, **opts).grid(row=2, column=3)
         
         tkinter.Checkbutton(self.frame_config, text='Log shifts', variable=self.log_shifts_var,
-                            bg=constants.background_color, fg=constants.text_color,
-                            command=self.update_gearnr_visibility).grid(row=row+1, column=2, columnspan=2)
+                            command=self.update_gearnr_visibility, **opts).grid(row=row+1, column=2, columnspan=2)
         
         
         self.frame_config.pack(fill='both', expand=True)
@@ -535,7 +556,9 @@ class GUILed:
         self.rpm_var.set(0)
         self.gear_var.set('1')
         self.run_shiftleds = [False for x in range(11)]
-        [state.set(0) for row in self.state_table for state in row]
+        [state.set(0) for row in self.state_table for state in row]        
+        self.audio_cue_rpm = [0 for x in range(11)]
         self.rpmtable = [0 for x in range(11)]
         self.revlimit = 0
         self.calculate_state_triggers()
+        
