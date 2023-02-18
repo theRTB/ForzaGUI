@@ -6,6 +6,7 @@ import warnings
 import json #for importing config and data files
 import statistics
 import math
+
 import intersect
 
 from tkinter import scrolledtext
@@ -76,6 +77,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 '''
 TODO:
+- investigate reason for forzaGUI not quitting after closing program
 - Move magical constants to a configuration file
 - add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
@@ -83,12 +85,12 @@ TODO:
   https://splunktool.com/resizing-a-matplotlib-plot-in-a-tkinter-toplevel
 
 -make use of styles to remove constant references to bg/fg colors
+-attempt to use styles, seems non-trivial and requires more ttk usage
 -make use of tkinter variables to remove awkward treeview assignments
 -remove forza dependency
 -figure out if socket can be closed cleanly
 -abstract away from the large list of plugins to a dictionary
 -rewrite treeview usage
--rewrite optimal shift rpm to use intersections not interpolated graphs
 
 NOTES
 fdp.dist_traveled seems broken for freeroam
@@ -320,7 +322,6 @@ class MainWindow:
         if os.path.exists(filename):
             self.trace = Trace(fromfile=True, filename=filename)
             self.logger.info(f"loaded file {filename}")
-            #self.logger.info(f"{self.trace.gear_collected} and {self.trace.gears}")
             self.trace.finish()
             self.revlimit = self.trace.rpm[-1]
             self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
@@ -477,7 +478,7 @@ class MainWindow:
         button_names = [('Connect', self.collect_data_handler, constants.collect_data),
                         ('Collect ratios', self.gatherratios_handler, constants.gatherratios),
                         ('Sweep', self.rpmtorque_handler, constants.analysis),
-                        ('Reset', self.reset_handler, constants.auto_shift)]
+                        ('Reset', self.reset_handler, constants.reset)]
         
         for i, (name, func, shortcut) in enumerate(button_names):
             button = tkinter.Button(self.button_frame, text=f'{name} ({shortcut.name})',
@@ -511,7 +512,6 @@ class MainWindow:
     def set_program_info_frame(self):
         """set code info frame
         """
-        # place code info frame
         self.program_info_frame = tkinter.Frame(self.root, border=0, bg=constants.background_color,
                                                 relief="groove",
                                                 highlightthickness=True, highlightcolor=constants.text_color)
@@ -659,22 +659,15 @@ class MainWindow:
             self.collect_data_handler(None)
         elif key == constants.analysis:
             self.rpmtorque_handler(None)
-            #self.analysis_handler(None, performance_profile=False, is_guid=False)
-        elif key == constants.auto_shift:
+        elif key == constants.reset:
             self.reset_handler(None)
         elif key == constants.gatherratios:
             self.gatherratios_handler(None)
-        # elif key == constants.writeback and config['plugins']['carinfo']['enabled']:
-        #     self.writeback_handler(None)
-        #elif key == constants.stop:
-        #    self.pause_handler(None)
-        #elif key == constants.close:
-        #    self.exit_handler(None)
 
     def close(self):
         """close program
         """
-        shutdown(self.forza5, self.threadPool, self.listener) 
+        shutdown(self.forza5, self.threadPool, self.listener)
         self.root.destroy()
 
 def shutdown(forza: Forza, threadPool: ThreadPoolExecutor, listener: Listener):
@@ -694,7 +687,6 @@ def main():
     """main.....
     """
     MainWindow()
-
 
 if __name__ == "__main__":
     main()
