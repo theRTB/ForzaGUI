@@ -24,14 +24,8 @@ from itertools import groupby, dropwhile
 from dragderivation import Trace, DragDerivation
 
 '''
-TODO:
-    test hysteresis value
-        
-    add audio tone to (different) reaction time adjusted shift rpm
-    
+TODO:    
     derive expected time in gear shifting optimally
-    
-    add log of actual duration per state per gear
     
     add displayed difference of reaction time state vs actual shift
     
@@ -39,9 +33,6 @@ TODO:
     this in case the result goes below the minimum rpm collected
     
     set a minimum distance in rpm between states for high gears
-    
-    hide shift lights if game is in menu/paused -> use fdp.is_race_on
-    fdp.is_race_on already used, need rewrite in gui_ledonly
         
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
@@ -233,21 +224,8 @@ class GUILed:
     
         self.__init__window(root)
         V._init_tkintervariables()
-   #     self.__init__anotherwin(root)
     
-   #  def __init__anotherwin(self, root):
-   #      self.testwin = tkinter.Toplevel(root)
-   #      WIDTH = 1000
-   #      HEIGHT = 500
-   #      OFFSET_X = int(3840/2 - WIDTH/2)
-   #      OFFSET_Y = int(2160/2 - HEIGHT/2)
-   
-   # #     self.window.wm_attributes("-topmost", 1) #force always on top
-   #      self.testwin.geometry(f"{WIDTH}x{HEIGHT}+{OFFSET_X}+{OFFSET_Y}")
-   #      self.canvas = tkinter.Canvas(self.testwin, width=WIDTH, height=HEIGHT, bg='red')
-   #      self.canvas.pack()
-    
-    #create window with true red canvas and transparantcolor true red
+    #create window with true red canvas and transparentcolor true red
     def __init__window(self, root):
         self.window = tkinter.Toplevel(root)
         self.window.wm_attributes("-topmost", 1) #force always on top
@@ -426,6 +404,8 @@ class GUILed:
         if self.log_shifts_var.get():
             self.handle_state_statistics(self.state, fdp)
             
+        self.update_leds(fdp)
+        
         if self.play_beep_var.get() and self.beep_counter <= 0:
             if fdp.current_engine_rpm > self.audio_cue_rpm[gear]:
                 self.beep_counter = 20
@@ -438,18 +418,16 @@ class GUILed:
                 self.beep_counter = 0
         elif self.beep_counter > 0 and fdp.current_engine_rpm < self.audio_cue_rpm[gear]:
             self.beep_counter -= 1
-                                
-        self.update_leds(fdp)
 
     def handle_state_statistics(self, state, fdp):
         self.deque.appendleft((state, fdp))
         if len(self.deque) == 1 or self.deque[0][1].gear <= self.deque[1][1].gear:
             return
         #gear changed, do work
-        #run back to last frame with positive boost (first frame of gear shift has -14.7 boost)
+        #run back to last frame with positive power (first frame of gear shift has negative power)
         #cut off points until most recent frame with state 0 if it exists
         #group consecutive states together, reverse the list
-        states = [s for s,x in dropwhile(lambda y: y[1].boost < 0, self.deque)]
+        states = [s for s,x in dropwhile(lambda y: y[1].power < 0, self.deque)]
         states = states[:states.index(0)-1] if 0 in states else states
         grouped = [f'{x}:{len(list(y)):2}' for x,y in groupby(reversed(states))]
         self.logger.info('|'.join(grouped))
