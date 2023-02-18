@@ -64,20 +64,21 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 #unused lowpass filter code
-def butter_lowpass(cutoff, fs, order=5):
-    return butter(order, cutoff, fs=fs, btype='low', analog=False)
+# from scipy.signal import butter, lfilter#, freqz
+# def butter_lowpass(cutoff, fs, order=5):
+#     return butter(order, cutoff, fs=fs, btype='low', analog=False)
 
-def butter_lowpass_filter(data, cutoff, fs, order=5):
-    b, a = butter_lowpass(cutoff, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
+# def butter_lowpass_filter(data, cutoff, fs, order=5):
+#     b, a = butter_lowpass(cutoff, fs, order=order)
+#     y = lfilter(b, a, data)
+#     return y
 
-#accel_filtered = butter_lowpass_filter(accel, cutoff, fs, order)
+# #accel_filtered = butter_lowpass_filter(accel, cutoff, fs, order)
 
-# Filter requirements.
-order = 6  #higher is steeper, see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
-fs = 60.0       # sample rate, Hz
-cutoff = 5.00  # desired cutoff frequency of the filter, Hz
+# # Filter requirements.
+# order = 6  #higher is steeper, see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
+# fs = 60.0       # sample rate, Hz
+# cutoff = 5.00  # desired cutoff frequency of the filter, Hz
 
 class Window ():
     width = 1500
@@ -188,7 +189,6 @@ class Window ():
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
 
-from scipy.signal import butter, lfilter#, freqz
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
     def __init__(self, frame):
