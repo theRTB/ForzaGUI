@@ -25,6 +25,7 @@ import numpy as np
 import constants
 from dragderivation import Trace
 
+from guibasic import GUIBasic, GUIBasicDummy
 from guimap import GUIMap, GUIMapDummy
 from guiled import GUILed, GUILedDummy
 from guisuspension import GUISuspension, GUISuspensionDummy
@@ -49,7 +50,7 @@ if len(sys.argv) > 1:
 
 DEFAULTCONFIG = {"window_offset_x": 0, "window_offset_y": 0, 
     'plugins':{
-#    'frame_basic':{'enabled': False, 'anchor': 'NW', 'relx': 0.0, 'rely': 0.0}, #TODO: rewrite frame_basic to follow plugin format
+    'basic':      {'enabled': True,  'frame':         {'anchor': 'nw', 'relx': 0.0,   'rely': 0.0}},
     'map':        {'enabled': False, 'map_canvas':    {'anchor': 'nw', 'relx': 0.5,   'rely': 0.5}},
     'ledbar':     {'enabled': False, 'frame_config':  {'anchor': 'ne', 'relx': 1.0,   'rely': 0.0},
                                      'frame_table':   {'anchor': 'se', 'relx': 1.0,   'rely': 1.0}},
@@ -112,6 +113,7 @@ class MainWindow:
         self.listener = Listener(on_press=self.on_press)
         
         enabled = {key: value['enabled'] for key, value in config['plugins'].items()}
+        self.basic = GUIBasic(self.logger) if enabled['basic'] else GUIBasicDummy(self.logger)
         self.map = GUIMap(self.logger) if enabled['map'] else GUIMapDummy(self.logger)
         self.ledbar = GUILed(self.logger, self.root) if enabled['ledbar'] else GUILedDummy(self.logger, self.root)
         self.suspension = GUISuspension(self.logger) if enabled['suspension'] else GUISuspensionDummy(self.logger)
@@ -153,14 +155,7 @@ class MainWindow:
         self.root.maxsize(1050, 950)
         self.root["background"] = constants.background_color
     
-    def __init__variables(self):
-        self.acceleration_var = tkinter.StringVar()
-        self.acceleration_var.set("0.0%")
-        self.brake_var = tkinter.StringVar()
-        self.brake_var.set("0.0%")        
-        self.steer_var = tkinter.StringVar()
-        self.steer_var.set("0")        
-        
+    def __init__variables(self):           
         self.infovarlist = ('car_ordinal', 'car_class', 'car_performance_index',
                             'drivetrain_type', 'num_cylinders', 
                             'engine_max_rpm', 'engine_idle_rpm')
@@ -232,7 +227,9 @@ class MainWindow:
             self.update_car_info_infovars(fdp)
             self.torquegraph_var.set(0)
             self.load_data(None)
-            
+            #TODO: disable wheel tracking
+        
+        self.basic.update(fdp)
         self.map.update(fdp)
         self.ledbar.update(fdp)     
         self.suspension.update(fdp)
@@ -251,13 +248,42 @@ class MainWindow:
             self.file.write(fdp.to_tsv() + '\n')
         
         #update display variables
-        self.display_car_info(fdp)
+        self.display_car_info()
 
-    def display_car_info(self, fdp):
-        self.acceleration_var.set(f"{str(round(fdp.accel / 255 * 100, 1))}%")
-        self.brake_var.set(f"{str(round(fdp.brake / 255 * 100, 1))}%")
-        self.steer_var.set(f"{fdp.steer}")
-                
+    def add_carinfo_to_trace(self, fdp):
+        carinfo = {}
+        carinfo = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
+        carinfo['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][carinfo['drivetrain_type']]
+        if config['plugins']['wheelsize']['enabled']:
+            carinfo['wheelsize_front'] = self.wheelsize.wheelsize_front_var.get()
+            carinfo['wheelsize_rear'] = self.wheelsize.wheelsize_rear_var.get()
+        carinfo['shiftdelay'] = self.gearstats.shiftdelay_median
+        self.trace.add_to_carinfo(carinfo)
+        
+    def update_car_info_infovars(self, fdp):
+        infovars = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
+        infovars['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][infovars['drivetrain_type']]
+        for key, value in infovars.items():
+            self.infotree.set(key, column='var_value', value=value)
+            
+    def load_data(self, event):
+        #self.logger.info("Load data button was pressed!")
+        filename = f"traces/trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
+        if os.path.exists(filename):
+            self.trace = Trace(fromfile=True, filename=filename)
+            self.logger.info(f"loaded file {filename}")
+            self.trace.finish()
+            self.revlimit = self.trace.rpm[-1]
+            self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
+            self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
+            self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
+            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
+            self.gearstats.display()
+            self.rpmtorque_handler(None)
+        else:
+            self.logger.info("File does not exist")
+
+    def display_car_info(self):
         self.suspension.display()
         self.wheelsize.display()
         self.laptimes.display()
@@ -266,12 +292,6 @@ class MainWindow:
         self.gearstats.display()
         #self.braketest.display()
         #self.launchtest.display()
-     
-    def update_car_info_infovars(self, fdp):
-        infovars = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
-        infovars['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][infovars['drivetrain_type']]
-        for key, value in infovars.items():
-            self.infotree.set(key, column='var_value', value=value)
 
     def reset_car_info(self):
         """reset car info and tree view
@@ -280,12 +300,9 @@ class MainWindow:
         for key in self.infotree.get_children():
             self.infotree.set(key, column='var_value', value='-')
         self.infovar_car_ordinal = None
+        self.infovar_car_performance_index = None
 
-        # reset accel and brake
-        self.acceleration_var.set("0.0%")
-        self.brake_var.set("0.0%")
-        self.steer_var.set("0")
-                        
+        self.basic.reset()
         self.map.reset()
         self.ledbar.reset()
         self.suspension.reset()
@@ -313,36 +330,7 @@ class MainWindow:
             self.file.close()
         self.filelogging_var.set(0)
         self.fileheaderwritten = False
-            
-        
-
-    def load_data(self, event):
-        #self.logger.info("Load data button was pressed!")
-        filename = f"traces/trace_ord{self.infovar_car_ordinal}_pi{self.infovar_car_performance_index}.json"
-        if os.path.exists(filename):
-            self.trace = Trace(fromfile=True, filename=filename)
-            self.logger.info(f"loaded file {filename}")
-            self.trace.finish()
-            self.revlimit = self.trace.rpm[-1]
-            self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
-            self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
-            self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
-            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
-            self.gearstats.display()
-            self.rpmtorque_handler(None)
-        else:
-            self.logger.info("File does not exist")
     
-    def add_carinfo_to_trace(self, fdp):
-        carinfo = {}
-        carinfo = dict(zip(self.infovarlist, fdp.to_list(self.infovarlist)))
-        carinfo['drivetrain_type'] = ['FWD', 'RWD', 'AWD'][carinfo['drivetrain_type']]
-        if config['plugins']['wheelsize']['enabled']:
-            carinfo['wheelsize_front'] = self.wheelsize.wheelsize_front_var.get()
-            carinfo['wheelsize_rear'] = self.wheelsize.wheelsize_rear_var.get()
-        carinfo['shiftdelay'] = self.gearstats.shiftdelay_median
-        self.trace.add_to_carinfo(carinfo)
-
     def set_car_info_frame(self):
         """set car info frame
         """
@@ -388,8 +376,7 @@ class MainWindow:
         self.load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
         self.load_data_button.bind('<Button-1>', self.load_data)
-        
-        
+
         self.infotree.pack(fill="both", expand=True)
         button_logging.pack()
         button_torque.pack()
@@ -416,23 +403,7 @@ class MainWindow:
         self.car_perf_frame.grid(row=0, column=1, sticky='news', columnspan=2)
         self.car_perf_frame.update() #is this necessary?
 
-        self.frame_basic = tkinter.Frame(self.car_perf_frame, border=0, bg=constants.background_color, relief="groove",
-                                            highlightthickness=True, highlightcolor=constants.text_color)
-        opts = {'bg':constants.background_color, 'fg':constants.text_color}
-        # place acceleration information text
-        tkinter.Label(self.frame_basic, text="Accel", font=('Helvetica 15 bold'), **opts).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.acceleration_var, width=6, 
-                      anchor=tkinter.E, font=('Helvetica 35 bold italic'), **opts).pack()
-
-        # place brake information test
-        tkinter.Label(self.frame_basic, text="Brake", **opts, font=('Helvetica 15 bold')).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.brake_var, width=6, 
-                      anchor=tkinter.E, font=('Helvetica 35 bold italic'), **opts).pack()
-        
-        tkinter.Label(self.frame_basic, text="Steer", **opts, font=('Helvetica 15 bold')).pack()
-        tkinter.Label(self.frame_basic, textvariable=self.steer_var, width=6, 
-                      anchor=tkinter.E, font=('Helvetica 30 bold italic'), **opts).pack()
-                                             
+        self.basic.set_canvas(self.car_perf_frame)
         self.map.set_canvas(self.car_perf_frame)
         self.suspension.set_canvas(self.car_perf_frame)
         self.wheelsize.set_canvas(self.car_perf_frame)
@@ -442,8 +413,6 @@ class MainWindow:
         self.braketest.set_canvas(self.car_perf_frame)
         self.launchtest.set_canvas(self.car_perf_frame)
         self.ledbar.set_canvas(self.car_perf_frame)
-        
-        self.frame_basic.place(anchor=tkinter.NW, relx=0.0, rely=0.0) 
         
         for name, plugin in config['plugins'].items():
             if not plugin['enabled']:
