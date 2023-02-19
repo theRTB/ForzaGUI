@@ -19,7 +19,7 @@
             }
         },
         "ledbar": {
-            "enabled": false,
+            "enabled": true,
             "frame_config": {
                 "anchor": "ne",
                 "relx": 1.0,
@@ -32,7 +32,7 @@
             }
         },
         "suspension": {
-            "enabled": true,
+            "enabled": false,
             "frame": {
                 "anchor": "ne",
                 "relx": 1.0,
@@ -40,7 +40,7 @@
             }
         },
         "wheelsize": {
-            "enabled": false,
+            "enabled": true,
             "frame": {
                 "anchor": "nw",
                 "relx": 0.0,
@@ -56,7 +56,7 @@
             }
         },
         "carinfo": {
-            "enabled": true,
+            "enabled": false,
             "frame": {
                 "anchor": "sw",
                 "relx": 0.0,
@@ -64,7 +64,7 @@
             }
         },
         "lateralg": {
-            "enabled": true,
+            "enabled": false,
             "frame": {
                 "anchor": "w",
                 "relx": 0.325,
@@ -77,7 +77,7 @@
             }
         },
         "braketest": {
-            "enabled": true,
+            "enabled": false,
             "frame": {
                 "anchor": "e",
                 "relx": 1.0,
@@ -85,7 +85,7 @@
             }
         },
         "launchtest": {
-            "enabled": true,
+            "enabled": false,
             "frame": {
                 "anchor": "w",
                 "relx": 0.0,
