@@ -42,9 +42,9 @@
         "wheelsize": {
             "enabled": true,
             "frame": {
-                "anchor": "nw",
+                "anchor": "sw",
                 "relx": 0.0,
-                "rely": 0.0
+                "rely": 1.0
             }
         },
         "laptimes": {
