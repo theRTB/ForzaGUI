@@ -33,7 +33,9 @@ TODO:
     this in case the result goes below the minimum rpm collected
     
     set a minimum distance in rpm between states for high gears
-        
+    
+    grey out and untick Gear tickbox if Lights tickbox is off
+    
     blank shift leds after detecting gear change
     gear change is a gradual process in telemetry: power is cut (negative), then gear changes, then power goes positive again
     blank on gear variable changing is simplest, but can be very slow
@@ -44,7 +46,7 @@ TODO:
 
 FILENAME_SETTINGS = 'settings_guiled.json'
 DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p screen, safe enough
-                 "illumination_interval": 60, #must be divisible by 5
+                 "illumination_interval": 60, #must be divisible by 4 and 5
                  "reaction_time": 6,  #frames within shift state until optimal shift rpm
                  "reaction_time_tone": 12,  #frames within shift state until optimal shift rpm (audio cue)
                  "distance_from_revlimit_ms": 5, #in frames
@@ -149,8 +151,8 @@ class Variable():
 #convenient class for displaying and modifying variables live in the GUI
 class V(): 
     illumination_interval = Variable('Illumination interval', config['illumination_interval'], 'Int', 'frames')  #1.0 seconds
-    reaction_time = Variable('Reaction time', config['reaction_time'], 'Int', 'frames')
-    reaction_time_tone = Variable('Audio cue delay', config['reaction_time_tone'], 'Int', 'frames')
+    reaction_time = Variable('LED offset', config['reaction_time'], 'Int', 'frames')
+    reaction_time_tone = Variable('Tone offset', config['reaction_time_tone'], 'Int', 'frames')
     distance_from_revlimit_ms = Variable('Distance from revlimit', config['distance_from_revlimit_ms'], 'Int', 'frames')
     distance_from_revlimit_pct = Variable('Distance from revlimit', config['distance_from_revlimit_pct'], 'Double', 'pct revlimit')
     hysteresis_pct_revlimit = Variable('Hysteresis downwards', config['hysteresis_pct_revlimit'], 'Double', 'pct revlimit')
