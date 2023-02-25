@@ -124,6 +124,9 @@ class MainWindow:
         self.braketest = GUIBraketest(self.logger) if enabled['braketest'] else GUIBraketestDummy(self.logger)
         self.launchtest = GUILaunchtest(self.logger) if enabled['launchtest'] else GUILaunchtestDummy(self.logger)
         self.gearstats = GUIGearStats(self.logger) if enabled['gearstats'] else GUIGearStatsDummy(self.logger)
+        
+        #helper array for loops
+        self.plugins = [self.basic, self.map, self.ledbar, self.suspension, self.wheelsize, self.laptimes, self.carinfo, self.lateralg, self.braketest, self.launchtest, self.gearstats]
 
         self.set_car_info_frame()
         self.set_car_perf_frame()
@@ -166,7 +169,6 @@ class MainWindow:
         self.infovar_car_ordinal = None
         self.infovar_car_performance_index = None
         
-        #self.prevrev = 0
         self.prevrev_torque = 0
         self.revlimit = 0
 
@@ -189,19 +191,14 @@ class MainWindow:
         if fdp.gear == 11: #gear 11 is neutral, hit when triggering events in the map
             return         #this breaks various hardcoded array limits
         
-        #update variable section
-        
         #wait for revs to increase
-        if self.collect_rpm == 1:
-            #self.logger.info(f"Waiting on throttle input {fdp.current_engine_rpm} vs {self.prevrev_torque}")
-            if fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
+        if self.collect_rpm == 1 and fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
                 self.trace = Trace(gear_collected=fdp.gear,
                                    gears=self.gearstats.gearratios)
         #collect data
         if self.collect_rpm == 2:
-            #self.logger.info(f"{fdp.current_engine_rpm} vs {self.prevrev_torque}")
-            if fdp.power > 0 and fdp.accel > 0: #fdp.current_engine_rpm > self.prevrev_torque:
+            if fdp.power > 0 and fdp.accel > 0:
                 self.trace.add(fdp)
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the Sweep (F8) button")
@@ -214,11 +211,6 @@ class MainWindow:
                 self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
                 self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
         self.prevrev_torque = fdp.current_engine_rpm
-
-        # if fdp.power < 0 and fdp.accel > 0:
-        #     self.revlimit = max(self.prevrev, self.revlimit)
-        # elif fdp.power >= 0:
-        #     self.prevrev = fdp.current_engine_rpm
         
         if fdp.car_ordinal != 0 and self.infovar_car_ordinal != fdp.car_ordinal:
             self.reset_car_info()
@@ -229,17 +221,8 @@ class MainWindow:
             self.load_data(None)
             #TODO: disable wheel tracking
         
-        self.basic.update(fdp)
-        self.map.update(fdp)
-        self.ledbar.update(fdp)     
-        self.suspension.update(fdp)
-        self.wheelsize.update(fdp)
-        self.laptimes.update(fdp)
-        self.carinfo.update(fdp)
-        self.lateralg.update(fdp)
-        self.braketest.update(fdp)
-        self.launchtest.update(fdp)
-        self.gearstats.update(fdp)
+        for plugin in self.plugins:
+            plugin.update(fdp)
         
         if self.file is not None and fdp.is_race_on == 1:
             if not self.fileheaderwritten:
@@ -290,8 +273,6 @@ class MainWindow:
         self.carinfo.display()
         self.lateralg.display()
         self.gearstats.display()
-        #self.braketest.display()
-        #self.launchtest.display()
 
     def reset_car_info(self):
         """reset car info and tree view
@@ -302,19 +283,9 @@ class MainWindow:
         self.infovar_car_ordinal = None
         self.infovar_car_performance_index = None
 
-        self.basic.reset()
-        self.map.reset()
-        self.ledbar.reset()
-        self.suspension.reset()
-        self.wheelsize.reset()
-        self.laptimes.reset()
-        self.carinfo.reset()
-        self.lateralg.reset()
-        self.gearstats.reset()
-        self.braketest.reset()
-        self.launchtest.reset()
+        for plugin in self.plugins:
+            plugin.reset()
 
-        #self.prevrev = 0
         self.prevrev_torque = 0
         self.revlimit = 0
         
