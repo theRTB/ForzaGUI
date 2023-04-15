@@ -78,7 +78,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 '''
 TODO:
-- investigate reason for forzaGUI not quitting after closing program
 - Move magical constants to a configuration file
 - add Balloon tooltop to tickbox Draw torque graph
 - draw map of circuit with left/right side
@@ -163,7 +162,7 @@ class MainWindow:
                             'drivetrain_type', 'num_cylinders', 
                             'engine_max_rpm', 'engine_idle_rpm')
         
-        self.extravarlist = ['revlimit', 'peak_power_kw', 'peak_torque_Nm', 'aspiration']
+        self.extravarlist = ['revlimit', 'peak_power_kw', 'peak_torque_Nm', 'peak_boost_psi']
         
         self.infovar_tree = {}
         self.infovar_car_ordinal = None
@@ -374,17 +373,11 @@ class MainWindow:
         self.car_perf_frame.grid(row=0, column=1, sticky='news', columnspan=2)
         self.car_perf_frame.update() #is this necessary?
 
-        self.basic.set_canvas(self.car_perf_frame)
-        self.map.set_canvas(self.car_perf_frame)
-        self.suspension.set_canvas(self.car_perf_frame)
-        self.wheelsize.set_canvas(self.car_perf_frame)
-        self.laptimes.set_canvas(self.car_perf_frame)
-        self.carinfo.set_canvas(self.car_perf_frame)
-        self.lateralg.set_canvas(self.car_perf_frame)
-        self.braketest.set_canvas(self.car_perf_frame)
-        self.launchtest.set_canvas(self.car_perf_frame)
-        self.ledbar.set_canvas(self.car_perf_frame)
-        
+        canvas_plugins = [self.basic, self.map, self.suspension, self.wheelsize, self.laptimes, self.carinfo, 
+                          self.lateralg, self.braketest, self.launchtest, self.ledbar]
+        for p in canvas_plugins:
+            p.set_canvas(self.car_perf_frame)
+            
         for name, plugin in config['plugins'].items():
             if not plugin['enabled']:
                 continue
