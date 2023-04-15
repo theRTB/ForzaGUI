@@ -218,6 +218,7 @@ class MainWindow:
             self.update_car_info_infovars(fdp)
             self.torquegraph_var.set(0)
             self.load_data(None)
+            
             #TODO: disable wheel tracking
         
         for plugin in self.plugins:
@@ -262,7 +263,9 @@ class MainWindow:
             self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
             self.gearstats.display()
             self.rpmtorque_handler(None)
+            self.wheelsize.set_tracking(True)
         else:
+            self.wheelsize.set_tracking(False)
             self.logger.info("File does not exist")
 
     def display_car_info(self):

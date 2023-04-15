@@ -24,6 +24,9 @@ class GUIWheelsizeDummy:
     def update(self, fdp):
         pass
     
+    def set_tracking(self, knowncar):
+        pass
+    
     def set_canvas(self, frame):
         pass
     
@@ -70,6 +73,9 @@ class GUIWheelsize:
         #radius in centimeters
         self.wheelsize_front_var.set(round(statistics.median(self.wheelsize['front'])*50, 2))
         self.wheelsize_rear_var.set(round(statistics.median(self.wheelsize['rear'])*50, 2))
+        
+    def set_tracking(self, knowncar):
+        self.tracking_var.set(value=knowncar)
     
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
