@@ -23,22 +23,6 @@ import csv
 #fdp.speed
 #fdp.brake
 #consider deriving distance with: 0.5 * start speed
-
-class GUILaunchtestDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
     
 LIMCOUNT = 3
 LIMRANGE = range(LIMCOUNT)
@@ -73,7 +57,7 @@ class GUILaunchtest:
                 {'start_var': 0, 'end_var':161},
                 {'start_var': 100, 'end_var':200}]
     
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         
         self.tests = [LaunchTest(**GUILaunchtest.DEFAULTS[x]) for x in LIMRANGE]
@@ -120,25 +104,25 @@ class GUILaunchtest:
           #  
     def update(self, fdp):
         for test in self.tests:
-        #    self.logger.info(f"s{test.state} {fdp.speed:.2f} {round(test.start_var.get()/3.6,2)}")
+            # self.logger.info(f"s{test.state} {fdp.speed:.2f} {round(test.start_var.get()/3.6,2)}")
             if test.state == GUILaunchtest.INITIAL and fdp.accel == 0 and int(fdp.speed - test.start_var.get()/3.6) <= 0: #force no accel and be at or below start speed
                 test.state = GUILaunchtest.WAIT
-           #     self.logger.info("We wait")
+                # self.logger.info("We wait")
             elif (test.state == GUILaunchtest.WAIT and fdp.accel > 0 and fdp.brake < 1 and fdp.handbrake < 1 and 
                                             (test.start_var.get()/3.6 - fdp.speed) < 0.05): #initial launch state
                 test.state = GUILaunchtest.LAUNCH
                 test.initial_timestamp = fdp.timestamp_ms
-             #   self.logger.info(f"We launch: {test.start_var.get():.0f} -> {test.end_var.get():.0f} ({fdp.speed:.2f})")
+                # self.logger.info(f"We launch: {test.start_var.get():.0f} -> {test.end_var.get():.0f} ({fdp.speed:.2f})")
                 self.add_datapoint(fdp, test)
             elif test.state == GUILaunchtest.LAUNCH and (fdp.accel == 0 or fdp.brake > 0 or fdp.handbrake > 0): #reset state if not launching
-           #     self.logger.info("We reset")
+                # self.logger.info("We reset")
                 test.state = GUILaunchtest.INITIAL
             elif test.state == GUILaunchtest.LAUNCH and fdp.accel != 0 and fdp.speed < test.end_var.get()/3.6: #steady launch state
                 self.add_datapoint(fdp, test)
             elif test.state == GUILaunchtest.LAUNCH and (fdp.accel != 0 or fdp.speed >= test.end_var.get()/3.6):
                 test.state = GUILaunchtest.INITIAL
                 test.time = fdp.timestamp_ms - test.initial_timestamp
-                #test.initial_timestamp = fdp.timestamp_ms
+                # test.initial_timestamp = fdp.timestamp_ms
                 self.add_datapoint(fdp, test)
                 
                 if self.log_var.get() == 1:

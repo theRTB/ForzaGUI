@@ -13,29 +13,10 @@ from collections import deque
 
 import constants
 
-class GUIWheelsizeDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_tracking(self, knowncar):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUIWheelsize:
     WHEELSIZE_MIN = 0.05
     WHEELSIZE_MAX = 5.00
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         
         self.front_var = tkinter.DoubleVar(value=0.00)
@@ -54,7 +35,10 @@ class GUIWheelsize:
             return
         
         for wheel in ['FL', 'FR', 'RL', 'RR']:
-            radius = fdp.speed  / getattr(fdp, f"wheel_rotation_speed_{wheel}")
+            rotation_speed = abs(getattr(fdp, f"wheel_rotation_speed_{wheel}"))
+            if rotation_speed == 0:
+                continue
+            radius = fdp.speed  / rotation_speed
             if (radius < GUIWheelsize.WHEELSIZE_MIN or 
                 radius > GUIWheelsize.WHEELSIZE_MAX):
                 continue

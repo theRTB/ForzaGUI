@@ -176,27 +176,8 @@ class V():
     def _to_config(cls):
         return {name:var.get() for name, var in cls.__dict__.items() if name[0] != '_'}
 
-class GUILedDummy:
-    def __init__(self, logger, root):
-        pass
-        
-    def set_rpmtable(self, rpmtable, revlimit, trace):
-        pass
-        
-    def update (self, fdp):
-        pass
-
-    def update_leds(self):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUILed:
-    def __init__(self, logger, root):
+    def __init__(self, logger, root, *args, **kwargs):
         self.logger = logger
         
         self.ledbar = [None for x in range(10)]

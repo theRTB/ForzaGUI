@@ -24,29 +24,13 @@ import csv
 #fdp.brake
 #consider deriving distance with: 0.5 * start speed
 
-class GUIBraketestDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUIBraketest:
     WAIT = 0
     BRAKE = 1
     DISPLAY = 2
     firstrow = ['timestamp', 'brake%', 'speed', 'deaccel', 'long_g', 'distance', 'slipratioFL', 'slipratioFR', 'slipratioRL', 'slipratioRR']
     
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         self.initial_speed = 0
         self.final_speed = 0

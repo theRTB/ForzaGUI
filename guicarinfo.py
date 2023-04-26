@@ -5,36 +5,14 @@ Created on Sat Jun  4 11:59:00 2022
 @author: RTB
 """
 
-import tkinter
-import tkinter.ttk
+#TODO: make a proper tsv out of fh5_cars_kudosprime2.tsv
 
 import csv
-
+import tkinter
+import tkinter.ttk
 from os.path import exists
 
-#import statistics
-
 import constants
-#import math
-
-class GUICarInfoDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-    
-    # def writeback(self):
-    #     pass
 
 class CarData():
     firstrow = []
@@ -57,7 +35,7 @@ class CarData():
         return None
     
 class GUICarInfo:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
                 
         self.maker_var = tkinter.StringVar()

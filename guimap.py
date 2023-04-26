@@ -10,30 +10,8 @@ import tkinter.ttk
 
 import constants
 
-class GUIMapDummy:
-    def __init__(self, logger):
-        pass
-
-    def scale_point(self, x, z):
-        pass
-
-    def update(self, fdp):
-        pass
-
-    def reset(self):
-        pass
-        
-    def set_canvas (self, frame):
-        pass
-
-    def center_map(self):
-        pass
-
-    def refresh_map(self):
-        pass
-
 class GUIMap:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         
         self.points = []

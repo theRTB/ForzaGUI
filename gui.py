@@ -25,17 +25,18 @@ import numpy as np
 import constants
 from dragderivation import Trace
 
-from guibasic import GUIBasic, GUIBasicDummy
-from guimap import GUIMap, GUIMapDummy
-from guiled import GUILed, GUILedDummy
-from guisuspension import GUISuspension, GUISuspensionDummy
-from guiwheelsize import GUIWheelsize, GUIWheelsizeDummy
-from guilaptimes import GUILaptimes, GUILaptimesDummy
-from guicarinfo import GUICarInfo, GUICarInfoDummy
-from guilateralg import GUILateralG, GUILateralGDummy
-from guibraketest import GUIBraketest, GUIBraketestDummy
-from guilaunchtest import GUILaunchtest, GUILaunchtestDummy
-from guigearstats import GUIGearStats, GUIGearStatsDummy
+#plugins
+from guibasic import GUIBasic
+from guimap import GUIMap
+from guiled import GUILed
+from guisuspension import GUISuspension
+from guiwheelsize import GUIWheelsize
+from guilaptimes import GUILaptimes
+from guicarinfo import GUICarInfo
+from guilateralg import GUILateralG
+from guibraketest import GUIBraketest
+from guilaunchtest import GUILaunchtest
+from guigearstats import GUIGearStats
 
 from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -95,9 +96,31 @@ TODO:
 NOTES
 fdp.dist_traveled seems broken for freeroam
 reverse gear is not a fixed ratio. maybe fixed per transmissioN?
+
 '''
 
+class GUIDummy():
+    """Dummy GUI plugin class
+    If new plugins are added with extra variables or functions that are called, add them here
+    """
+    NAMES = set(['display', 'update', 'set_canvas', 'reset'])
+    NAMES.update(['get_shiftlimit', 'set_rpmtable']) #guigearstats
+    NAMES.update(['update_leds', 'set_rpmtable']) #guiled
+    
+    def __init__(self, *args, **kwargs):
+        self.gatherratios = False #guigearstats
+        
+        def doNothing(*args, **kwargs):
+            pass
+        
+        for func in self.NAMES:
+            setattr(self, func, doNothing)
+
 class MainWindow:
+    PLUGINS = {'basic':GUIBasic, 'braketest':GUIBraketest, 'carinfo':GUICarInfo, 
+               'gearstats':GUIGearStats, 'laptimes':GUILaptimes, 'lateralg':GUILateralG,
+               'launchtest':GUILaunchtest, 'ledbar':GUILed, 'map':GUIMap, 
+               'suspension':GUISuspension, 'wheelsize':GUIWheelsize}
     def __init__(self):
         """init
         """
@@ -111,21 +134,12 @@ class MainWindow:
         self.forza5 = Forza(self.threadPool, self.logger, constants.packet_format)
         self.listener = Listener(on_press=self.on_press)
         
-        enabled = {key: value['enabled'] for key, value in config['plugins'].items()}
-        self.basic = GUIBasic(self.logger) if enabled['basic'] else GUIBasicDummy(self.logger)
-        self.map = GUIMap(self.logger) if enabled['map'] else GUIMapDummy(self.logger)
-        self.ledbar = GUILed(self.logger, self.root) if enabled['ledbar'] else GUILedDummy(self.logger, self.root)
-        self.suspension = GUISuspension(self.logger) if enabled['suspension'] else GUISuspensionDummy(self.logger)
-        self.wheelsize = GUIWheelsize(self.logger) if enabled['wheelsize'] else GUIWheelsizeDummy(self.logger)
-        self.laptimes = GUILaptimes(self.logger) if enabled['laptimes'] else GUILaptimesDummy(self.logger)
-        self.carinfo = GUICarInfo(self.logger) if enabled['carinfo'] else GUICarInfoDummy(self.logger)
-        self.lateralg = GUILateralG(self.logger) if enabled['lateralg'] else GUILateralGDummy(self.logger)
-        self.braketest = GUIBraketest(self.logger) if enabled['braketest'] else GUIBraketestDummy(self.logger)
-        self.launchtest = GUILaunchtest(self.logger) if enabled['launchtest'] else GUILaunchtestDummy(self.logger)
-        self.gearstats = GUIGearStats(self.logger) if enabled['gearstats'] else GUIGearStatsDummy(self.logger)
+        enabled = {key: value['enabled'] for key, value in config['plugins'].items()}        
+        for name, GUIPlugin in self.PLUGINS.items():
+            setattr(self, name, GUIPlugin(self.logger, self.root) if enabled[name] else GUIDummy())
         
         #helper array for loops
-        self.plugins = [self.basic, self.map, self.ledbar, self.suspension, self.wheelsize, self.laptimes, self.carinfo, self.lateralg, self.braketest, self.launchtest, self.gearstats]
+        self.plugins = [getattr(self, name) for name in self.PLUGINS]
 
         self.set_car_info_frame()
         self.set_car_perf_frame()
@@ -218,8 +232,6 @@ class MainWindow:
             self.update_car_info_infovars(fdp)
             self.torquegraph_var.set(0)
             self.load_data(None)
-            
-            #TODO: disable wheel tracking
         
         for plugin in self.plugins:
             plugin.update(fdp)

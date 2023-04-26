@@ -22,24 +22,8 @@ import math
 
 #needs updating to frame
 
-class GUILaptimesDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUILaptimes:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         
         self.laptimes = deque(maxlen=20)

@@ -14,22 +14,6 @@ import statistics
 import constants
 import math
 
-class GUISuspensionDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 TIRES = ['FL', 'FR', 'RL', 'RR']
 
 class Suspension ():
@@ -60,7 +44,7 @@ class Suspension ():
     
 
 class GUISuspension:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
                 
         self.suspension = {x:Suspension() for x in TIRES}

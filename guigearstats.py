@@ -25,30 +25,8 @@ TODO:
 
 '''
 
-class GUIGearStatsDummy:
-    def __init__(self, logger):
-        self.gatherratios = False
-
-    def display(self):
-        pass
-
-    def get_shiftlimit (self):
-        pass
-
-    def set_rpmtable(self, rpmtable):
-        pass
-    
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUIGearStats:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
         
         self.gatherratios = False

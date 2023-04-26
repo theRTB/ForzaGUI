@@ -50,22 +50,6 @@ TIRES = ['FL', 'FR', 'RL', 'RR']
 
 MAXG = 8
 SLIPLIMIT = 1.5
-
-class GUILateralGDummy:
-    def __init__(self, logger):
-        pass        
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass 
     
 #implements a short deque that rolls over into a long deque
 #maintains a rolling sum for a rolling average
@@ -114,7 +98,7 @@ class GUILateralG:
     MAX_DATAPOINTS = 60
     SHORTLEN = 10
     TOTALLEN = 300
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
           
         self.accelx_deque = double_deque(shortlen=GUILateralG.SHORTLEN, 

@@ -10,24 +10,8 @@ import tkinter.ttk
 
 import constants
 
-class GUIBasicDummy:
-    def __init__(self, logger):
-        pass
-
-    def display(self):
-        pass
-
-    def update(self, fdp):
-        pass
-    
-    def set_canvas(self, frame):
-        pass
-    
-    def reset(self):
-        pass
-
 class GUIBasic:
-    def __init__(self, logger):
+    def __init__(self, logger, *args, **kwargs):
         self.logger = logger
 
         self.acceleration_var = tkinter.StringVar()
