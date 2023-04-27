@@ -120,18 +120,19 @@ class GUIBraketest:
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
-        tkinter.Label(self.frame, text="Speed (km/h)", bg=constants.background_color, fg=constants.text_color,
+        opts = {'bg':constants.background_color, 'fg':constants.text_color}
+        tkinter.Label(self.frame, text="Speed (km/h)", **opts, 
                       font=('Helvetica 15 bold')).grid(row=0, sticky='W', rowspan=2)
-        tkinter.Label(self.frame, textvariable=self.speed_var, bg=constants.background_color, fg=constants.text_color, justify=tkinter.LEFT, anchor="w", width=12, 
+        tkinter.Label(self.frame, textvariable=self.speed_var, **opts, justify=tkinter.LEFT, anchor="w", width=12, 
                       font=('Helvetica 20 bold')).grid(row=2, sticky='W', columnspan=2)
         
-        tkinter.Label(self.frame, text="Brake distance (m)", bg=constants.background_color, fg=constants.text_color,
+        tkinter.Label(self.frame, text="Brake distance (m)", **opts,
                       font=('Helvetica 15 bold')).grid(row=3, sticky='W', columnspan=2)
-        tkinter.Label(self.frame, textvariable=self.distance_var, bg=constants.background_color, fg=constants.text_color, justify=tkinter.LEFT, anchor="w", width=12,  
+        tkinter.Label(self.frame, textvariable=self.distance_var, **opts, justify=tkinter.LEFT, anchor="w", width=12,  
                       font=('Helvetica 20 bold')).grid(row=4, sticky='W', columnspan=2)
         
-        tkinter.Checkbutton(self.frame, text='Write', variable=self.write_var, bg=constants.background_color, fg=constants.text_color).grid(row=0, column=1, sticky='W')
-        tkinter.Checkbutton(self.frame, text='Log', variable=self.log_var, bg=constants.background_color, fg=constants.text_color).grid(row=1, column=1, sticky='W')
+        tkinter.Checkbutton(self.frame, text='Write', variable=self.write_var, **opts).grid(row=0, column=1, sticky='W')
+        tkinter.Checkbutton(self.frame, text='Log', variable=self.log_var, **opts).grid(row=1, column=1, sticky='W')
     
     def reset(self):
         self.initial_speed = 0
