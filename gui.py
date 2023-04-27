@@ -22,9 +22,6 @@ ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
 import matplotlib.pyplot as plt
 import numpy as np
 
-import constants
-from dragderivation import Trace
-
 #plugins
 from guibasic import GUIBasic
 from guimap import GUIMap
@@ -38,6 +35,8 @@ from guibraketest import GUIBraketest
 from guilaunchtest import GUILaunchtest
 from guigearstats import GUIGearStats
 
+import constants
+from dragderivation import Trace
 from forza import Forza
 from concurrent.futures.thread import ThreadPoolExecutor
 from logger import Logger, TextHandler
@@ -158,7 +157,7 @@ class MainWindow:
         self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
         # Configure the rows that are in use to have weight #
         self.root.grid_rowconfigure(0, minsize=550, weight=550)
-        self.root.grid_rowconfigure(1, minsize=300, weight=400)
+        self.root.grid_rowconfigure(1, minsize=400, weight=400)
 
         # Configure the cols that are in use to have weight #
         self.root.grid_columnconfigure(0, minsize=175, weight=175)
@@ -284,7 +283,7 @@ class MainWindow:
         self.suspension.display()
         self.wheelsize.display()
         self.laptimes.display()
-        self.carinfo.display()
+        #self.carinfo.display()
         self.lateralg.display()
         self.gearstats.display()
 
@@ -358,14 +357,15 @@ class MainWindow:
                             bg=constants.background_color, fg=constants.text_color,
                             onvalue=1, offvalue=0)
 
-        self.load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
+        #arguably unnecessary? 
+        load_data_button = tkinter.Button(self.car_info_frame, text='Load torque/ratios', bg=constants.background_color, fg=constants.text_color,
                                 borderwidth=3, highlightcolor=constants.text_color, highlightthickness=True)
-        self.load_data_button.bind('<Button-1>', self.load_data)
+        load_data_button.bind('<Button-1>', self.load_data)
 
         self.infotree.pack(fill="both", expand=True)
         button_logging.pack()
         button_torque.pack()
-        self.load_data_button.pack()
+        load_data_button.pack()
 
         self.car_info_frame.grid(row=0, column=0, sticky='news')
 

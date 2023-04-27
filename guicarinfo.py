@@ -65,6 +65,8 @@ class GUICarInfo:
             
             for key, value in row.items():
                 setattr(self, key, value)
+            
+            self.display()
     
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
