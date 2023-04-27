@@ -28,7 +28,9 @@ from struct import unpack
 
 ## Documentation of the packet format is available on
 ## https://forums.forzamotorsport.net/turn10_postsm926839_Forza-Motorsport-7--Data-Out--feature-details.aspx#post_926839
+#this link is dead
 
+#TODO: implement pack into bytearray
 class ForzaDataPacket:
     ## Class variables are the specification of the format and the names of all
     ## the properties found in the data packet.
@@ -163,16 +165,63 @@ class ForzaDataPacket:
 
         return('{0.is_race_on}\t{0.timestamp_ms}\t{0.engine_max_rpm:f}\t{0.engine_idle_rpm:f}\t{0.current_engine_rpm:f}\t{0.acceleration_x:f}\t{0.acceleration_y:f}\t{0.acceleration_z:f}\t{0.velocity_x:f}\t{0.velocity_y:f}\t{0.velocity_z:f}\t{0.angular_velocity_x:f}\t{0.angular_velocity_y:f}\t{0.angular_velocity_z:f}\t{0.yaw:f}\t{0.pitch:f}\t{0.roll:f}\t{0.norm_suspension_travel_FL:f}\t{0.norm_suspension_travel_FR:f}\t{0.norm_suspension_travel_RL:f}\t{0.norm_suspension_travel_RR:f}\t{0.tire_slip_ratio_FL:f}\t{0.tire_slip_ratio_FR:f}\t{0.tire_slip_ratio_RL:f}\t{0.tire_slip_ratio_RR:f}\t{0.wheel_rotation_speed_FL:f}\t{0.wheel_rotation_speed_FR:f}\t{0.wheel_rotation_speed_RL:f}\t{0.wheel_rotation_speed_RR:f}\t{0.wheel_on_rumble_strip_FL:f}\t{0.wheel_on_rumble_strip_FR:f}\t{0.wheel_on_rumble_strip_RL:f}\t{0.wheel_on_rumble_strip_RR:f}\t{0.wheel_in_puddle_FL:f}\t{0.wheel_in_puddle_FR:f}\t{0.wheel_in_puddle_RL:f}\t{0.wheel_in_puddle_RR:f}\t{0.surface_rumble_FL:f}\t{0.surface_rumble_FR:f}\t{0.surface_rumble_RL:f}\t{0.surface_rumble_RR:f}\t{0.tire_slip_angle_FL:f}\t{0.tire_slip_angle_FR:f}\t{0.tire_slip_angle_RL:f}\t{0.tire_slip_angle_RR:f}\t{0.tire_combined_slip_FL:f}\t{0.tire_combined_slip_FR:f}\t{0.tire_combined_slip_RL:f}\t{0.tire_combined_slip_RR:f}\t{0.suspension_travel_meters_FL:f}\t{0.suspension_travel_meters_FR:f}\t{0.suspension_travel_meters_RL:f}\t{0.suspension_travel_meters_RR:f}\t{0.car_ordinal}\t{0.car_class}\t{0.car_performance_index}\t{0.drivetrain_type}\t{0.num_cylinders}\t{0.position_x}\t{0.position_y}\t{0.position_z}\t{0.speed}\t{0.power}\t{0.torque}\t{0.tire_temp_FL}\t{0.tire_temp_FR}\t{0.tire_temp_RL}\t{0.tire_temp_RR}\t{0.boost}\t{0.fuel}\t{0.dist_traveled}\t{0.best_lap_time}\t{0.last_lap_time}\t{0.cur_lap_time}\t{0.cur_race_time}\t{0.lap_no}\t{0.race_pos}\t{0.accel}\t{0.brake}\t{0.clutch}\t{0.handbrake}\t{0.gear}\t{0.steer}\t{0.norm_driving_line}\t{0.norm_ai_brake_diff}'.format(self))
 
+#extends ForzaDataPacket to an array with optional filter on the props
+#TODO: implement all relevant array functions
 class ForzaDataPacketArray(ForzaDataPacket):
-    def __init__(self, packet_format = 'fh4'):
+    def __init__(self, set_props = [], attributes = [], packet_format='fh4'):
         self.packet_format = packet_format
         
-        for prop in self.get_props(self.get_format()):
+        #consider test if set_props is subset of fdp props
+        #list1.union(list2) is true iff list1 subset list2
+        self.props = set_props if set_props else ForzaDataPacket.get_props(packet_format)
+        self.attributes = attributes
+        for prop in self.props + attributes:
             setattr(self, prop, [])
         self.packets = []
     
     def append(self, fdp):
-        props = self.get_props(self.get_format())
-        for prop, value in zip(props, fdp.to_list(None)):
+        for prop, value in zip(self.props, fdp.to_list(self.props)):
             getattr(self, prop).append(value)
         self.packets.append(fdp.data)
+
+    def get_props(self):
+        return self.props
+
+    def to_list(self, attributes):
+        '''
+        Return the values of this data packet, in order. If a list of
+        attributes are provided, only return those.
+
+        :param attributes: the attributes to return
+        :type attributes: list
+        '''
+        if attributes:
+            return([getattr(self, a) for a in attributes])
+
+        if self.packet_format == 'sled':
+            return([getattr(self, prop_name) for prop_name in self.sled_props])
+
+        return([getattr(self, prop_name) for prop_name in \
+                self.sled_props + self.dash_props])
+    
+    def get_packets(self):
+        return self.packets
+
+    def get_tsv_header(self):
+        return '\t'.join(self.props)
+
+    #TODO: implement
+    def to_tsv(self):
+        pass
+
+#extends ForzaDataPacket to a deque with optional filter on the props
+#TODO: implement all relevant deque functions
+from collections import deque        
+class ForzaDataPacketDeque(ForzaDataPacketArray):
+    def __init__(self, maxlen = None, set_props = [], packet_format = 'fh4'):
+        self.packet_format = packet_format
+        
+        self.props = set_props if set_props else ForzaDataPacket.get_props(packet_format)
+        for prop in self.props:
+            setattr(self, prop, deque(maxlen=maxlen))
+        self.packets = deque(maxlen=maxlen)
