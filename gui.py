@@ -103,12 +103,10 @@ class GUIDummy():
     If new plugins are added with extra variables or functions that are called, add them here
     """
     NAMES = set(['display', 'update', 'set_canvas', 'reset'])
-    NAMES.update(['get_shiftlimit', 'set_rpmtable']) #guigearstats
+    NAMES.update(['toggle_gatherratios', 'get_gearratios', 'set_gearratios', 'set_shiftrpms']) #guigearstats
     NAMES.update(['update_leds', 'set_rpmtable']) #guiled
     
-    def __init__(self, *args, **kwargs):
-        self.gatherratios = False #guigearstats
-        
+    def __init__(self, *args, **kwargs):        
         def doNothing(*args, **kwargs):
             pass
         
@@ -207,7 +205,7 @@ class MainWindow:
         if self.collect_rpm == 1 and fdp.accel > 0 and fdp.current_engine_rpm > self.prevrev_torque:
                 self.collect_rpm = 2
                 self.trace = Trace(gear_collected=fdp.gear,
-                                   gears=self.gearstats.gearratios)
+                                   gears=self.gearstats.get_gearratios())
         #collect data
         if self.collect_rpm == 2:
             if fdp.power > 0 and fdp.accel > 0:
@@ -271,12 +269,11 @@ class MainWindow:
             self.infotree.set('revlimit', column='var_value', value=int(self.revlimit))
             self.infotree.set('peak_power_kw', column='var_value', value=round(max(self.trace.power)))
             self.infotree.set('peak_torque_Nm', column='var_value', value=round(max(self.trace.torque)))
-            self.gearstats.gearratios = [0] + self.trace.gears + [0]*(10 - len(self.trace.gears))
-            self.gearstats.display()
+            self.gearstats.set_gearratios(self.trace.gears)
             self.rpmtorque_handler(None)
-            self.wheelsize.set_tracking(True)
-        else:
             self.wheelsize.set_tracking(False)
+        else:
+            self.wheelsize.set_tracking(True)
             self.logger.info("File does not exist")
 
     def display_car_info(self):
@@ -505,7 +502,8 @@ class MainWindow:
         power = self.trace.power #power in kw
         speed = self.trace.speed #speed in kmh
                     
-        gears = [self.gearstats.gearratios[key] for key in range(1,11) if self.gearstats.gearratios[key] != 0]
+        #gears = [self.gearstats.gearratios[key] for key in range(1,11) if self.gearstats.gearratios[key] != 0]
+        gears = [ratio for ratio in self.gearstats.get_gearratios() if ratio != 0]
         ratios = [gears[x]/gears[x+1] for x in range(len(gears)-1)]
         
         self.logger.info([round(g, 3) for g in gears])
@@ -520,7 +518,8 @@ class MainWindow:
                   f"drop is {int(shiftrpm*(1.0 - 1.0/ratio))}")
         
         self.ledbar.set_rpmtable(self.rpmtable, self.revlimit, self.trace)
-        self.gearstats.set_rpmtable(self.rpmtable)
+        #self.gearstats.set_rpmtable(self.rpmtable)
+        self.gearstats.set_shiftrpms(self.rpmtable)
         
         if self.torquegraph_var.get() == 0:
             return
@@ -570,13 +569,8 @@ class MainWindow:
         fig.tight_layout()
         plt.show()
 
-
-    def gatherratios_handler(self, event):
-        self.gearstats.gatherratios = not(self.gearstats.gatherratios)
-        if self.gearstats.gatherratios:
-            self.logger.info("Updating ratios")
-        else:
-            self.logger.info("Ratios not updating")
+    def gatherratios_handler(self, _):
+        self.gearstats.toggle_gatherratios()
 
     def reset_handler(self, event):
         """ run reset callback
@@ -627,8 +621,8 @@ def shutdown(forza: Forza, threadPool: ThreadPoolExecutor, listener: Listener):
         listener (Listener): keyboard listener
     """
     forza.isRunning = False
-    forza.server_socket.close()
     threadPool.shutdown(wait=False)
+    forza.server_socket.close()
     listener.stop()
 
 def main():
