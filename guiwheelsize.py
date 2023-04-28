@@ -31,7 +31,7 @@ class GUIWheelsize:
         self.rear_var.set(round(statistics.median(self.rear)*100, 2))
 
     def update(self, fdp):
-        if not self.tracking_var.get() or fdp.is_race_on == 0 or fdp.steer == 0:
+        if not self.tracking_var.get() or fdp.is_race_on == 0 or fdp.steer != 0:
             return
         
         for wheel in ['FL', 'FR', 'RL', 'RR']:
