@@ -131,6 +131,8 @@ class GUIGearStats:
         self.deque = deque(maxlen=120)
         self.table = GearTable()
         
+        self.shiftdelay_deque = deque(maxlen=120)
+        
         self.shiftdelay_var = tkinter.StringVar()
         self.shiftdelay_median = 0
         self.shiftdelay_latest = 0
@@ -146,8 +148,7 @@ class GUIGearStats:
         self.reset()
         
     def display(self):
-        gear = self.gear if self.gear > 0 else 'R'
-        self.gear_var.set(f'Gear: {gear}')
+        self.gear_var.set(f'Gear: {GEARLABELS[self.gear]}')
         self.shiftdelay_var.set(f'Shiftdelay: {self.shiftdelay_latest/60:.2f}s {self.shiftdelay_median/60:.2f}s')
 
     #return array of 11 elements: R, 1 to 10. R is generally 0
@@ -176,10 +177,11 @@ class GUIGearStats:
     #//Corresponds to EDrivetrainType; 0 = FWD, 1 = RWD, 2 = AWD
     #NOTE: ratio is off by relative front/back size if AWD conversion and front/rear are different sizes
     def update_gearratios(self, fdp):
-        rad = 0
-        if abs(fdp.speed) < 2: #if speed below 2 m/s assume faulty data
+        rpm = fdp.current_engine_rpm
+        if abs(fdp.speed) < 2 or rpm == 0: #if speed below 2 m/s assume faulty data
             return
                 
+        rad = 0
         if fdp.drivetrain_type == 0: #FWD
             rad = (fdp.wheel_rotation_speed_FL + fdp.wheel_rotation_speed_FR) / 2.0
         elif fdp.drivetrain_type == 1: #RWD
@@ -190,11 +192,33 @@ class GUIGearStats:
                    fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 4.0
         if abs(rad) <= 1e-6:
             return
-        # if rad < 0: #in the case of reverse
-        #     rad = -rad
-        self.deque.append(2 * math.pi * fdp.current_engine_rpm / (rad * 60))
-        ratio = statistics.median(self.deque)
-        self.table.set_gearratio(fdp.gear, ratio)
+        if rad < 0: #in the case of reverse
+            rad = -rad
+        self.deque.append(2 * math.pi * rpm / (rad * 60))
+        self.table.set_gearratio(fdp.gear, statistics.median(self.deque))
+
+    #we assume power is negative between gear change and first frame of shift
+    #accel has to be positive at all times, otherwise we don't know for sure 
+    #where the shift starts
+    def derive_shiftrpm(self, fdp):
+        if (len(self.shiftdelay_deque) == 0 or self.shiftdelay_deque[0].gear >= fdp.gear
+            or self.shiftdelay_deque[0].gear == 0): #case gear reverse
+            self.shiftdelay_deque.appendleft(fdp)
+            return
+        
+        #case gear has gone up
+        prev_packet = fdp
+        rpm = None
+        for packet in self.shiftdelay_deque:
+            if packet.accel == 0:
+                return
+            if prev_packet.power < 0 and packet.power >= 0:
+                rpm = packet.current_engine_rpm
+                break            
+            prev_packet = packet
+        if rpm is not None:
+            self.table.set_lastshiftrpm(self.gear, rpm)
+            self.shiftdelay_deque.clear()
 
     #TODO: update: 
     def update_car_info_shiftdelay(self, fdp):
@@ -223,7 +247,7 @@ class GUIGearStats:
             if fdp.power < 0:
                 self.shiftdelay_counter += 1
             elif fdp.power > 0:
-                self.table.set_lastshiftrpm(self.shiftdelay_gear, self.shiftdelay_rpm)
+              #  self.table.set_lastshiftrpm(self.shiftdelay_gear, self.shiftdelay_rpm)
                 self.shiftdelay.append(self.shiftdelay_counter)
                 self.shiftdelay_latest = self.shiftdelay_counter
                 self.shiftdelay_median = statistics.median(self.shiftdelay)
@@ -236,13 +260,14 @@ class GUIGearStats:
             return
         
         if self.gatherratios:
-            if self.gear != fdp.gear:
+            if self.gear != fdp.gear: #self.gear is fdp.gear from last packet
                 self.deque.clear()
             self.update_gearratios(fdp)
             
-        self.gear = fdp.gear
-        
+        self.derive_shiftrpm(fdp)
         self.update_car_info_shiftdelay(fdp)
+        
+        self.gear = fdp.gear
     
     def toggle_gatherratios(self):
         self.gatherratios = not(self.gatherratios)
@@ -252,13 +277,16 @@ class GUIGearStats:
             self.logger.info("Ratios not updating")
     
     def set_canvas(self, frame):
-        self.table.set_canvas(frame)
+        self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
+                                            highlightthickness=True, highlightcolor=constants.text_color)
+        
+        self.table.set_canvas(self.frame)
         self.table.frame.pack(fill='both', expand=True)
         
-        tkinter.Label(frame, textvariable=self.gear_var, bg=constants.background_color, fg=constants.text_color, justify=tkinter.LEFT, width=8, 
-                      font=('Helvetica 20 bold')).pack(fill='x')
-        tkinter.Label(frame, textvariable=self.shiftdelay_var, bg=constants.background_color, fg=constants.text_color, justify=tkinter.LEFT, width=8, 
-                      font=('Helvetica 12')).pack(fill='x')
+        opts = {'bg':constants.background_color, 'fg':constants.text_color, 'justify':tkinter.LEFT, 'width':8}
+        
+        tkinter.Label(self.frame, textvariable=self.gear_var, **opts, font=('Helvetica 20 bold')).pack(fill='x')
+        tkinter.Label(self.frame, textvariable=self.shiftdelay_var, **opts, font=('Helvetica 12')).pack(fill='x')
     
     def reset(self):
         self.gear = 1
@@ -273,5 +301,7 @@ class GUIGearStats:
         
         self.table.reset()
         self.deque.clear()
+        
+        self.shiftdelay_deque.clear()
         
         self.display()

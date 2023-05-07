@@ -76,23 +76,21 @@ class GUISuspension:
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 'font':('Helvetica 12 bold')}
         tkinter.Label(self.frame, text="Suspension (cm)", **opts).grid(row=1, columnspan=6)
               
-        tkinter.Label(self.frame, text="minimum", **opts).grid(row=2, column=1, columnspan=2) 
-        tkinter.Label(self.frame, text="avg (1s)", **opts).grid(row=2, column=4, columnspan=2) 
-        tkinter.Label(self.frame, text="maximum", **opts).grid(row=5, column=1, columnspan=2) 
-        tkinter.Label(self.frame, text="current", **opts).grid(row=5, column=4, columnspan=2) 
+        tkinter.Label(self.frame, text="extend",      **opts).grid(row=2, column=1, columnspan=2) 
+        tkinter.Label(self.frame, text="avg (1s)",    **opts).grid(row=2, column=4, columnspan=2) 
+        tkinter.Label(self.frame, text="compression", **opts).grid(row=5, column=1, columnspan=2) 
+        tkinter.Label(self.frame, text="current",     **opts).grid(row=5, column=4, columnspan=2) 
         
-        opts['justify'] = tkinter.RIGHT
-        opts['anchor'] = tkinter.E
-        opts['font'] = ('Helvetica 14 bold italic')
-        opts['width'] = 6 
+        opts.update({'justify':tkinter.RIGHT, 'anchor': tkinter.E, 
+                     'font':('Helvetica 14 bold italic'), 'width': 6})
         # min avg
         # max cur
         for i, x in enumerate(TIRES):
             row = int(i/2)+3
             column = i%2 + 1
-            tkinter.Label(self.frame, textvariable=self.suspension[x].min_var, **opts).grid(row=row, column=column)     
+            tkinter.Label(self.frame, textvariable=self.suspension[x].min_var, **opts).grid(row=row,   column=column)     
             tkinter.Label(self.frame, textvariable=self.suspension[x].max_var, **opts).grid(row=row+3, column=column) 
-            tkinter.Label(self.frame, textvariable=self.suspension[x].avg_var, **opts).grid(row=row, column=column+3)  
+            tkinter.Label(self.frame, textvariable=self.suspension[x].avg_var, **opts).grid(row=row,   column=column+3)  
             tkinter.Label(self.frame, textvariable=self.suspension[x].cur_var, **opts).grid(row=row+3, column=column+3)   
     
     def reset(self):

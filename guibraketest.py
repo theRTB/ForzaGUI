@@ -121,7 +121,7 @@ class GUIBraketest:
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
                                             highlightthickness=True, highlightcolor=constants.text_color)
         opts = {'bg':constants.background_color, 'fg':constants.text_color}
-        tkinter.Label(self.frame, text="Speed (km/h)", **opts, 
+        tkinter.Label(self.frame, text="Brake\nSpeed (km/h)", **opts, 
                       font=('Helvetica 15 bold')).grid(row=0, sticky='W', rowspan=2)
         tkinter.Label(self.frame, textvariable=self.speed_var, **opts, justify=tkinter.LEFT, anchor="w", width=12, 
                       font=('Helvetica 20 bold')).grid(row=2, sticky='W', columnspan=2)

@@ -32,7 +32,7 @@ class GUIBasic:
         opts = {'bg':constants.background_color, 'fg':constants.text_color}
         tkinter.Label(self.frame, text=text, font=('Helvetica 15 bold'), **opts).pack()
         tkinter.Label(self.frame, textvariable=variable, width=6, 
-                      anchor=tkinter.E, font=('Helvetica 35 bold italic'), **opts).pack()
+                      anchor=tkinter.E, font=('Helvetica 25 bold italic'), **opts).pack()
 
     def set_canvas(self, frame):
         self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
