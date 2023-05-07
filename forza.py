@@ -25,7 +25,7 @@ class Forza():
 
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_socket.settimeout(1)
-        self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Issue spyder console does not allow re-opening of gui.py, port in use. This does not fix as suggested by Googel
+        #self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #Issue spyder console does not allow re-opening of gui.py, port in use. This does not fix as suggested by Googel
         self.server_socket.bind((constants.ip, constants.port))
         self.logger.info('listening on port {}'.format(constants.port))
 
@@ -50,6 +50,3 @@ class Forza():
 
         except BaseException as e:
             self.logger.exception(e)
-        finally:
-            self.isRunning = False
-            self.logger.debug(f'{self.test_gear.__name__} finished')
