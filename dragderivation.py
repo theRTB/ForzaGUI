@@ -213,8 +213,8 @@ class DragDerivation():
         #self.gears = [g/final_drive for g in gears]
         #self.final_drive = final_drive
         
+        #gear_collected cannot be None
         if trace is None:
-            #gear_collected cannot be None
             trace = Trace(gear_collected, fromfile=True, filename=filename)
         self.gear_collected = trace.gear_collected
         self.rpm = trace.rpm

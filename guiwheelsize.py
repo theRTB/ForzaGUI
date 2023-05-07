@@ -16,13 +16,7 @@ import constants
 '''
 TODO:
  - if wheelsize is known, derive slip ratio for driven wheels
- - only track if:
-     - steer = 0
-     - accel = 0
-     - 5 <= speed <= 15 km/h
-     - consider forcing pitch to be near 0 (car is on flat ground)
- - once variance is low -> disable tracking
- 
+ - consider forcing pitch to be near 0 (car is on flat ground) for prerequisite
 '''    
 
 TIRES = ['FL', 'FR', 'RL', 'RR']
@@ -141,7 +135,7 @@ class GUIWheelsize:
             rotation_speed = abs(getattr(fdp, f"wheel_rotation_speed_{wheel}"))
             if rotation_speed == 0:
                 continue
-            radius = 100 * fdp.speed  / rotation_speed
+            radius = 100 * fdp.speed  / rotation_speed #convert to cm
             # if (radius < GUIWheelsize.WHEELSIZE_MIN or 
             #     radius > GUIWheelsize.WHEELSIZE_MAX):
             #     continue
