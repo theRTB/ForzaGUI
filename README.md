@@ -56,6 +56,7 @@ As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and 
 
 ### Interactive Gearing
 A secondary application to dynamically alter gearing ratios for a given trace for a given car. Derives gearing efficiency relative to a perfect transmission and interactively determines optimal shift rpms (but does not yet take the impact of reduced/negative boost from turbo into account). The RPM limit is useful in determining the impact of automatic shifting, which always happens at redline when accelerating normally. Top speed is derived from comparing derived drag to the peak power curve. The wheel drag value should be mostly valid for comparing drag between cars though you should assume a fair margin of error, AWD cars with different front/rear wheel sizes may not be that accurate either. Final gear is an approximation, there is no way to derive final gear from just telemetry.
+The derived shift rpm values are valid if and only if: at full throttle, shift duration of 0, not grip limited
 ![example interactive transmission](images/interactivetransmission_AcuraNSX_stock.PNG)
 
 ### Configuration
