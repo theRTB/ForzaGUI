@@ -2,11 +2,11 @@
 
 ### GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
 
-**Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), there are Python installations that conflict with FH5. Any tkinter/matplotlib usage can cause FH5 to crash. The as-user installation of Python Anaconda with version 3.10.9 seems to be fine. Compiling using pyinstaller bypasses this problem.**
+**Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), there are Python installations that conflict with FH5. Any tkinter/matplotlib usage can cause FH5 to crash. The as-user installation of Python Anaconda with version 3.10.9 seems to be fine. Compiling using pyinstaller bypasses this problem. It is likely that FH5 registers these Python installations as potential hacking tools and will crash on detecting those, which is a shame in this case.**
 
-Launching `gui.py settings_gui_ledonly.json` provides a separate always-on-top movable shiftlight window with optional gear number. The GUI has been simplified to primarily show variables related to the shift lights and can be edited to adjust the illumination live. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
+The GUI provides a separate always-on-top movable shiftlight window with optional gear number and most parameters can be edited live to adjust the illumination and shift tone. The shift lights take drag into account using an approximation for time-consistent states, this requires the torque graph at a gear affected by drag (think 3rd or 4th with 6 gears) but able to finish at the horizon drag strip (1.6km long, roughly).
 
-This was a project never originally intended for public view, a hobby project for getting back to Python programming. Code quality is all over the place depending on when the function was written or updated. The GUI seems to be functional on Windows only.
+This was a project never originally intended for public view, a hobby project for getting back to Python programming. Code quality is all over the place depending on when the function was written or updated. The GUI seems to be functional on Windows only. A more stable version may happen in the future.
 
 There are various 'plugins' that offer telemetry readouts or derivations but may not be readily enabled unless the code responsible for placing the frames is updated. The plugins that are not currently active may not function or cause performance degradation.
 
@@ -14,10 +14,12 @@ Current focus is to derive drag and transmission efficiency to fully quantify dr
 
 Previous focus was on making an accurate shiftled display. Work has been put into deriving information for an accurate progression of speed over time per gear, this will be used to derive more accurate triggers on rpm values to progress LED states. See dragderivation.py for various methods to derive top speeds, speed over time, and the impact of drag on modified engine torque. This applies to the torque value after multiplying with the gear ratio and multiplying the speed to match the ratio.
 
+I'm aware of shortcomings around the non-linear ratio of engine rpm and speed due to slip ratio, as well as a lack of correction in early gears for engine inertia.
+
 ### Examples of telemetry displayed, derived numbers and graphs:
 - acceleration, brake, steering input
 - car ordinal, PI, drivetrain, min/max/idle rpm
-- derived peak power, torque, rev limit
+- derived peak power, torque, boost, rev limit, drag, guesstimate drivetrain loss based on stock weight
 - slip ratio visualized per wheel (longitudinal and lateral)
 - absolute suspension values per wheel: min/max/avg/current
 - launch statistics: 0 to 97kmh, 0 to 161 km/h and 100 to 200 km/h and ability to dump the data
@@ -26,7 +28,7 @@ Previous focus was on making an accurate shiftled display. Work has been put int
 - transmission statistics: per-gear ratio (no effective way to derive final ratio), duration of power cut (excludes clutch behavior)
 - torque-per-gear graph: after collecting a full rpm sweep at moderate speed with per-gear ratio
 - lap times: best, current, number of laps
-- map
+- 2D map
 
 ### Steps for collecting data per car tune:
 - Easiest place to collect data is at the drag strip at the main Horizon Festival
@@ -65,7 +67,7 @@ Configuration is done through editing the json files that are regenerated with d
   * enabled: Whether plugin is enabled or not
   * frame name: internal name of frame
     * anchor: tkinter anchor
-    * relx: relative x position of the frame, from 0 to 1. Plugins are primarily placed in the top right frame of the GUI.
+    * relx: relative x position of the frame, from 0 to 1. Plugins are primarily placed in the top frame of the GUI.
     * rely: relative y position of the frame
 
 #### settings_guiled.json
