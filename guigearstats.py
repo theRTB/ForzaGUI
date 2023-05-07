@@ -26,6 +26,7 @@ TODO:
 
 
     - add option to hide unused gears for known cars through greying out rows
+    - add clutch display given known gear ratios for cars where the ratio doesn't float
 '''
 
 class GearRow():
@@ -64,7 +65,7 @@ class GearRow():
     def set_canvas(self, frame, opts):
         grid = {'row':self.gear+1, 'sticky':tkinter.EW}
         tkinter.Label(frame, text=self.label, **opts).grid(column=0, **grid)
-        tkinter.Label(frame, textvariable=self.ratio_var, **opts).grid(column=1, **grid)
+        tkinter.Label(frame, textvariable=self.ratio_var, width=5, **opts).grid(column=1, **grid)
         tkinter.Label(frame, textvariable=self.shiftrpm, **opts).grid(column=2, **grid)
         tkinter.Label(frame, textvariable=self.lastshiftrpm, **opts).grid(column=3, **grid)
 
@@ -107,12 +108,12 @@ class GearTable():
                                             highlightthickness=True, highlightcolor=constants.text_color)
         
         opts = {'bg':constants.background_color, 'fg':constants.text_color,
-                'font':('Helvetica 10 bold'), 'relief':tkinter.SUNKEN}        
+                'font':('Helvetica 11 bold'), 'relief':tkinter.SUNKEN}        
         for column, name in enumerate(self.FIRSTROW):
             tkinter.Label(self.frame, text=name, **opts).grid(row=0, column=column, sticky=tkinter.NSEW)
             self.frame.columnconfigure(column, weight=1)
         
-        opts.update({'font':('Helvetica 10'), 'justify': tkinter.RIGHT, 'anchor':tkinter.E})
+        opts.update({'font':('Helvetica 11'), 'justify': tkinter.RIGHT, 'anchor':tkinter.E}) #the sticky EW should override anchor E?
         for row in self.rows:
             row.set_canvas(self.frame, opts)
         
@@ -126,10 +127,8 @@ class GUIGearStats:
         self.logger = logger
         
         self.gatherratios = False
-        self.gearratios_deque = [deque(maxlen=240) for x in GEARLIST]
-        self.counter = 0
         
-        self.deque = ForzaDataPacketDeque()
+        self.deque = deque(maxlen=120)
         self.table = GearTable()
         
         self.shiftdelay_var = tkinter.StringVar()
@@ -178,24 +177,24 @@ class GUIGearStats:
     #NOTE: ratio is off by relative front/back size if AWD conversion and front/rear are different sizes
     def update_gearratios(self, fdp):
         rad = 0
-        if abs(fdp.speed) < 3: 
+        if abs(fdp.speed) < 2: #if speed below 2 m/s assume faulty data
             return
+                
         if fdp.drivetrain_type == 0: #FWD
             rad = (fdp.wheel_rotation_speed_FL + fdp.wheel_rotation_speed_FR) / 2.0
         elif fdp.drivetrain_type == 1: #RWD
             rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0
         else:
-            #rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0  #AWD assumes primary power is sent to rear, otherwise gear ratio floats. 
+            #rad = (fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 2.0
             rad = (fdp.wheel_rotation_speed_FL + fdp.wheel_rotation_speed_FR + 
                    fdp.wheel_rotation_speed_RL + fdp.wheel_rotation_speed_RR) / 4.0
-        if rad == 0:
+        if abs(rad) <= 1e-6:
             return
-        if rad < 0: #in the case of reverse
-            rad = -rad
-        gear = int(fdp.gear)
-        self.gearratios_deque[gear].append(2 * math.pi * fdp.current_engine_rpm / (rad * 60))
-        ratio = statistics.median(self.gearratios_deque[gear])
-        self.table.set_gearratio(gear, ratio)
+        # if rad < 0: #in the case of reverse
+        #     rad = -rad
+        self.deque.append(2 * math.pi * fdp.current_engine_rpm / (rad * 60))
+        ratio = statistics.median(self.deque)
+        self.table.set_gearratio(fdp.gear, ratio)
 
     #TODO: update: 
     def update_car_info_shiftdelay(self, fdp):
@@ -236,10 +235,12 @@ class GUIGearStats:
         if fdp.is_race_on == 0:
             return
         
-        self.gear = fdp.gear
-        
         if self.gatherratios:
+            if self.gear != fdp.gear:
+                self.deque.clear()
             self.update_gearratios(fdp)
+            
+        self.gear = fdp.gear
         
         self.update_car_info_shiftdelay(fdp)
     
@@ -260,8 +261,6 @@ class GUIGearStats:
                       font=('Helvetica 12')).pack(fill='x')
     
     def reset(self):
-        for g in GEARLIST:
-            self.gearratios_deque[g].clear()
         self.gear = 1
         self.shiftdelay.clear() 
         self.shiftdelay_median = 0  
@@ -273,6 +272,6 @@ class GUIGearStats:
         self.counter = 0
         
         self.table.reset()
-        #self.deque.reset()
+        self.deque.clear()
         
         self.display()
