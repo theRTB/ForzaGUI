@@ -20,30 +20,33 @@ I'm aware of shortcomings around the non-linear ratio of engine rpm and speed du
 - acceleration, brake, steering input
 - car ordinal, PI, drivetrain, min/max/idle rpm
 - derived peak power, torque, boost, rev limit, drag, guesstimate drivetrain loss based on stock weight
-- slip ratio visualized per wheel (longitudinal and lateral)
+- slip visualized per wheel (longitudinal and lateral)
+  - past peak grip (slip > 1): color orange
+  - lost grip (slip > 2): color red (number 2 is arbitrarily chosen)
 - absolute suspension values per wheel: min/max/avg/current
 - launch statistics: 0 to 97kmh, 0 to 161 km/h and 100 to 200 km/h and ability to dump the data
 - lateral G statistics: per X, Y, Z axis and total vector length, per 10 frames or averaged over 300 frames with ability to dump the data
 - brake statistics: start to end speed, distance and duration with ability to dump the data
 - transmission statistics: per-gear ratio (no effective way to derive final ratio), duration of power cut (excludes clutch behavior)
 - torque-per-gear graph: after collecting a full rpm sweep at moderate speed with per-gear ratio
-- lap times: best, current, number of laps
+- lap times: best, current, number of laps (needs update)
 - 2D map
 
 ### Steps for collecting data per car tune:
 - Easiest place to collect data is at the drag strip at the main Horizon Festival
 - Press F10 to start monitoring
-- Optional: Coast at low speed (~10km/h) at high gear to measure wheel size (avoid inputs)
-  - After measuring untick Tracking on wheel radius
+- Coast at low speed (~8-20km/h) at a high gear or clutch held with no inputs, to measure wheel size
+  - The GUI will notify you when an accurate wheel size has been derived
 - Press F9 to enable ratio collecting
-  - Drive around a bit per gear until number stabilizes in Ratio column bottom right
-  - AWD cars can have a floating ratio and are not quite right yet, to be investigated
+  - Drive around a bit per gear until number stabilizes in Ratio in gearstats display
+  - AWD cars can have a floating ratio and are not quite right yet, to be investigated (center diff and different front/rear wheel sizes are involved)
 - Press F9 to stop ratio collecting
 - Select an appropriate gear (4th gear is generally fine)
   - Gear must have enough torque to accelerate from idle rpm
   - Gear must be long enough to be affected by drag near rev limit 
   - Car must be able to accelerate from idle to rev limit within 1.6km/1mile
   - Do a test run if you are unsure, higher gears are more accurate
+  - The run must be completed entirely on tarmac
 - Take note of the engine_idle_rpm, you want to be above this number to avoid clutch behaviour
 - Align car with drag strip at either far side
 - Press F8 and let RPM drop to near idle rpm
@@ -53,6 +56,9 @@ I'm aware of shortcomings around the non-linear ratio of engine rpm and speed du
 - The data is saved. The GUI will automatically try to load the data file based on car ordinal and PI number on restarts.
 
 As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
+
+![example GUI](images/example_AcuraNSX_stock_v0.20.png)
+![example ingame ledbar](images/ingameledbar_AcuraNSX_stock.png)
 
 ### Interactive Gearing
 A secondary application to dynamically alter gearing ratios for a given trace for a given car. Derives gearing efficiency relative to a perfect transmission and interactively determines optimal shift rpms (but does not yet take the impact of reduced/negative boost from turbo into account). The RPM limit is useful in determining the impact of automatic shifting, which always happens at redline when accelerating normally. Top speed is derived from comparing derived drag to the peak power curve. The wheel drag value should be mostly valid for comparing drag between cars though you should assume a fair margin of error, AWD cars with different front/rear wheel sizes may not be that accurate either. Final gear is an approximation, there is no way to derive final gear from just telemetry.
@@ -83,13 +89,17 @@ Settings file for the shiftlights. Most settings apart from led_height, led_widt
 * hysteresis_pct_revlimit: Shiftlight state is only allowed to drop after live rpm has dropped by this value (taken as a percentage of rev limit) below state trigger rpm. Defaults to 5% as 0.05.
 * state_dropdown_delay: After going up in state, state may not drop for x frames. Defaults to 0 currently. Non-functional at the moment.
 * led_height: Vertical size of LED rectangles in shiftlight window. Defaults to 40 pixels (may be affected by scaling in Windows)
-* led_width": Horizontal size of LED rectangles in shiftlight window. Defaults to 40 pixels (may be affected by scaling in Windows)
-* sequence": Pattern style. *"linear"* is left to right (McLaren pattern), *"sides"* is sides to center (Porsche pattern). Defaults to *"linear"*
+* led_width: Horizontal size of LED rectangles in shiftlight window. Defaults to 40 pixels (may be affected by scaling in Windows)
+* sequence: Pattern style. *"linear"* is left to right (McLaren pattern), *"sides"* is sides to center (Porsche pattern). Defaults to *"linear"*
 
 Original GUI code by https://github.com/Juice-XIJ/forza_auto_gear
 
-![example GUI](images/example_AcuraNSX_stock_v0.20.png)
-![example ingame ledbar](images/ingameledbar_AcuraNSX_stock.png)
+Alternate LED bar:
+
 ![example ingame alternate ledbar](images/ingameledbar_AcuraNSX_stock_v2.png)
-![example torque graph per gear](images/example_AcuraNSX_stock.png)
+
+Derivation on drag by equating engine torque to an acceleration trace:
 ![example drag corrected torque per gear](images/drag_corrected_torque_AcuraNSX_stock.png)
+
+Graph rendered inside the GUI when pressing the Sweep button with Draw torque graph enabled:
+![example torque graph per gear](images/example_AcuraNSX_stock.png)
