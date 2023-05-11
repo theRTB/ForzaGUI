@@ -14,7 +14,10 @@ from pynput.keyboard import Listener
 
 # from https://pypi.org/project/pynput/
 # section Ensuring consistent coordinates between listener and controller on Windows
+# TODO: confirm if value should be 1 or 2
+# https://learn.microsoft.com/en-us/windows/win32/api/shellscalingapi/ne-shellscalingapi-process_dpi_awareness
 import ctypes
+PROCESS_SYSTEM_DPI_AWARE = 1
 PROCESS_PER_MONITOR_DPI_AWARE = 2
 ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
 
@@ -258,7 +261,7 @@ class MainWindow:
             self.carinfo.set_trace(self.trace)
         else:
             self.wheelsize.set_tracking(True)
-            self.logger.info("File does not exist")
+            self.logger.info(f"File does not exist: {filename}")
 
     def display_car_info(self):
         self.suspension.display()

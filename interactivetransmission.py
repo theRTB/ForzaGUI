@@ -20,6 +20,11 @@ from matplotlib.figure import Figure
 from dragderivation import Trace, DragDerivation
 from cardata import CarData
 
+
+import ctypes
+PROCESS_PER_MONITOR_DPI_AWARE = 2
+ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+
 '''
 TODO:
     - add awd slider for center diff (current assumption is 60%)
@@ -40,57 +45,6 @@ not updating. May be due to a lack of an update call:
 '''
 
 
-def testing():
-    global window#, array, trace, gearing, car_ordinal, car_performance_index, rpm, power, ratios, shiftrpms
-    #globals are used for debugging
-    
-    #example: stock NSX Acura
-    car_ordinal = 342 #2352
-    car_performance_index = 789#831
-    filename = f'traces/trace_ord{car_ordinal}_pi{car_performance_index}.json'
-
-    # override_gearratio = [] #e.g.: [4.14, 2.67, 1.82, 1.33, 1.00, 0.8]
-    # final_ratio = 1
-    trace = Trace(fromfile=True, filename=filename)
-
-    # if len(override_gearratio):
-    #     trace.gears = [x*final_ratio for x in trace.gears]
-    #     trace.gears = override_gearratio
-
-#    gearing = Gearing(trace, None, final_ratio, car_ordinal, car_performance_index)
-
-    # def get_intersections(self):
-    #     X = 0
-    #     data = [graph.get_points() for graph in self.gears]
-    #     intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
-    #     intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]  
-        
-
-    ratios = np.flip(np.linspace(2, 1, 200, False))
-  #  draw(trace)
-
-    # rmin, rmax = int(Sliders.GEARRATIO_MIN*100), int(Sliders.GEARRATIO_MAX*100)
-    # array = sorted(set((y/x) for x in range(rmin, rmax) for y in range(x+1, rmax+1)))
-    
-    rpm, power = zip(*sorted(zip(trace.rpm, trace.power)))
-    decimator = int(len(rpm) / 200)
-    rpm = np.array(rpm[:-1:decimator], rpm[-1])
-    power = np.array(power[:-1:decimator], power[-1])
-    
-   # print(f'points: {len(rpm)}')
-    
-    plt.plot(rpm, power)
-    shiftrpms = [intersect.intersection(rpm*x, power, rpm, power)[0] for x in ratios]
-    shiftrpms = [x[-1] if len(x) else rpm[-1] for x in shiftrpms]
-        
-  #  print(timeit.timeit("[intersect.intersection(rpm*x, power, rpm, power)[0] for x in ratios]", globals=globals(), number=10))
-  
-   # plt.plot(ratios, shiftrpms)
-   
-    fig, ax = plt.subplots(1)
-    ax.plot(ratios, shiftrpms)
-    ax.grid()
-    ax.set_title("shift rpm given relative ratio (Acura NSX)")
     
 def main ():
     Window()
@@ -350,7 +304,10 @@ class InfoFrame():
         elif packet:
             ordinal = packet.car_ordinal
             pi = packet.car_performance_index
-            cardata = CarData.getinfo(ordinal)
+            cardata = CarData.getinfo(ordinal) #TODO: This will return None if no data found
+            if cardata is None:
+                carname.update(f'Unknown car ord:{ordinal} pi:{pi}')
+                return
             cardata.update({'car_performance_index': pi})
             carname = self.NAMESTRING(cardata)
         
@@ -385,8 +342,8 @@ class InfoFrame():
         if trace_v1plus:
             wheelsize_front = float(trace.carinfo.get('wheelsize_front', 0))
             wheelsize_rear = float(trace.carinfo.get('wheelsize_rear', 0))        
-            self.wheelsize_front_var.set(wheelsize_front)
-            self.wheelsize_rear_var.set(wheelsize_rear)
+            self.wheelsize_front_var.set(f'{wheelsize_front:.2f}')
+            self.wheelsize_rear_var.set(f'{wheelsize_rear:.2f}')
         
             wheelsize = 'N/A'
             if self.drivetrain_var.get() == 'FWD':

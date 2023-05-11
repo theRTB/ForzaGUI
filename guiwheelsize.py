@@ -106,8 +106,8 @@ class GUIWheelsize:
     def is_variance_stable(self):
         return (self.front.get_sample_variance() <= self.UPPER_BOUND_VARIANCE and 
                 self.rear.get_sample_variance()  <= self.UPPER_BOUND_VARIANCE and
-                self.front.get_count() > self.COUNT_LOWER_BOUND and 
-                self.rear.get_count() > self.COUNT_LOWER_BOUND)
+                self.front.get_count() > self.LOWER_BOUND_COUNT and 
+                self.rear.get_count() > self.LOWER_BOUND_COUNT)
     
     def update(self, fdp):
         if self.state == self.STATE_OTHER:
