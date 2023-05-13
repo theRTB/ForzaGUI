@@ -1,13 +1,27 @@
 import socket
-import time
+# import time
 from concurrent.futures.thread import ThreadPoolExecutor
 
 from fdp import ForzaDataPacket
 
 import constants
-import helper
 from logger import Logger
 
+def nextFdp(server_socket: socket, format: str):
+    """next fdp
+
+    Args:
+        server_socket (socket): socket
+        format (str): format
+
+    Returns:
+        [ForzaDataPacket]: fdp
+    """
+    try:
+        message, _ = server_socket.recvfrom(1024)
+        return ForzaDataPacket(message, packet_format=format)
+    except BaseException:
+        return None
 
 class Forza():
     def __init__(self, threadPool: ThreadPoolExecutor, logger: Logger = None, packet_format='fh4', clutch = False):
@@ -41,7 +55,7 @@ class Forza():
         """
         try:
             while self.isRunning:
-                fdp = helper.nextFdp(self.server_socket, self.packet_format)
+                fdp = nextFdp(self.server_socket, self.packet_format)
                 if fdp is None:
                     continue
                     
