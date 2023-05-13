@@ -93,7 +93,7 @@ class Window ():
 
     #maxlen model 46, maxlen maker 24, maxlen group 21 : 2023-04-32
     # _ in lambda because it is called as a class function and has self or cls in front, sadly
-    NAMESTRING = lambda _, data: "{maker} {model} ({year}) PI:{car_performance_index} {group} o{car_ordinal}".format(**data)
+    NAMESTRING = lambda _, data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
     
     DEFAULTCARDATA = {'maker':'Acura', 'model':'NSX', 'year':2017, 'car_performance_index':831, 'group':'MODERN SUPERCARS', 'car_ordinal':2352}
     DEFAULTCAR =  NAMESTRING(None, DEFAULTCARDATA) #'Acura NSX (2017) PI:831 MODERN SUPERCARS o2352'
@@ -201,7 +201,7 @@ class Window ():
 
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
-    NAMESTRING = lambda _, data: "{maker} {model} ({year}) PI:{car_performance_index} {group} o{car_ordinal}".format(**data)
+    NAMESTRING = lambda _, data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
     CARNAME_FONTSIZE = 8
     
     def __init__(self, *args, **kwargs):        
@@ -299,22 +299,23 @@ class InfoFrame():
             data = trace.data_to_fdp()
             packet = data[0] if packet is None else packet
 
+        ordinal = None
         if carname:
             ordinal = int(carname.split(' ')[-1][1:]) #ugly
+            pi = int(carname.split(' ')[-2][3:])
         elif packet:
             ordinal = packet.car_ordinal
             pi = packet.car_performance_index
-            cardata = CarData.getinfo(ordinal) #TODO: This will return None if no data found
-            if cardata is None:
-                carname.update(f'Unknown car ord:{ordinal} pi:{pi}')
-                return
-            cardata.update({'car_performance_index': pi})
-            carname = self.NAMESTRING(cardata)
-        
-        if carname or packet:
-            self.carname_var.set(carname)
+            
+        if ordinal:
             cardata = CarData.getinfo(ordinal)
-            self.weight_var.set(cardata['weight'])
+            if cardata is None:
+                carname = f'Unknown car ord:{ordinal} pi:{pi}'
+            else:
+                cardata.update({'car_performance_index': pi})
+                carname = self.NAMESTRING(cardata)
+                self.weight_var.set(cardata['weight'])
+            self.carname_var.set(carname)
         
         if packet is not None: #or trace_v2            
             self.num_cylinders_var.set(packet.num_cylinders)
