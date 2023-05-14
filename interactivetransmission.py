@@ -32,11 +32,9 @@ TODO:
     - add information on shifts
     - add duration for gear at full throttle and no traction issues
     - investigate torque output during a shift
-    - split matplotlib drawings into separate canvases
     - maybe replace matplotlib slider with tkinter slider
     - add dump to excel file for all variables
     - consider https://matplotlib.org/stable/api/scale_api.html#matplotlib.scale.FuncScale
-    - sliders are allowed to be equal in the maximum value, closedmax required?
 
 moving the matplotlib sliders into their own canvas resulted in the main canvas
 not updating. May be due to a lack of an update call:
@@ -80,16 +78,16 @@ warnings.filterwarnings("ignore", category=UserWarning)
 DISPLAY_ALL = True
 
 class Window ():
-    width = 1500
-    height = 1080
+    width = 1550
+    height = 1030
 
     graph_width = 1000
-    graph_height = 900
+    graph_height = 850
     
     slider_height = 500
-    slider_width = 500
+    slider_width = 550
     
-    frameinfo_height = 350
+    frameinfo_height = 400
 
     #maxlen model 46, maxlen maker 24, maxlen group 21 : 2023-04-32
     # _ in lambda because it is called as a class function and has self or cls in front, sadly
@@ -125,9 +123,16 @@ class Window ():
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
 
+        self.notebook = tkinter.ttk.Notebook(self.frame)
+
         self.frame_info = tkinter.Frame(self.frame)
         self.info = InfoFrame()
-        self.info.set_canvas(self.frame_info)
+        self.info.set_canvas(self.frame_info)        
+
+        self.power_graph = PowerGraph(self.notebook)
+
+        self.notebook.add(self.frame_info, text="Statistics")
+        self.notebook.add(self.power_graph.frame, text='Power')
 
         self.carname_changed() #force initial update to default car
         
@@ -135,15 +140,16 @@ class Window ():
         self.frame.grid_rowconfigure(1, minsize=Window.frameinfo_height, weight=Window.frameinfo_height)
         self.frame.grid_columnconfigure(0, minsize=Window.slider_width, weight=Window.slider_width)
         self.frame.grid_columnconfigure(1, minsize=Window.graph_width, weight=Window.graph_width)
-        
+                
         self.combobox.pack()
+        self.toolbar.pack(fill='x', side=tkinter.BOTTOM)
         self.frame.pack(fill='both', expand=True)
-        self.toolbar.pack(fill='x')
         
         self.canvas_slider.get_tk_widget().grid(row=0, column=0)
-        self.frame_info.grid(row=1, column=0, sticky=tkinter.NW)
+        # self.frame_info.grid(row=1, column=0, sticky=tkinter.NW)
+        self.notebook.grid(row=1, column=0, sticky=tkinter.NSEW)
         self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=2)
-
+        
         self.root.mainloop()
     
     def entry_validation(input, varname, maxval):
@@ -153,9 +159,6 @@ class Window ():
         return True
 
     def carname_changed(self, event=None):
-        self.fig.clf()
-        if self.fig_slider is not None:
-            self.fig_slider.clf()
         carname = self.combobox.get()
         filename = self.carlist[carname]
         trace = Trace(fromfile=True, filename=filename)
@@ -169,12 +172,17 @@ class Window ():
 
         final_ratio = Sliders.average_final_ratio(trace.gears)
 
+        self.fig.clf()
+        if self.fig_slider is not None:
+            self.fig_slider.clf()
         self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, title=carname, fig_slider=self.fig_slider)
         
         self.drag = DragDerivation(trace=None, filename=filename)
         self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
         
         self.info.carname_changed(carname, packet=None, trace=trace, drag=self.drag)
+        self.frame_info.update() #required since adding Notebook layer
+        self.power_graph.carname_changed(trace=trace)
         
         
     #filename structure:
@@ -196,7 +204,25 @@ class Window ():
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
 
-        
+#TODO: add a tab with a power graph
+class PowerGraph():
+    def __init__(self, frame):
+        self.frame = tkinter.Frame(frame)
+        self.fig = Figure(figsize=(546/100.0, 372/100.0), dpi=100)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
+        self.canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    def carname_changed(self, trace):
+        self.fig.clf()
+        ax = self.fig.subplots(1)
+        ax.plot(trace.rpm, trace.power)
+        ax.grid()
+        self.kw = self.fig.text(0.00, 0.00, "kW / RPM")
+        for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+             ax.get_xticklabels() + ax.get_yticklabels()):
+            item.set_fontsize(8)
+        self.fig.tight_layout()
+        self.canvas.draw_idle()
         
 
 class InfoFrame():
@@ -209,6 +235,7 @@ class InfoFrame():
         
         #if drag exists, trace does too
         #drag can be made from trace if None
+        #packet is made from trace v2 if None
         
         #from carname, but easier with packet or trace v2
         self.weight_var = tkinter.IntVar(value=0)
@@ -258,11 +285,11 @@ class InfoFrame():
                  ['Drivetrain:', self.drivetrain_var, ''],
                  ['Drivetrain loss:', self.transmission_efficiency_var, '%'],
                  ['Wheel radius:', self.wheelsize_front_var, 'front,', self.wheelsize_rear_var, 'rear (cm)'],
-               #  ['Shift duration:', self.shiftdelay_var, 'seconds'],
+                 # ['Shift duration:', self.shiftdelay_var, 'seconds'],
                  ['Stock weight:', self.weight_var, 'kg'],
-                 ['Center diff:', self.center_diff_var, '% to rear if AWD'],
-              #   ['Max slip ratio:', self.max_slipratio_front_var, '% front, ', self.max_slipratio_rear_var, '% rear']
-               #  ['Torque limit:', self.torque_limit_var, 'Nm']
+                 # ['Center diff:', self.center_diff_var, '% to rear if AWD'],
+                 # ['Max slip ratio:', self.max_slipratio_front_var, '% front, ', self.max_slipratio_rear_var, '% rear']
+                 # ['Torque limit:', self.torque_limit_var, 'Nm']
             ]
         
     #    entry_centerdiff_validation = self.root.register(Window.entry_centerdiff_validation)
@@ -402,6 +429,7 @@ class InfoFrame():
         print(sorted(max_torque)[int(len(max_torque)/20):int(len(max_torque)/10)])
         self.torque_limit_var.set(int(torque_limit))
 
+    #TODO: investigate
     def derive_max_slipratio(self, data, wheelsize_front, wheelsize_rear, drawgraph=False):
         wheelsize = {'FL': wheelsize_front/100, 'FR': wheelsize_front/100,
                      'RL': wheelsize_rear/100, 'RR': wheelsize_rear/100}
@@ -649,6 +677,7 @@ class Sliders ():
             'disclaimer':            [0.01, 0.01]
             }
 
+    #TODO: split __init__ up into sub functions
     def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, separate_fig=False):
         if separate_fig:
          #   Sliders.xmin, Sliders.xmax = 0.2, 1.1
@@ -669,7 +698,7 @@ class Sliders ():
         final_slider_limit, gear_slider_limit = self.slider_limits(final_ratio)
 
         #sliders must have a reference to stay interactive
-        self.final_gear_ax = fig.add_axes(Sliders.axes['final_gear'])
+        self.final_gear_ax = fig.add_axes(self.axes['final_gear'])
         self.final_gear_slider = Slider(
             ax=self.final_gear_ax,
             label='Final gear',
@@ -677,21 +706,21 @@ class Sliders ():
             closedmin=False,
             valmax=final_slider_limit['valmax'],
             valinit= final_ratio,
-            valstep = Sliders.RATIO_STEP,
+            valstep = self.RATIO_STEP,
             valfmt = "%4.2f" #override default to avoid 1.001 as value
         )
 
         for gear, ratio in zip(gears, trace.gears):
-            ax = fig.add_axes(Sliders.axes['gears'](gear.gear))
+            ax = fig.add_axes(self.axes['gears'](gear.gear))
             slider = Slider(
                 ax=ax,
                 label=f'gear {gear.gear+1}',
                 valmin=gear_slider_limit['valmin'],
                 closedmin=False,
                 closedmax=False,
-                valmax=gear_slider_limit['valmax']+Sliders.RATIO_STEP,
+                valmax=gear_slider_limit['valmax']+self.RATIO_STEP,
                 valinit=ratio,
-                valstep = Sliders.RATIO_STEP
+                valstep = self.RATIO_STEP
             )
             gear.add_slider(ax, slider) #for resetting
             gear.slider.on_changed(gear.update)
@@ -719,7 +748,8 @@ class Sliders ():
                 graph.slider.reset()
         self.button.on_clicked(reset)
         
-        #limit rpm/torque graph to the defined rpm limit (think redline limit for automatic transmission)
+        #create slider to limit rpm/torque graph to the defined rpm limit 
+        #(think redline limit for automatic transmission)
         self.rpmlimit_ax = fig.add_axes(Sliders.axes['rpmlimit'])
         self.rpmlimit_slider = Slider(
             ax=self.rpmlimit_ax,
@@ -738,7 +768,7 @@ class Sliders ():
         else:
             self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
             self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
-        self.integral_ax = fig.add_axes(Sliders.axes['integral'])
+        self.integral_ax = fig.add_axes(self.axes['integral'])
         self.integral_slider = RangeSlider(
             ax=self.integral_ax,
             label='Integral\nlimits',
@@ -760,24 +790,25 @@ class Sliders ():
     def integral_onchanged(self, func):
         self.integral_slider.on_changed(func)
 
-    def slider_limits(self, final_ratio):
+    @classmethod
+    def slider_limits(cls, final_ratio):
         if final_ratio == 1:
-            final_slider_settings = {'valmin': Sliders.FINALRATIO_MIN / Sliders.FINALRATIO_MAX,
-                                     'valmax': Sliders.FINALRATIO_MAX / Sliders.FINALRATIO_MIN}
-            gear_slider_settings = {'valmin': Sliders.FINALRATIO_MIN * Sliders.GEARRATIO_MIN,
-                                    'valmax': Sliders.FINALRATIO_MAX * Sliders.GEARRATIO_MAX}
+            final_slider_settings = {'valmin': cls.FINALRATIO_MIN / cls.FINALRATIO_MAX,
+                                     'valmax': cls.FINALRATIO_MAX / cls.FINALRATIO_MIN}
+            gear_slider_settings = {'valmin': cls.FINALRATIO_MIN * cls.GEARRATIO_MIN,
+                                    'valmax': cls.FINALRATIO_MAX * cls.GEARRATIO_MAX}
         else:
-            final_slider_settings = {'valmin': Sliders.FINALRATIO_MIN,
-                                     'valmax': Sliders.FINALRATIO_MAX}
-            gear_slider_settings = {'valmin': Sliders.GEARRATIO_MIN,
-                                    'valmax': Sliders.GEARRATIO_MAX}
+            final_slider_settings = {'valmin': cls.FINALRATIO_MIN,
+                                     'valmax': cls.FINALRATIO_MAX}
+            gear_slider_settings = {'valmin': cls.GEARRATIO_MIN,
+                                    'valmax': cls.GEARRATIO_MAX}
 
         return (final_slider_settings, gear_slider_settings)
         
     @classmethod
     def average_final_ratio(cls, gears):
-        upper_limit = min(gears[-1]/Sliders.GEARRATIO_MIN, Sliders.FINALRATIO_MAX) 
-        lower_limit = max(gears[0]/Sliders.GEARRATIO_MAX, Sliders.FINALRATIO_MIN)
+        upper_limit = min(gears[-1]/cls.GEARRATIO_MIN, cls.FINALRATIO_MAX) 
+        lower_limit = max(gears[0]/cls.GEARRATIO_MAX, cls.FINALRATIO_MIN)
         return (upper_limit + lower_limit) / 2
 
 class ShiftRPM ():
