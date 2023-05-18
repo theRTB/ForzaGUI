@@ -13,13 +13,11 @@ import statistics
 import intersect
 import matplotlib.pyplot as plt
 import numpy as np
-#from functools import partial
 from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from dragderivation import Trace, DragDerivation
 from cardata import CarData
-
 
 import ctypes
 PROCESS_PER_MONITOR_DPI_AWARE = 2
@@ -34,6 +32,7 @@ TODO:
     - investigate torque output during a shift
     - maybe replace matplotlib slider with tkinter slider
     - add dump to excel file for all variables
+    - rewrite to use pyqtgraph and qt due to limitations in tkinter/matplotlib
     - consider https://matplotlib.org/stable/api/scale_api.html#matplotlib.scale.FuncScale
 
 moving the matplotlib sliders into their own canvas resulted in the main canvas
@@ -46,13 +45,6 @@ not updating. May be due to a lack of an update call:
     
 def main ():
     Window()
-
-# def draw(trace):
-#     fig, ax = plt.subplots(1)
-#     rpm, power = zip(*sorted(zip(trace.rpm, trace.power)))
-#     ax.plot([x*1000 for x in rpm], power)
-#     ax.plot([x*1001 for x in rpm], power)
-#     plt.show()
 
 # suppress matplotlib warning while running in thread
 import warnings
@@ -81,8 +73,8 @@ class Window ():
     width = 1550
     height = 1030
 
-    graph_width = 1000
     graph_height = 850
+    graph_width = 1000
     
     slider_height = 500
     slider_width = 550
@@ -101,10 +93,9 @@ class Window ():
         self.root = tkinter.Tk()
         self.root.tk.call('tk', 'scaling', 1.5) #Spyder console fix for DPI too low
         self.root.title("Interactive gearing for collected traces for ForzaGUI")
-        self.root.geometry(f"{Window.width}x{Window.height}")
+        self.root.geometry(f"{self.width}x{self.height}")
+        self.root.minsize(self.width, self.height)
 
-        self.frame = tkinter.Frame(self.root)
-        
         self.generate_carlist()
 
         self.combobox = tkinter.ttk.Combobox(self.root, width=100,
@@ -114,43 +105,55 @@ class Window ():
         self.combobox.current(index)
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
+        self.filter_var = tkinter.IntVar(value=1)
+        self.filter_button = tkinter.Checkbutton(self.root, text='Filter old traces', 
+                                                 variable=self.filter_var, command=self.filter_toggle,
+                                                 onvalue=1, offvalue=0)
+        
+        self.frame = tkinter.Frame(self.root)
         px = 1/plt.rcParams['figure.dpi'] # pixel in inches
-        self.fig = Figure(figsize=(Window.graph_width*px, (Window.graph_height)*px), dpi=100)
+        self.fig = Figure(figsize=(self.graph_width*px, self.graph_height*px), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.fig_slider = Figure(figsize=(Window.slider_width*px, (Window.slider_height)*px), dpi=100)
+        self.fig_slider = Figure(figsize=(self.slider_width*px, self.slider_height*px), dpi=100)
         self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, master=self.frame)
+        
+        self.frame.grid_rowconfigure(0, minsize=self.slider_height, weight=self.slider_height)
+        self.frame.grid_rowconfigure(1, minsize=self.frameinfo_height, weight=self.frameinfo_height)
+        self.frame.grid_columnconfigure(0, minsize=self.slider_width, weight=self.slider_width)
+        self.frame.grid_columnconfigure(1, minsize=self.graph_width, weight=self.graph_width)
         
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
 
         self.notebook = tkinter.ttk.Notebook(self.frame)
-
         self.frame_info = tkinter.Frame(self.frame)
         self.info = InfoFrame()
-        self.info.set_canvas(self.frame_info)        
-
+        self.info.set_canvas(self.frame_info)       
         self.power_graph = PowerGraph(self.notebook)
-
+        self.torque_deriv_graph = TorqueDerivative(self.notebook)
         self.notebook.add(self.frame_info, text="Statistics")
         self.notebook.add(self.power_graph.frame, text='Power')
+        self.notebook.add(self.torque_deriv_graph.frame, text='Torque\'')
 
         self.carname_changed() #force initial update to default car
-        
-        self.frame.grid_rowconfigure(0, minsize=Window.slider_height, weight=Window.slider_height)
-        self.frame.grid_rowconfigure(1, minsize=Window.frameinfo_height, weight=Window.frameinfo_height)
-        self.frame.grid_columnconfigure(0, minsize=Window.slider_width, weight=Window.slider_width)
-        self.frame.grid_columnconfigure(1, minsize=Window.graph_width, weight=Window.graph_width)
                 
-        self.combobox.pack()
-        self.toolbar.pack(fill='x', side=tkinter.BOTTOM)
-        self.frame.pack(fill='both', expand=True)
+        self.toolbar.pack(      side=tkinter.BOTTOM, fill='x')
+        self.frame.pack(        side=tkinter.BOTTOM, fill='both', expand=True)
+        self.filter_button.pack(side=tkinter.RIGHT)
+        self.combobox.pack(     side=tkinter.RIGHT, expand=True)
         
-        self.canvas_slider.get_tk_widget().grid(row=0, column=0)
+        self.canvas_slider.get_tk_widget().grid(row=0, column=0)#, sticky=tkinter.NSEW)
         # self.frame_info.grid(row=1, column=0, sticky=tkinter.NW)
         self.notebook.grid(row=1, column=0, sticky=tkinter.NSEW)
-        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=2)
+        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=2)#, sticky=tkinter.NSEW)
         
         self.root.mainloop()
+    
+    def filter_toggle(self):
+        if self.filter_var.get():
+            self.combobox['values'] = sorted(self.carlist.keys())
+        else:
+            self.combobox['values'] = sorted(self.carlist_all.keys())
     
     def entry_validation(input, varname, maxval):
         print(f'validating {input}')
@@ -160,7 +163,7 @@ class Window ():
 
     def carname_changed(self, event=None):
         carname = self.combobox.get()
-        filename = self.carlist[carname]
+        filename = self.carlist_all[carname]
         trace = Trace(fromfile=True, filename=filename)
 
         #reduce point count to roughly 125-150 for performance reasons
@@ -183,11 +186,13 @@ class Window ():
         self.info.carname_changed(carname, packet=None, trace=trace, drag=self.drag)
         self.frame_info.update() #required since adding Notebook layer
         self.power_graph.carname_changed(trace=trace)
+        self.torque_deriv_graph.carname_changed(trace=self.drag)
         
         
     #filename structure:
     def generate_carlist(self):
         self.carlist = {}
+        self.carlist_all = {}
         for entry in os.scandir(Window.TRACE_DIR):
             filename = entry.name
             ordinal = int(filename.split('_')[1][3:])
@@ -199,18 +204,21 @@ class Window ():
                 # carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']} o{ordinal}"
                 carname = self.NAMESTRING(data)
                 trace = Trace(fromfile=True, filename=Window.TRACE_DIR + filename)
-                if len(trace.data) > 0 or DISPLAY_ALL:
+                self.carlist_all[carname] = Window.TRACE_DIR + filename
+                if len(trace.data) > 0:
                     self.carlist[carname] = Window.TRACE_DIR + filename
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
+        print(f'filtered car list contains {len(self.carlist)} items')
+        print(f'total car list contains {len(self.carlist_all)} items')
 
 #TODO: add a tab with a power graph
 class PowerGraph():
     def __init__(self, frame):
         self.frame = tkinter.Frame(frame)
-        self.fig = Figure(figsize=(546/100.0, 372/100.0), dpi=100)
+        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=100)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.canvas.get_tk_widget().pack(fill='both', expand=True)
+        self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
 
     def carname_changed(self, trace):
         self.fig.clf()
@@ -223,7 +231,40 @@ class PowerGraph():
             item.set_fontsize(8)
         self.fig.tight_layout()
         self.canvas.draw_idle()
+    
+class TorqueDerivative():
+    DERIVE = False
+    def __init__(self, frame):
+        self.frame = tkinter.Frame(frame)
+        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=100)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
+        self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
+
+    def carname_changed(self, trace):
+        self.fig.clf()
+        ax = self.fig.subplots(1)
+        rpm, torque, power = trace.rpm, trace.torque, trace.power #zip(*sorted(zip(trace.rpm, trace.torque, trace.power)))
+        rpm = np.array(rpm)
+        torque = np.array(torque)
+        power = np.array(power)
+       # time = np.linspace(0, (len(trace.torque)-1)/60, len(trace.torque))
+        torque_deriv = np.gradient(torque, rpm)
+        i = np.argmax(power)
+        torque_deriv_sorted = sorted(torque_deriv[i:])
+        percentile = lambda array, pct: array[int(pct/100*len(array))]
+        ymin = percentile(torque_deriv_sorted, 5)
+        ymax = percentile(torque_deriv_sorted, 95)
         
+        torque_deriv_filtered = [t for t in torque_deriv[i:] if t > ymin and t < ymax]
+        ax.plot(torque_deriv_filtered)
+        ax.grid()
+        ax.set_ylim(ymin, ymax)
+        self.kw = self.fig.text(0.00, 0.008, "Nm' / points  5/95% filtered derivative of torque past peak power")
+        for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+             ax.get_xticklabels() + ax.get_yticklabels()):
+            item.set_fontsize(8)
+        self.fig.tight_layout()
+        self.canvas.draw_idle()
 
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
@@ -685,16 +726,62 @@ class Sliders ():
                             'gears':       lambda g: [0.17, 0.90-0.06*g,    0.74, 0.025],
                             'rel_ratios':  lambda g: [0.82, 0.87-0.06*g],
                             'reset':                 [0.7, 0.27,            0.2, 0.08],
-                            'rpmlimit':              [0.18, 0.21,           0.7, 0.025],
-                            'integral':              [0.18, 0.17,           0.6, 0.025],
+                            'rpmlimit':              [0.18, 0.22,           0.7, 0.025],
+                            'integral':              [0.18, 0.16,           0.6, 0.025],
                             'integral_text':         [0.21, 0.13],
                             'checkbutton':           [0.21, 0.00, 0.2, 0.2],
                             'disclaimer':            [0.01, 0.01]
                             }
         else:
             # create space for sliders
-            fig.subplots_adjust(left=Sliders.xmax)
+            fig.subplots_adjust(left=self.xmax)
 
+        self.__init__gearsliders(fig, final_ratio, gears, trace)
+
+        # Create a `matplotlib.widgzets.Button` to reset the sliders to initial values.
+        self.ax_reset = fig.add_axes(self.axes['reset']) #0.72
+        self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
+        def reset(event):
+            self.final_gear_slider.reset()
+            self.rpmlimit_slider.reset()
+            for graph in gears:
+                graph.slider.reset()
+        self.button.on_clicked(reset)
+        
+        #create slider to limit rpm/torque graph to the defined rpm limit 
+        #(think redline limit for automatic transmission)
+        self.rpmlimit_ax = fig.add_axes(self.axes['rpmlimit'])
+        self.rpmlimit_slider = Slider(
+            ax=self.rpmlimit_ax,
+            label='RPM limit',
+            valmin=trace.rpm[0],
+            valmax=trace.rpm[-1],
+            valinit=trace.rpm[-1],
+         #   valstep = 50
+        )
+        
+        #default to peak power in first and last gear
+        i = trace.power.argmax()
+        if len(gears) == 1:
+            self.lower = 1
+            self.upper = xmax/rpmperkmh
+        else:
+            self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
+            self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
+        self.integral_ax = fig.add_axes(self.axes['integral'])
+        self.integral_slider = RangeSlider(
+            ax=self.integral_ax,
+            label='Integral\nlimits',
+            valmin=0,
+            valmax=xmax/rpmperkmh,
+            closedmin=False,
+            closedmax=True,
+            valinit=(self.lower, self.upper),
+            valstep=1,
+            valfmt = "%4.0f" #override default to avoid 1.001 as value
+        )
+    
+    def __init__gearsliders(self, fig, final_ratio, gears, trace):
         final_slider_limit, gear_slider_limit = self.slider_limits(final_ratio)
 
         #sliders must have a reference to stay interactive
@@ -727,7 +814,7 @@ class Sliders ():
 
         self.rel_ratios_text = []
         for gear, next_gear in zip(gears[:-1], gears[1:]):
-            text = fig.text(*Sliders.axes['rel_ratios'](gear.gear), 
+            text = fig.text(*self.axes['rel_ratios'](gear.gear), 
                                           f'{gear.ratio/next_gear.ratio:.3f}')
             self.rel_ratios_text.append(text)
 
@@ -737,49 +824,6 @@ class Sliders ():
             a.slider.slidermax = prev_gear.slider if prev_gear is not None else None
             a.slider.slidermin = next_gear.slider if next_gear is not None else None
             prev_gear = a
-
-        # Create a `matplotlib.widgzets.Button` to reset the sliders to initial values.
-        self.ax_reset = fig.add_axes(Sliders.axes['reset']) #0.72
-        self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
-        def reset(event):
-            self.final_gear_slider.reset()
-            self.rpmlimit_slider.reset()
-            for graph in gears:
-                graph.slider.reset()
-        self.button.on_clicked(reset)
-        
-        #create slider to limit rpm/torque graph to the defined rpm limit 
-        #(think redline limit for automatic transmission)
-        self.rpmlimit_ax = fig.add_axes(Sliders.axes['rpmlimit'])
-        self.rpmlimit_slider = Slider(
-            ax=self.rpmlimit_ax,
-            label='RPM limit',
-            valmin=trace.rpm[0],
-            valmax=trace.rpm[-1],
-            valinit=trace.rpm[-1],
-         #   valstep = 50
-        )
-        
-        #default to peak power in first and last gear
-        i = trace.power.argmax()
-        if len(gears) == 1:
-            self.lower = 1
-            self.upper = xmax/rpmperkmh
-        else:
-            self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
-            self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
-        self.integral_ax = fig.add_axes(self.axes['integral'])
-        self.integral_slider = RangeSlider(
-            ax=self.integral_ax,
-            label='Integral\nlimits',
-            valmin=0,
-            valmax=xmax/rpmperkmh,
-            closedmin=False,
-            closedmax=True,
-            valinit=(self.lower, self.upper),
-            valstep=1,
-            valfmt = "%4.0f" #override default to avoid 1.001 as value
-        )
     
     def final_ratio_onchanged(self, func):
         self.final_gear_slider.on_changed(func)    
