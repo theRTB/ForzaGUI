@@ -9,8 +9,9 @@ import math
 
 import intersect
 
-from tkinter import scrolledtext
+from tkinter import scrolledtext #used by logging
 from pynput.keyboard import Listener
+from concurrent.futures.thread import ThreadPoolExecutor
 
 # from https://pypi.org/project/pynput/
 # section Ensuring consistent coordinates between listener and controller on Windows
@@ -41,7 +42,7 @@ from guigearstats import GUIGearStats
 import constants
 from dragderivation import Trace
 from forza import Forza
-from concurrent.futures.thread import ThreadPoolExecutor
+
 from logger import Logger, TextHandler
 
 if not os.path.exists('traces'):
@@ -207,12 +208,13 @@ class MainWindow:
                                    gears=self.gearstats.get_gearratios())
         #collect data
         if self.collect_rpm == 2:
-            if fdp.power > 0 and fdp.accel > 0:
+            if fdp.power > 0 and fdp.accel > 0: #TODO: force max accel?
                 self.trace.add(fdp)
             else: #finish up and draw graph
                 self.logger.info("Draw graph by pressing the Sweep (F8) button")
                 self.trace.finish()
                 self.add_carinfo_to_trace(fdp)
+                self.carinfo.set_trace(self.trace)
                 self.trace.writetofile(f"traces/trace_ord{fdp.car_ordinal}_pi{fdp.car_performance_index}.json")
                 self.collect_rpm = 0
                 self.revlimit = self.trace.rpm[-1] #fdp.current_engine_rpm
