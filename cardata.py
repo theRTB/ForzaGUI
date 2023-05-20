@@ -8,6 +8,9 @@ Created on Tue May  2 20:00:13 2023
 import csv
 from os.path import exists
 
+#maxlen model 46, maxlen maker 24, maxlen group 21 : 2023-04-32
+NAMESTRING = lambda data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
+
 class CarData():
     firstrow = []
     data = []

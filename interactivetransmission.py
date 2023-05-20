@@ -17,7 +17,7 @@ from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from dragderivation import Trace, DragDerivation
-from cardata import CarData
+from cardata import CarData, NAMESTRING
 
 import ctypes
 PROCESS_PER_MONITOR_DPI_AWARE = 2
@@ -25,6 +25,7 @@ ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
 
 '''
 TODO:
+    - investigate dpi scaling when combining tkinter and matplotlib
     - add awd slider for center diff (current assumption is 60%)
     - override slider to add ability to enter ratio
     - add information on shifts
@@ -34,6 +35,7 @@ TODO:
     - add dump to excel file for all variables
     - rewrite to use pyqtgraph and qt due to limitations in tkinter/matplotlib
     - consider https://matplotlib.org/stable/api/scale_api.html#matplotlib.scale.FuncScale
+    - consider https://matplotlib.org/stable/tutorials/intermediate/autoscale.html
 
 moving the matplotlib sliders into their own canvas resulted in the main canvas
 not updating. May be due to a lack of an update call:
@@ -41,8 +43,6 @@ not updating. May be due to a lack of an update call:
         self.canvas.draw() #should be called every update, doesn't seem to be required at all?
 '''
 
-
-    
 def main ():
     Window()
 
@@ -51,6 +51,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 #unused lowpass filter code
+#see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
 # from scipy.signal import butter, lfilter#, freqz
 # def butter_lowpass(cutoff, fs, order=5):
 #     return butter(order, cutoff, fs=fs, btype='low', analog=False)
@@ -63,7 +64,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # #accel_filtered = butter_lowpass_filter(accel, cutoff, fs, order)
 
 # # Filter requirements.
-# order = 6  #higher is steeper, see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
+# order = 6  #higher is steeper, 
 # fs = 60.0       # sample rate, Hz
 # cutoff = 5.00  # desired cutoff frequency of the filter, Hz
 
@@ -73,31 +74,41 @@ class Window ():
     width = 1550
     height = 1030
 
-    graph_height = 850
+    graph_height = 1200
     graph_width = 1000
     
     slider_height = 500
     slider_width = 550
     
     frameinfo_height = 400
-
-    #maxlen model 46, maxlen maker 24, maxlen group 21 : 2023-04-32
-    # _ in lambda because it is called as a class function and has self or cls in front, sadly
-    NAMESTRING = lambda _, data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
     
-    DEFAULTCARDATA = {'maker':'Acura', 'model':'NSX', 'year':2017, 'car_performance_index':831, 'group':'MODERN SUPERCARS', 'car_ordinal':2352}
-    DEFAULTCAR =  NAMESTRING(None, DEFAULTCARDATA) #'Acura NSX (2017) PI:831 MODERN SUPERCARS o2352'
+    DEFAULTCARDATA = {'maker':'Acura', 'model':'NSX', 'year':2017, 
+                      'car_performance_index':831, 'group':'MODERN SUPERCARS', 
+                      'car_ordinal':2352}
+    DEFAULTCAR =  NAMESTRING(DEFAULTCARDATA) #'Acura NSX (2017) MODERN SUPERCARS PI:831 o2352'
     TRACE_DIR = 'traces/'
 
     def __init__(self):
         self.root = tkinter.Tk()
-        self.root.tk.call('tk', 'scaling', 1.5) #Spyder console fix for DPI too low
+      #  self.root.tk.call('tk', 'scaling', 2) #Spyder console fix for DPI too low
         self.root.title("Interactive gearing for collected traces for ForzaGUI")
-        self.root.geometry(f"{self.width}x{self.height}")
-        self.root.minsize(self.width, self.height)
 
-        self.generate_carlist()
-
+        self.__init__carlist()     
+        
+        self.__init__combobox()
+        self.__init__filter_button()        
+        self.__init__main_frame()        
+        self.__init__toolbar() #must be after main_frame
+        self.__init__notebook()                
+        self.__init__widget_placement()
+        
+        self.carname_changed() #force initial update to default car
+        
+        self.root.geometry(f"{self.width}x{self.height}") #must be set after creating the gearing canvas?
+        self.root.minsize(self.width, self.height)        
+        self.root.mainloop()
+    
+    def __init__combobox(self):
         self.combobox = tkinter.ttk.Combobox(self.root, width=100,
                                              exportselection=False, state='readonly',
                                              values=sorted(self.carlist.keys()))
@@ -105,28 +116,27 @@ class Window ():
         self.combobox.current(index)
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
+    def __init__filter_button(self):
         self.filter_var = tkinter.IntVar(value=1)
         self.filter_button = tkinter.Checkbutton(self.root, text='Filter old traces', 
                                                  variable=self.filter_var, command=self.filter_toggle,
                                                  onvalue=1, offvalue=0)
-        
-        self.frame = tkinter.Frame(self.root)
+    
+    def __init__main_frame(self):
+    #    self.frame = tkinter.Frame(self.root)
         px = 1/plt.rcParams['figure.dpi'] # pixel in inches
-        self.fig = Figure(figsize=(self.graph_width*px, self.graph_height*px), dpi=100)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.fig_slider = Figure(figsize=(self.slider_width*px, self.slider_height*px), dpi=100)
-        self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, master=self.frame)
-        
-        self.frame.grid_rowconfigure(0, minsize=self.slider_height, weight=self.slider_height)
-        self.frame.grid_rowconfigure(1, minsize=self.frameinfo_height, weight=self.frameinfo_height)
-        self.frame.grid_columnconfigure(0, minsize=self.slider_width, weight=self.slider_width)
-        self.frame.grid_columnconfigure(1, minsize=self.graph_width, weight=self.graph_width)
-        
+        self.fig = Figure(figsize=(self.graph_width*px, self.graph_height*px), dpi=72, layout="constrained")
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
+        self.fig_slider = Figure(figsize=(self.slider_width*px, self.slider_height*px), dpi=72)
+        self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, master=self.root)
+    
+    def __init__toolbar(self):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
         self.toolbar.update()
-
-        self.notebook = tkinter.ttk.Notebook(self.frame)
-        self.frame_info = tkinter.Frame(self.frame)
+    
+    def __init__notebook(self):
+        self.notebook = tkinter.ttk.Notebook(self.root)#frame)
+        self.frame_info = tkinter.Frame(self.root)#frame)
         self.info = InfoFrame()
         self.info.set_canvas(self.frame_info)       
         self.power_graph = PowerGraph(self.notebook)
@@ -134,21 +144,20 @@ class Window ():
         self.notebook.add(self.frame_info, text="Statistics")
         self.notebook.add(self.power_graph.frame, text='Power')
         self.notebook.add(self.torque_deriv_graph.frame, text='Torque\'')
-
-        self.carname_changed() #force initial update to default car
-                
-        self.toolbar.pack(      side=tkinter.BOTTOM, fill='x')
-        self.frame.pack(        side=tkinter.BOTTOM, fill='both', expand=True)
-        self.filter_button.pack(side=tkinter.RIGHT)
-        self.combobox.pack(     side=tkinter.RIGHT, expand=True)
-        
-        self.canvas_slider.get_tk_widget().grid(row=0, column=0)#, sticky=tkinter.NSEW)
-        # self.frame_info.grid(row=1, column=0, sticky=tkinter.NW)
-        self.notebook.grid(row=1, column=0, sticky=tkinter.NSEW)
-        self.canvas.get_tk_widget().grid(row=0, column=1, rowspan=2)#, sticky=tkinter.NSEW)
-        
-        self.root.mainloop()
     
+    def __init__widget_placement(self):
+        self.root.grid_rowconfigure(1, minsize=self.slider_height, weight=self.slider_height)
+        self.root.grid_rowconfigure(2, minsize=self.frameinfo_height, weight=self.frameinfo_height)
+        self.root.grid_columnconfigure(0, minsize=self.slider_width, weight=self.slider_width)
+        self.root.grid_columnconfigure(1, minsize=self.graph_width, weight=self.graph_width)
+        
+        self.combobox.grid(row=0, column=0, columnspan=2)
+        self.filter_button.grid(row=0, column=0, columnspan=2, sticky=tkinter.E)
+        self.canvas_slider.get_tk_widget().grid(row=1, column=0, sticky=tkinter.NSEW)
+        self.canvas.get_tk_widget().grid(row=1, column=1, rowspan=2, sticky=tkinter.NSEW)
+        self.notebook.grid(row=2, column=0, sticky=tkinter.NSEW)
+        self.toolbar.grid(row=3, column=0, columnspan=2, sticky=tkinter.NSEW)
+        
     def filter_toggle(self):
         if self.filter_var.get():
             self.combobox['values'] = sorted(self.carlist.keys())
@@ -186,11 +195,10 @@ class Window ():
         self.info.carname_changed(carname, packet=None, trace=trace, drag=self.drag)
         self.frame_info.update() #required since adding Notebook layer
         self.power_graph.carname_changed(trace=trace)
-        self.torque_deriv_graph.carname_changed(trace=self.drag)
-        
+        self.torque_deriv_graph.carname_changed(trace=self.drag)        
         
     #filename structure:
-    def generate_carlist(self):
+    def __init__carlist(self):
         self.carlist = {}
         self.carlist_all = {}
         for entry in os.scandir(Window.TRACE_DIR):
@@ -202,7 +210,7 @@ class Window ():
             if data is not None:
                 data.update({'car_performance_index':pi})
                 # carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']} o{ordinal}"
-                carname = self.NAMESTRING(data)
+                carname = NAMESTRING(data)
                 trace = Trace(fromfile=True, filename=Window.TRACE_DIR + filename)
                 self.carlist_all[carname] = Window.TRACE_DIR + filename
                 if len(trace.data) > 0:
@@ -212,11 +220,10 @@ class Window ():
         print(f'filtered car list contains {len(self.carlist)} items')
         print(f'total car list contains {len(self.carlist_all)} items')
 
-#TODO: add a tab with a power graph
 class PowerGraph():
     def __init__(self, frame):
         self.frame = tkinter.Frame(frame)
-        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=100)
+        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=72)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
 
@@ -231,12 +238,15 @@ class PowerGraph():
             item.set_fontsize(8)
         self.fig.tight_layout()
         self.canvas.draw_idle()
-    
+
+#focuses on the numeric derivative of torque after peak power is reached
+#discounting noise, it can be observed that some cars have a linear drop in torque
+#while others have a gentle quadratic slope.
 class TorqueDerivative():
     DERIVE = False
     def __init__(self, frame):
         self.frame = tkinter.Frame(frame)
-        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=100)
+        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=72)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
         self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
 
@@ -268,8 +278,7 @@ class TorqueDerivative():
 
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
-    NAMESTRING = lambda _, data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
-    CARNAME_FONTSIZE = 8
+    CARNAME_FONTSIZE = 7
     
     def __init__(self, *args, **kwargs):        
         self.carname_var = tkinter.StringVar(value='')
@@ -381,7 +390,7 @@ class InfoFrame():
                 carname = f'Unknown car ord:{ordinal} pi:{pi}'
             else:
                 cardata.update({'car_performance_index': pi})
-                carname = self.NAMESTRING(cardata)
+                carname = NAMESTRING(cardata)
                 self.weight_var.set(cardata['weight'])
             self.carname_var.set(carname)
         
@@ -507,8 +516,6 @@ class InfoFrame():
     #     state = tkinter.NORMAL if enable else tkinter.DISABLED
     #     self.entries['Center diff:'].config(state=state)
 
-
-
 #helper class for class Gearing
 class Gear():
     def __init__(self, gear, trace, ax, update_backref, final_ratio=1):
@@ -565,7 +572,7 @@ class Gearing ():
         self.legend = self.ax.legend()  #force add legend to axis due to extra legend being added later
         self.ax.add_artist(self.legend) #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
         
-        self.fig.tight_layout()
+       # self.fig.tight_layout()
         
         separate_fig = True
         if fig_slider == None:
@@ -906,7 +913,7 @@ class ShiftRPM ():
             vline.set_segments( [np.array([[x, 0.0],[x, self.ymax]])])
         
     def get_intersections(self):
-        X = 0
+        X = 0 #axis
         data = [graph.get_points() for graph in self.gears]
         intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
         intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]
