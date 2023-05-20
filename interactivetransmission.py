@@ -36,6 +36,8 @@ TODO:
     - rewrite to use pyqtgraph and qt due to limitations in tkinter/matplotlib
     - consider https://matplotlib.org/stable/api/scale_api.html#matplotlib.scale.FuncScale
     - consider https://matplotlib.org/stable/tutorials/intermediate/autoscale.html
+    - consider  tkinter.font.measure(text)
+      Pass this method a string, and it will return the number of pixels of width that string will take in the font. Warning: some slanted characters may extend outside this area. 
 
 moving the matplotlib sliders into their own canvas resulted in the main canvas
 not updating. May be due to a lack of an update call:
@@ -279,6 +281,7 @@ class TorqueDerivative():
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
     CARNAME_FONTSIZE = 7
+    TABLE_FONTSIZE = 8
     
     def __init__(self, *args, **kwargs):        
         self.carname_var = tkinter.StringVar(value='')
@@ -344,9 +347,11 @@ class InfoFrame():
         
     #    entry_centerdiff_validation = self.root.register(Window.entry_centerdiff_validation)
         self.entries = {}
+        
+        opts.update({'font': tkinter.font.Font(size=self.TABLE_FONTSIZE)})
         carname_opts = opts.copy()
         carname_opts['font'] = tkinter.font.Font(size=self.CARNAME_FONTSIZE)
-        tkinter.Label(frame, textvariable=table[0], **carname_opts).grid(row=0, column=0, columnspan=6)
+        tkinter.Label(frame, textvariable=table[0], **carname_opts).grid(row=0, column=0, columnspan=6, sticky=tkinter.W)
         for i, row in enumerate(table[1:], start=1):
             tkinter.Label(frame, text=row[0], **opts).grid(row=i, column=0, sticky=tkinter.E)
             if row[0] == 'Weight:' or row[0] == 'Center diff:':

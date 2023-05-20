@@ -22,6 +22,7 @@ class GUICarInfo(InfoFrame):
         self.trace = None
         self.packet = None
         self.CARNAME_FONTSIZE = 16
+        self.TABLE_FONTSIZE = 12
     
     def set_trace(self, trace):
         self.trace = trace
