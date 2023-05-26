@@ -49,8 +49,8 @@ def main ():
     Window()
 
 # suppress matplotlib warning while running in thread
-import warnings
-warnings.filterwarnings("ignore", category=UserWarning)
+# import warnings
+# warnings.filterwarnings("ignore", category=UserWarning)
 
 #unused lowpass filter code
 #see https://stackoverflow.com/questions/63320705/what-are-order-and-critical-frequency-when-creating-a-low-pass-filter-using
@@ -70,8 +70,6 @@ warnings.filterwarnings("ignore", category=UserWarning)
 # fs = 60.0       # sample rate, Hz
 # cutoff = 5.00  # desired cutoff frequency of the filter, Hz
 
-DISPLAY_ALL = True
-
 class Window ():
     width = 1550
     height = 1030
@@ -84,10 +82,12 @@ class Window ():
     
     frameinfo_height = 400
     
-    DEFAULTCARDATA = {'maker':'Acura', 'model':'NSX', 'year':2017, 
-                      'car_performance_index':831, 'group':'MODERN SUPERCARS', 
-                      'car_ordinal':2352}
-    DEFAULTCAR =  NAMESTRING(DEFAULTCARDATA) #'Acura NSX (2017) MODERN SUPERCARS PI:831 o2352'
+    DEFAULT_CAR_ORDINAL = 2352 #Acura NSX 2017
+    DEFAULT_CAR_PI = 831
+    DEFAULTCARDATA =  CarData.getinfo(DEFAULT_CAR_ORDINAL)
+    DEFAULTCARDATA.update({'car_performance_index':DEFAULT_CAR_PI})
+    DEFAULTCAR = NAMESTRING(DEFAULTCARDATA)
+    
     TRACE_DIR = 'traces/'
 
     def __init__(self):
@@ -112,51 +112,67 @@ class Window ():
     
     def __init__combobox(self):
         self.combobox = tkinter.ttk.Combobox(self.root, width=100,
-                                             exportselection=False, state='readonly',
+                                             exportselection=False, 
+                                             state='readonly',
                                              values=sorted(self.carlist.keys()))
-        index = sorted(self.carlist.keys()).index(Window.DEFAULTCAR)
+        index = sorted(self.carlist.keys()).index(self.DEFAULTCAR)
         self.combobox.current(index)
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
         
     def __init__filter_button(self):
         self.filter_var = tkinter.IntVar(value=1)
-        self.filter_button = tkinter.Checkbutton(self.root, text='Filter old traces', 
-                                                 variable=self.filter_var, command=self.filter_toggle,
+        self.filter_button = tkinter.Checkbutton(self.root, 
+                                                 text='Filter old traces', 
+                                                 variable=self.filter_var, 
+                                                 command=self.filter_toggle,
                                                  onvalue=1, offvalue=0)
     
     def __init__main_frame(self):
     #    self.frame = tkinter.Frame(self.root)
         px = 1/plt.rcParams['figure.dpi'] # pixel in inches
-        self.fig = Figure(figsize=(self.graph_width*px, self.graph_height*px), dpi=72, layout="constrained")
+        self.fig = Figure(figsize=(self.graph_width*px, self.graph_height*px), 
+                          dpi=72, layout="constrained")
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)
-        self.fig_slider = Figure(figsize=(self.slider_width*px, self.slider_height*px), dpi=72)
-        self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, master=self.root)
+        self.fig_slider = Figure(figsize=(self.slider_width*px, 
+                                          self.slider_height*px), dpi=72)
+        self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, 
+                                               master=self.root)
     
     def __init__toolbar(self):
-        self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, pack_toolbar=False)
-        self.toolbar.update()
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, 
+                                            pack_toolbar=False)
+      #  self.toolbar.update()
     
     def __init__notebook(self):
         self.notebook = tkinter.ttk.Notebook(self.root)#frame)
-        self.frame_info = tkinter.Frame(self.root)#frame)
+        self.frame_info = tkinter.Frame(self.notebook)#frame)
         self.info = InfoFrame()
         self.info.set_canvas(self.frame_info)       
         self.power_graph = PowerGraph(self.notebook)
         self.torque_deriv_graph = TorqueDerivative(self.notebook)
+        self.slip_ratio = SlipRatio(self.notebook)
         self.notebook.add(self.frame_info, text="Statistics")
         self.notebook.add(self.power_graph.frame, text='Power')
         self.notebook.add(self.torque_deriv_graph.frame, text='Torque\'')
+        self.notebook.add(self.slip_ratio.frame, text='Slip ratio')
     
     def __init__widget_placement(self):
-        self.root.grid_rowconfigure(1, minsize=self.slider_height, weight=self.slider_height)
-        self.root.grid_rowconfigure(2, minsize=self.frameinfo_height, weight=self.frameinfo_height)
-        self.root.grid_columnconfigure(0, minsize=self.slider_width, weight=self.slider_width)
-        self.root.grid_columnconfigure(1, minsize=self.graph_width, weight=self.graph_width)
+        self.root.grid_rowconfigure(1, minsize=self.slider_height, 
+                                       weight=self.slider_height)
+        self.root.grid_rowconfigure(2, minsize=self.frameinfo_height, 
+                                       weight=self.frameinfo_height)
+        self.root.grid_columnconfigure(0, minsize=self.slider_width, 
+                                          weight=self.slider_width)
+        self.root.grid_columnconfigure(1, minsize=self.graph_width, 
+                                          weight=self.graph_width)
         
         self.combobox.grid(row=0, column=0, columnspan=2)
-        self.filter_button.grid(row=0, column=0, columnspan=2, sticky=tkinter.E)
-        self.canvas_slider.get_tk_widget().grid(row=1, column=0, sticky=tkinter.NSEW)
-        self.canvas.get_tk_widget().grid(row=1, column=1, rowspan=2, sticky=tkinter.NSEW)
+        self.filter_button.grid(row=0, column=0, columnspan=2, 
+                                sticky=tkinter.E)
+        self.canvas_slider.get_tk_widget().grid(row=1, column=0, 
+                                                sticky=tkinter.NSEW)
+        self.canvas.get_tk_widget().grid(row=1, column=1, rowspan=2, 
+                                         sticky=tkinter.NSEW)
         self.notebook.grid(row=2, column=0, sticky=tkinter.NSEW)
         self.toolbar.grid(row=3, column=0, columnspan=2, sticky=tkinter.NSEW)
         
@@ -179,9 +195,9 @@ class Window ():
 
         #reduce point count to roughly 125-150 for performance reasons
         decimator = int(len(trace.array) / 125)
-        last = trace.array[-1]
-        start = trace.array[:Trace.REMOVE_FROM_START]
-        trace.array = start + trace.array[Trace.REMOVE_FROM_START:-1:decimator] + [last]
+        trace.array = (trace.array[:Trace.REMOVE_FROM_START] + #start
+                      trace.array[Trace.REMOVE_FROM_START:-1:decimator] +  
+                      [trace.array[-1]]) #force last element
         trace.finish()
 
         final_ratio = Sliders.average_final_ratio(trace.gears)
@@ -189,46 +205,58 @@ class Window ():
         self.fig.clf()
         if self.fig_slider is not None:
             self.fig_slider.clf()
-        self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, title=carname, fig_slider=self.fig_slider)
+        self.gearing = Gearing(trace, self.fig, final_ratio=final_ratio, 
+                               title=carname, fig_slider=self.fig_slider)
         
         self.drag = DragDerivation(trace=None, filename=filename)
-        self.drag.draw_torquelosttodrag(ax=self.gearing.ax, step_kmh=Gearing.STEP_KMH, **self.drag.__dict__)
+        self.drag.draw_torquelosttodrag(ax=self.gearing.ax, 
+                                        step_kmh=Gearing.STEP_KMH, 
+                                        **self.drag.__dict__)
         
-        self.info.carname_changed(carname, packet=None, trace=trace, drag=self.drag)
+        self.info.carname_changed(carname, packet=None, trace=trace, 
+                                  drag=self.drag)
         self.frame_info.update() #required since adding Notebook layer
         self.power_graph.carname_changed(trace=trace)
-        self.torque_deriv_graph.carname_changed(trace=self.drag)        
+        self.torque_deriv_graph.carname_changed(trace=self.drag)
+        self.slip_ratio.carname_changed(trace=trace)
         
     #filename structure:
     def __init__carlist(self):
         self.carlist = {}
         self.carlist_all = {}
-        for entry in os.scandir(Window.TRACE_DIR):
+        for entry in os.scandir(self.TRACE_DIR):
             filename = entry.name
             ordinal = int(filename.split('_')[1][3:])
             pi = int(filename.split('_')[2][2:-5])
+            filepath = self.TRACE_DIR + filename
 
             data = CarData.getinfo(ordinal)
             if data is not None:
                 data.update({'car_performance_index':pi})
-                # carname = f"{data['maker']} {data['model']} ({data['year']}) PI:{pi} {data['group']} o{ordinal}"
                 carname = NAMESTRING(data)
-                trace = Trace(fromfile=True, filename=Window.TRACE_DIR + filename)
-                self.carlist_all[carname] = Window.TRACE_DIR + filename
+                trace = Trace(fromfile=True, filename=filepath)
+                self.carlist_all[carname] = filepath
                 if len(trace.data) > 0:
-                    self.carlist[carname] = Window.TRACE_DIR + filename
+                    self.carlist[carname] = filepath
             else:
                 print(f'ordinal {ordinal} NOT FOUND')
         print(f'filtered car list contains {len(self.carlist)} items')
         print(f'total car list contains {len(self.carlist_all)} items')
 
-class PowerGraph():
+class NotebookFrame():
+    FIG_X, FIG_Y = 546, 328
     def __init__(self, frame):
         self.frame = tkinter.Frame(frame)
-        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=72)
+        px = 1/plt.rcParams['figure.dpi'] # pixel in inches
+        self.fig = Figure(figsize=(self.FIG_X*px, self.FIG_Y*px), dpi=72, 
+                          layout="constrained")
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
+        self.canvas.get_tk_widget().pack(fill='both', expand=True)
+    
+    def draw_idle(self):
+        self.canvas.draw_idle()
 
+class PowerGraph(NotebookFrame):
     def carname_changed(self, trace):
         self.fig.clf()
         ax = self.fig.subplots(1)
@@ -238,50 +266,87 @@ class PowerGraph():
         for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
              ax.get_xticklabels() + ax.get_yticklabels()):
             item.set_fontsize(8)
-        self.fig.tight_layout()
-        self.canvas.draw_idle()
+        self.draw_idle()
 
 #focuses on the numeric derivative of torque after peak power is reached
-#discounting noise, it can be observed that some cars have a linear drop in torque
-#while others have a gentle quadratic slope.
-class TorqueDerivative():
-    DERIVE = False
-    def __init__(self, frame):
-        self.frame = tkinter.Frame(frame)
-        self.fig = Figure(figsize=(546/100.0, 328/100.0), dpi=72)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.frame)
-        self.canvas.get_tk_widget().pack(fill='both')#, expand=True)
-
+#discounting noise, it can be observed that some cars have a linear drop in 
+#torque while others have a gentle quadratic slope.
+class TorqueDerivative(NotebookFrame):
     def carname_changed(self, trace):
         self.fig.clf()
         ax = self.fig.subplots(1)
-        rpm, torque, power = trace.rpm, trace.torque, trace.power #zip(*sorted(zip(trace.rpm, trace.torque, trace.power)))
-        rpm = np.array(rpm)
-        torque = np.array(torque)
-        power = np.array(power)
-       # time = np.linspace(0, (len(trace.torque)-1)/60, len(trace.torque))
-        torque_deriv = np.gradient(torque, rpm)
-        i = np.argmax(power)
-        torque_deriv_sorted = sorted(torque_deriv[i:])
-        percentile = lambda array, pct: array[int(pct/100*len(array))]
-        ymin = percentile(torque_deriv_sorted, 5)
-        ymax = percentile(torque_deriv_sorted, 95)
+        i = np.argmax(trace.power)
+        torque_deriv = np.gradient(trace.torque, trace.rpm)[i:]
+                
+        ymin = np.percentile(torque_deriv, 5)
+        ymax = np.percentile(torque_deriv, 95)
         
-        torque_deriv_filtered = [t for t in torque_deriv[i:] if t > ymin and t < ymax]
+        torque_deriv_filtered = torque_deriv[(torque_deriv > ymin) & 
+                                             (torque_deriv < ymax)]
         ax.plot(torque_deriv_filtered)
         ax.grid()
         ax.set_ylim(ymin, ymax)
-        self.kw = self.fig.text(0.00, 0.008, "Nm' / points  5/95% filtered derivative of torque past peak power")
+        ax.set_xlabel("Nm' / points  5/95% filtered derivative of torque past peak power")
         for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
              ax.get_xticklabels() + ax.get_yticklabels()):
             item.set_fontsize(8)
-        self.fig.tight_layout()
-        self.canvas.draw_idle()
+        self.draw_idle()
 
+#derives slip ratio during trace and relates it to the normalized slip ratio in
+#the packets.
+class SlipRatio(NotebookFrame):
+    TIRES = ['FL', 'FR', 'RL', 'RR']
+    
+    def carname_changed(self, trace):
+        if trace.version < 2:
+            return
+        self.fig.clf()
+        ax = self.fig.subplots(1)
+        data = trace.data_to_fdp()
+        sizes = ([float(trace.carinfo.get('wheelsize_front', 0)) / 100] * 2 + 
+                 [float(trace.carinfo.get('wheelsize_rear',  0)) / 100] * 2)
+        for tire, size in zip(self.TIRES, sizes):
+            x,y = zip(*self.get_slipratio_for_wheel(tire, size, data))
+            ax.scatter(x[20:],y[20:], label=tire, s=2)
+        ax.legend()
+        ax.grid()
+        ax.set_xlabel("game normalized slip ratio")
+        ax.set_ylabel("calculated slip ratio")
+        self.draw_idle()
+    
+    @staticmethod
+    def get_slipratio_for_wheel(tire, size, data):
+        output = []
+        for p in data:
+            base_rotation_speed = p.speed / size
+            rotation_speed = getattr(p, f'wheel_rotation_speed_{tire}')
+            slip_ratio = getattr(p, f'tire_slip_ratio_{tire}')
+#            output.append((p.speed  / p.torque, slip_ratio))
+            output.append((slip_ratio, rotation_speed / base_rotation_speed))
+            
+        return output
+    
+         #   val = [(self.wheelsize[tire] / (p.speed / getattr(p, f'wheel_rotation_speed_{tire}')) - 1) / getattr(p, f'tire_slip_ratio_{tire}') for p in data]
+            #val = butter_lowpass_filter(val, cutoff, fs, order)  
+          #  self.tiredata[tire] = statistics.median(val)
+    
+    # @staticmethod
+    # def wheelsizes_of(fdp):
+    #     for wheel, side in zip(TIRES, [self.front]*2 + [self.rear]*2):
+    #         rotation_speed = abs(getattr(fdp, f"wheel_rotation_speed_{wheel}"))
+    #         if rotation_speed == 0:
+    #             continue
+    #         radius = 100 * fdp.speed  / rotation_speed #convert to cm
+    #         # if (radius < GUIWheelsize.WHEELSIZE_MIN or 
+    #         #     radius > GUIWheelsize.WHEELSIZE_MAX):
+    #         #     continue
+    #         side.update(radius)
+    
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
     CARNAME_FONTSIZE = 7
     TABLE_FONTSIZE = 8
+    DRIVETRAINS = ['FWD', 'RWD', 'AWD']
     
     def __init__(self, *args, **kwargs):        
         self.carname_var = tkinter.StringVar(value='')
@@ -326,49 +391,55 @@ class InfoFrame():
     def set_canvas(self, frame, opts={}):
         frame.columnconfigure(5, weight=1000)
         table = [self.carname_var, 
-                 ['Peak power:', self.peak_power_var, 'kW @', self.peak_power_rpm_var, 'rpm'], 
-                 ['Peak torque:', self.peak_torque_var, 'Nm @', self.peak_torque_rpm_var, 'rpm'],
-                 ['Peak boost:', self.peak_boost_var, 'bar'],
-                 ['Revlimit:', self.revlimit_var, ''],
-                 ['Engine:', self.engine_idle_rpm_var, 'rpm idle,', self.engine_max_rpm_var, 'rpm max'],
-                 ['Num cylinders:', self.num_cylinders_var, ''], 
-                 ['Top speed:', self.top_speed_var, 'km/h'],
-                 ['vmax:', self.true_top_speed_var, 'km/h @', self.true_top_speed_ratio_var, 'ratio'],
-                 ['Drag value:', self.drag_var, ' (100*C*wheelsize*efficiency)'],
-                 ['Drivetrain:', self.drivetrain_var, ''],
-                 ['Drivetrain loss:', self.transmission_efficiency_var, '%'],
-                 ['Wheel radius:', self.wheelsize_front_var, 'front,', self.wheelsize_rear_var, 'rear (cm)'],
-                 # ['Shift duration:', self.shiftdelay_var, 'seconds'],
-                 ['Stock weight:', self.weight_var, 'kg'],
-                 # ['Center diff:', self.center_diff_var, '% to rear if AWD'],
-                 # ['Max slip ratio:', self.max_slipratio_front_var, '% front, ', self.max_slipratio_rear_var, '% rear']
-                 # ['Torque limit:', self.torque_limit_var, 'Nm']
+                ['Peak power:', self.peak_power_var, 'kW @', 
+                                               self.peak_power_rpm_var, 'rpm'], 
+                ['Peak torque:', self.peak_torque_var, 'Nm @', 
+                                              self.peak_torque_rpm_var, 'rpm'],
+                ['Peak boost:', self.peak_boost_var, 'bar'],
+                ['Revlimit:', self.revlimit_var, ''],
+                ['Engine:', self.engine_idle_rpm_var, 'rpm idle,', 
+                                           self.engine_max_rpm_var, 'rpm max'],
+                ['Num cylinders:', self.num_cylinders_var, ''], 
+                ['Top speed:', self.top_speed_var, 'km/h'],
+                ['vmax:', self.true_top_speed_var, 'km/h @', 
+                                       self.true_top_speed_ratio_var, 'ratio'],
+                ['Drag value:', self.drag_var,' (100*C*wheelsize*efficiency)'],
+                ['Drivetrain:', self.drivetrain_var, ''],
+                ['Drivetrain loss:', self.transmission_efficiency_var, '%'],
+                ['Wheel radius:', self.wheelsize_front_var, 'front,', 
+                                         self.wheelsize_rear_var, 'rear (cm)'],
+                # ['Shift duration:', self.shiftdelay_var, 'seconds'],
+                ['Stock weight:', self.weight_var, 'kg'],
+                # ['Center diff:', self.center_diff_var, '% to rear if AWD'],
+                # ['Max slip ratio:', self.max_slipratio_front_var, '% front, ', self.max_slipratio_rear_var, '% rear']
+                # ['Torque limit:', self.torque_limit_var, 'Nm']
             ]
         
     #    entry_centerdiff_validation = self.root.register(Window.entry_centerdiff_validation)
-        self.entries = {}
         
         opts.update({'font': tkinter.font.Font(size=self.TABLE_FONTSIZE)})
         carname_opts = opts.copy()
         carname_opts['font'] = tkinter.font.Font(size=self.CARNAME_FONTSIZE)
-        tkinter.Label(frame, textvariable=table[0], **carname_opts).grid(row=0, column=0, columnspan=6, sticky=tkinter.W)
+        tkinter.Label(frame, textvariable=table[0], **carname_opts).grid(
+                               row=0, column=0, columnspan=6, sticky=tkinter.W)
         for i, row in enumerate(table[1:], start=1):
-            tkinter.Label(frame, text=row[0], **opts).grid(row=i, column=0, sticky=tkinter.E)
-            if row[0] == 'Weight:' or row[0] == 'Center diff:':
-                self.entries[row[0]] = tkinter.Entry(frame, textvariable=row[1], width=5, state=tkinter.DISABLED, **opts)
-                                                  #   validate='all', validatecommand=(entry_centerdiff_validation, '%P'))
-                self.entries[row[0]].grid(row=i, column=1)
-            else:
-                tkinter.Label(frame, textvariable=row[1], **opts).grid(row=i, column=1)
-                
+            tkinter.Label(frame, text=row[0], **opts).grid(row=i, column=0, 
+                                                           sticky=tkinter.E)
+            tkinter.Label(frame, textvariable=row[1], **opts).grid(row=i, 
+                                                                   column=1)
             if len(row) == 3:
-                tkinter.Label(frame, text=row[2], **opts).grid(row=i, column=2, columnspan=3, sticky=tkinter.W)
+                tkinter.Label(frame, text=row[2], **opts).grid(
+                               row=i, column=2, columnspan=3, sticky=tkinter.W)
             else:
-                tkinter.Label(frame, text=row[2], **opts).grid(row=i, column=2, sticky=tkinter.W)
-                tkinter.Label(frame, textvariable=row[3], **opts).grid(row=i, column=3)
-                tkinter.Label(frame, text=row[4], **opts).grid(row=i, column=4, sticky=tkinter.W)
+                tkinter.Label(frame, text=row[2], **opts).grid(
+                                             row=i, column=2, sticky=tkinter.W)
+                tkinter.Label(frame, textvariable=row[3], **opts).grid(
+                                                               row=i, column=3)
+                tkinter.Label(frame, text=row[4], **opts).grid(
+                                             row=i, column=4, sticky=tkinter.W)
 
-     #  self.revlimit_var.set(int(25*round(drag.rpm[-1]/25, 0))) #round to nearest 25 #maybe use elsewhere?
+        #round to nearest 25 #maybe use elsewhere?
+     #  self.revlimit_var.set(int(25*round(drag.rpm[-1]/25, 0))) 
     def carname_changed(self, carname=None, packet=None, trace=None, drag=None):
         self.reset_vars()
                 
@@ -403,7 +474,7 @@ class InfoFrame():
             self.num_cylinders_var.set(packet.num_cylinders)
             self.engine_idle_rpm_var.set(int(round(packet.engine_idle_rpm, 0)))
             self.engine_max_rpm_var.set(int(round(packet.engine_max_rpm, 0))) 
-            self.drivetrain_var.set(['FWD', 'RWD', 'AWD'][packet.drivetrain_type])
+            self.drivetrain_var.set(self.DRIVETRAINS[packet.drivetrain_type])
         
         if trace is not None: #trace_v0plus
             source = drag if drag is not None else trace
@@ -414,13 +485,15 @@ class InfoFrame():
             self.peak_torque_var.set(round(max(source.torque), 1))
             self.peak_torque_rpm_var.set(int(source.rpm[peak_torque_index]))
             self.revlimit_var.set(math.ceil(source.rpm[-1]))
-            self.top_speed_var.set(round(drag.top_speed_by_drag(**drag.__dict__), 1))
-            gear_ratio, top_speed = drag.optimal_final_gear_ratio(**drag.__dict__)
+            self.top_speed_var.set(round(drag.top_speed_by_drag(
+                                                          **drag.__dict__), 1))
+            gear_ratio, top_speed = drag.optimal_final_gear_ratio(
+                                                               **drag.__dict__)
             self.true_top_speed_var.set(round(top_speed, 1))
             self.true_top_speed_ratio_var.set(round(gear_ratio, 3))
         
         if packet is None and trace_v1plus:
-            self.drivetrain_var.set(trace.carinfo.get('drivetrain_type', 'N/A'))
+            self.drivetrain_var.set(trace.carinfo.get('drivetrain_type','N/A'))
         
         if trace_v1plus:
             wheelsize_front = float(trace.carinfo.get('wheelsize_front', 0))
@@ -438,18 +511,21 @@ class InfoFrame():
                 self.center_diff_var.set(100)
                 # self.centerdiffentryenabled(False)
             elif self.drivetrain_var.get() == 'AWD':
-                wheelsize = ((1-InfoFrame.DEFAULT_CENTERDIFF/100)*wheelsize_front 
-                             + InfoFrame.DEFAULT_CENTERDIFF/100*wheelsize_rear)
+                wheelsize = (
+                        (1-InfoFrame.DEFAULT_CENTERDIFF/100)*wheelsize_front 
+                         + InfoFrame.DEFAULT_CENTERDIFF/100*wheelsize_rear)
                 self.center_diff_var.set(InfoFrame.DEFAULT_CENTERDIFF)
                 # self.centerdiffentryenabled(True)
 
-
             shift_delay = trace.carinfo.get('shiftdelay', 0)
-            shift_delay = f"±{shift_delay/60:.3f}" if shift_delay != 0 else 'N/A'
+            shift_delay = f"±{shift_delay/60:.3f}" if shift_delay!=0 else 'N/A'
             self.shiftdelay_var.set(shift_delay)
 
         if (trace_v1plus and packet) or trace_v2:
-            efficiency = 1/statistics.median((drag.torque_adj - drag.C*drag.speed*drag.speed)/wheelsize/drag.accel/self.weight_var.get()) if wheelsize not in ['N/A', 0] else 0
+            if wheelsize not in ['N/A', 0]:
+                efficiency = 1/statistics.median((drag.torque_adj - drag.C*drag.speed*drag.speed)/wheelsize/drag.accel/self.weight_var.get())
+            else:
+                efficiency = 0
             self.transmission_efficiency_var.set(f'{100 - efficiency:.1f}')
             self.drag_var.set(round(100* drag.C / wheelsize * efficiency, 1))
 
@@ -463,7 +539,9 @@ class InfoFrame():
 
     #reset all object variables that end in _var
     def reset_vars(self):
-        [var.set('N/A') for key, var in self.__dict__.items() if key[-4:] == '_var']
+        for key, var in self.__dict__.items():
+            if key[-4:] == '_var':
+                var.set('N/A')
             
     #TODO: investigate
     def derive_max_torque(self, data, drivetrain_type, drag):
@@ -479,13 +557,17 @@ class InfoFrame():
         max_torque = []
         for p in data:
             wheel_force = p.torque*ratio/2
-            max_torque.extend([wheel_force/getattr(p, f'tire_slip_ratio_{tire}') for tire in tires])
-        torque_limit = statistics.median(sorted(max_torque)[int(len(max_torque)/20):int(len(max_torque)/10)])
-        print(sorted(max_torque)[int(len(max_torque)/20):int(len(max_torque)/10)])
+            max_torque.extend([wheel_force/getattr(p,f'tire_slip_ratio_{tire}')
+                                                            for tire in tires])
+            low = int(len(max_torque)/20)
+            high= int(len(max_torque)/10)
+        torque_limit = statistics.median(sorted(max_torque)[low:high])
+        print(sorted(max_torque)[low:high])
         self.torque_limit_var.set(int(torque_limit))
 
     #TODO: investigate
-    def derive_max_slipratio(self, data, wheelsize_front, wheelsize_rear, drawgraph=False):
+    def derive_max_slipratio(self, data, wheelsize_front, wheelsize_rear, 
+                                                              drawgraph=False):
         wheelsize = {'FL': wheelsize_front/100, 'FR': wheelsize_front/100,
                      'RL': wheelsize_rear/100, 'RR': wheelsize_rear/100}
         tiredata = {}
@@ -494,7 +576,9 @@ class InfoFrame():
         count = len(data)
         ymin, ymax = 1, 0
         for tire in ['FL', 'FR', 'RL', 'RR']:
-            val = [(wheelsize[tire] / (p.speed / getattr(p, f'wheel_rotation_speed_{tire}')) - 1) / getattr(p, f'tire_slip_ratio_{tire}') for p in data]
+            val = [(wheelsize[tire] / (p.speed / 
+                    getattr(p, f'wheel_rotation_speed_{tire}')) - 1) / 
+                    getattr(p, f'tire_slip_ratio_{tire}') for p in data]
             #val = butter_lowpass_filter(val, cutoff, fs, order)  
             tiredata[tire] = statistics.median(val)
             if drawgraph:
@@ -535,7 +619,8 @@ class Gear():
     def get_points(self):
         full_ratio = self.ratio*self.final_ratio
         x = [x/full_ratio for x in self.trace.rpm if x <= self.rpmlimit]
-        y = [x*full_ratio for x,y in zip(self.trace.torque, self.trace.rpm) if y <= self.rpmlimit]
+        y = [x*full_ratio for x,y in zip(self.trace.torque, self.trace.rpm) 
+                                                         if y <= self.rpmlimit]
         return (x,y)
 
     def add_slider(self, ax, slider):
@@ -562,53 +647,65 @@ class Gear():
 class Gearing ():
     STEP_KMH = 25
     
-    def __init__(self, trace, fig=None, final_ratio=1, title=None, fig_slider=None,
-                 car_ordinal=None, car_performance_index=None):
+    def __init__(self, trace, fig=None, final_ratio=1, title=None, 
+                 fig_slider=None,car_ordinal=None, car_performance_index=None):
         if fig == None:
-            self.fig, (self.ax, ax2) = plt.subplots(2,1, gridspec_kw={'height_ratios': [2,1]})
+            self.fig, (self.ax, ax2) = plt.subplots(2,1, 
+                                          gridspec_kw={'height_ratios': [2,1]})
             self.fig.set_size_inches(16, 10)
         else:
             self.fig = fig
-            self.ax, ax2 = self.fig.subplots(2,1, gridspec_kw={'height_ratios': [2,1]})
+            self.ax, ax2 = self.fig.subplots(2,1,
+                                          gridspec_kw={'height_ratios': [2,1]})
 
-        self.__init__graph(trace, final_ratio, title, car_ordinal, car_performance_index)
+        self.__init__graph(trace, final_ratio, title, car_ordinal, 
+                           car_performance_index)
         self.__init__power_contour()
         
-        self.legend = self.ax.legend()  #force add legend to axis due to extra legend being added later
-        self.ax.add_artist(self.legend) #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
+        #force add legend to axis due to extra legend being added later
+        #see https://matplotlib.org/stable/tutorials/intermediate/legend_guide.html
+        self.legend = self.ax.legend()  
+        self.ax.add_artist(self.legend) 
         
-       # self.fig.tight_layout()
+       # self.fig.tight_layout() #changed to constrained layout when Figure is defined
         
         separate_fig = True
         if fig_slider == None:
             fig_slider = self.fig
             separate_fig = False            
         self.sliders = Sliders(fig_slider, self.final_ratio, self.gears, 
-                               self.trace, self.xmax, self.rpmperkmh, separate_fig)
+                               self.trace, self.xmax, self.rpmperkmh, 
+                               separate_fig)
         self.sliders.final_ratio_onchanged(self.update_final_ratio)
         self.sliders.rpmlimit_onchanged(self.update_rpmlimit)
         self.sliders.integral_onchanged(self.update_integral)
         
-        self.shiftrpm = ShiftRPM(fig_slider, self.ax, self.gears, self.legend, self.fig.canvas.draw_idle)
+        self.shiftrpm = ShiftRPM(fig_slider, self.ax, self.gears, self.legend, 
+                                 self.fig.canvas.draw_idle)
         
-        self.differencegraph = DifferenceGraph(ax2, self.gears, self.power_contour, 
-                                               self.rpmperkmh, self.xmax, self.xticks)
+        self.differencegraph = DifferenceGraph(ax2, self.gears, 
+                                               self.power_contour, 
+                                               self.rpmperkmh, self.xmax, 
+                                               self.xticks)
         
-        fig_text = fig_slider if fig_slider is not None else fig #TODO: move integral text to DifferenceGraph?
-        self.integral_text = fig_text.text(*Sliders.axes['integral_text'], "Gearing efficiency: 100% in range")
+        #TODO: move integral text to DifferenceGraph?
+        fig_text = fig_slider if fig_slider is not None else fig 
+        self.integral_text = fig_text.text(*Sliders.axes['integral_text'], 
+                                           "Gearing efficiency: 100% in range")
         
         self.disclaimer = fig_text.text(*Sliders.axes['disclaimer'], 'Shift rpm values valid if and only if: \nFull throttle, shift duration is 0, no traction limit')
         
         self.print_integral()
 
-    def __init__graph(self, trace, final_ratio, title, car_ordinal, car_performance_index):
+    def __init__graph(self, trace, final_ratio, title, car_ordinal, 
+                      car_performance_index):
         self.trace = trace
         self.final_ratio = final_ratio
         self.trace.gears = [g/final_ratio for g in self.trace.gears]
 
         self.gears = []
         for i, ratio in enumerate(self.trace.gears):
-            self.gears.append(Gear(i, trace, self.ax, self.update, final_ratio))
+            self.gears.append(Gear(i, trace, self.ax, self.update,final_ratio))
         
         #sort rpm and torque to be monotonically increasing on rpm
         rpm, torque = zip(*sorted(zip(self.trace.rpm, self.trace.torque)))
@@ -616,13 +713,16 @@ class Gearing ():
         self.trace.torque = np.array(torque)
 
         #1 km/h per x rpm, scaled to final ratio
-        self.rpmperkmh = (statistics.median([(a/b) for (a, b) in zip(self.trace.rpm, self.trace.speed)]) /
-               (self.trace.gears[self.trace.gear_collected-1]*self.final_ratio))
+        self.rpmperkmh = (statistics.median([(a/b) 
+               for (a, b) in zip(self.trace.rpm, self.trace.speed)]) /
+              (self.trace.gears[self.trace.gear_collected-1]*self.final_ratio))
         valstep = Gearing.STEP_KMH*self.rpmperkmh
 
         #if the x values are converted to speed, we seem to lose accuracy in drawing the power contour
         #therefore, use rpm/ratio and hide the xtick true values
-        self.xmax = math.ceil(self.trace.rpm[-1]/(self.gears[-1].ratio*self.final_ratio)*valstep)/valstep
+        self.xmax = math.ceil(self.trace.rpm[-1]/
+                              (self.gears[-1].ratio*self.final_ratio)
+                              *valstep)/valstep
         self.xticks = np.arange(0,self.xmax+valstep,valstep)
 
         ymax = max(self.trace.torque*self.gears[0].ratio*self.final_ratio)*1.01
@@ -631,7 +731,8 @@ class Gearing ():
         self.ax.set_xticks(self.xticks)
         self.ax.set_xlabel("speed (km/h)")
         self.ax.set_ylabel("torque (Nm)")
-        self.ax.set_xticklabels([math.ceil(x/self.rpmperkmh) for x in self.xticks])
+        self.ax.set_xticklabels([math.ceil(x/self.rpmperkmh) 
+                                                         for x in self.xticks])
         
         self.ax.grid()
         
@@ -647,15 +748,6 @@ class Gearing ():
                 print("we missing a title")
         self.ax.set_title(title)  
 
-    # def find_intersections(self):
-    #     self.data = [graph.get_points() for graph in self.gears]
-    #   #  data = [(x, y-self.power_contour(x)) for x,y in data]
-    #     intersections = [intersect.intersection(x1, y1, x2, y2) for (x1,y1), (x2, y2) in zip(self.data[:-1], self.data[1:])]
-    #     ratios = [graph.ratio*self.final_ratio for graph in self.gears]
-    #     intersections = [x*r for (x,y),r in zip(intersections, ratios)]
-    #     #print(intersections)
-    #     return intersections
-
     def __init__power_contour(self):
         i = self.trace.power.argmax()
         peak_power_torque = self.trace.torque[i]
@@ -663,7 +755,8 @@ class Gearing ():
 
         self.power_contour = lambda rpm: peak_power_torque*peak_power_rpm/rpm
         rpmmax = int(2*self.trace.rpm[-1])
-        self.ax.plot(self.power_contour(range(1, rpmmax)), label='Peak power torque')
+        self.ax.plot(self.power_contour(range(1, rpmmax)), 
+                     label='Peak power torque')
 
     def update_integral(self, value):
         self.sliders.lower, self.sliders.upper = value
@@ -674,14 +767,16 @@ class Gearing ():
        x,y = self.differencegraph.get_difference()
        lower = self.sliders.lower*self.rpmperkmh
        upper = self.sliders.upper*self.rpmperkmh
-       y = [b+self.power_contour(a) for a, b in zip(x, y) if a >= lower and a <= upper]
+       y = [b+self.power_contour(a) for a, b in zip(x, y) 
+                                                  if a >= lower and a <= upper]
        x = [a for a in x if a >= lower and a <= upper]
        
        maximum = math.log(upper/lower)*self.power_contour(1)
        #print(x, y)
        integral = np.trapz(y, x)
        percentage = 100*integral/maximum
-       self.integral_text.set_text(f"Gearing efficiency: {percentage:5.1f}% in range")
+       self.integral_text.set_text(
+                            f"Gearing efficiency: {percentage:5.1f}% in range")
        self.fig.canvas.draw_idle()
 
     def update_rpmlimit(self, value):
@@ -698,8 +793,9 @@ class Gearing ():
 
     def update(self, value):
         self.redraw_difference()
-        for text, gear, next_gear in zip(self.sliders.rel_ratios_text, self.gears[:-1], self.gears[1:]):
-            text.set_text(f'{gear.ratio/next_gear.ratio:.2f}')
+        for text, gear, next_gear in zip(self.sliders.rel_ratios_text, 
+                                         self.gears[:-1], self.gears[1:]):
+            text.set_text(f'{gear.ratio/next_gear.ratio:.3f}')
 
     def redraw_difference(self):
         self.differencegraph.redraw_difference()
@@ -731,67 +827,30 @@ class Sliders ():
             }
 
     #TODO: split __init__ up into sub functions
-    def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, separate_fig=False):
+    def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, 
+                 separate_fig=False):
         if separate_fig:
          #   Sliders.xmin, Sliders.xmax = 0.2, 1.1
-            Sliders.axes = {'final_gear':            [0.17, 0.95,           0.74, 0.025],
-                            'gears':       lambda g: [0.17, 0.90-0.06*g,    0.74, 0.025],
-                            'rel_ratios':  lambda g: [0.82, 0.87-0.06*g],
-                            'reset':                 [0.7, 0.27,            0.2, 0.08],
-                            'rpmlimit':              [0.18, 0.22,           0.7, 0.025],
-                            'integral':              [0.18, 0.16,           0.6, 0.025],
-                            'integral_text':         [0.21, 0.13],
-                            'checkbutton':           [0.21, 0.00, 0.2, 0.2],
-                            'disclaimer':            [0.01, 0.01]
-                            }
+            Sliders.axes = {
+                'final_gear':            [0.17, 0.95,           0.74, 0.025],
+                'gears':       lambda g: [0.17, 0.90-0.06*g,    0.74, 0.025],
+                'rel_ratios':  lambda g: [0.82, 0.87-0.06*g],
+                'reset':                 [0.7, 0.27,            0.2, 0.08],
+                'rpmlimit':              [0.18, 0.22,           0.7, 0.025],
+                'integral':              [0.18, 0.16,           0.6, 0.025],
+                'integral_text':         [0.21, 0.13],
+                'checkbutton':           [0.21, 0.00, 0.2, 0.2],
+                'disclaimer':            [0.01, 0.01] }
         else:
             # create space for sliders
             fig.subplots_adjust(left=self.xmax)
 
         self.__init__gearsliders(fig, final_ratio, gears, trace)
-
-        # Create a `matplotlib.widgzets.Button` to reset the sliders to initial values.
-        self.ax_reset = fig.add_axes(self.axes['reset']) #0.72
-        self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
-        def reset(event):
-            self.final_gear_slider.reset()
-            self.rpmlimit_slider.reset()
-            for graph in gears:
-                graph.slider.reset()
-        self.button.on_clicked(reset)
-        
-        #create slider to limit rpm/torque graph to the defined rpm limit 
-        #(think redline limit for automatic transmission)
-        self.rpmlimit_ax = fig.add_axes(self.axes['rpmlimit'])
-        self.rpmlimit_slider = Slider(
-            ax=self.rpmlimit_ax,
-            label='RPM limit',
-            valmin=trace.rpm[0],
-            valmax=trace.rpm[-1],
-            valinit=trace.rpm[-1],
-         #   valstep = 50
-        )
-        
-        #default to peak power in first and last gear
-        i = trace.power.argmax()
-        if len(gears) == 1:
-            self.lower = 1
-            self.upper = xmax/rpmperkmh
-        else:
-            self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
-            self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
-        self.integral_ax = fig.add_axes(self.axes['integral'])
-        self.integral_slider = RangeSlider(
-            ax=self.integral_ax,
-            label='Integral\nlimits',
-            valmin=0,
-            valmax=xmax/rpmperkmh,
-            closedmin=False,
-            closedmax=True,
-            valinit=(self.lower, self.upper),
-            valstep=1,
-            valfmt = "%4.0f" #override default to avoid 1.001 as value
-        )
+        self.__init__rel_ratios(fig, gears)
+        self.__init__resetbutton(fig, gears)
+        self.__init__rpmlimitslider(fig, trace)
+        self.__init__integralslider(fig, final_ratio, gears, trace, xmax, 
+                                    rpmperkmh)
     
     def __init__gearsliders(self, fig, final_ratio, gears, trace):
         final_slider_limit, gear_slider_limit = self.slider_limits(final_ratio)
@@ -824,19 +883,67 @@ class Sliders ():
             gear.add_slider(ax, slider) #for resetting
             gear.slider.on_changed(gear.update)
 
+        #connect sliders: the ratio per slider must be between previous 
+        #and next gear's ratios            
+        for a, b in zip(gears[:-1], gears[1:]):
+            b.slider.slidermax = a.slider
+            a.slider.slidermin = b.slider
+            
+    
+    def __init__rel_ratios(self, fig, gears):
         self.rel_ratios_text = []
         for gear, next_gear in zip(gears[:-1], gears[1:]):
             text = fig.text(*self.axes['rel_ratios'](gear.gear), 
                                           f'{gear.ratio/next_gear.ratio:.3f}')
             self.rel_ratios_text.append(text)
-
-        #connect sliders: the ratio per slider must be between previous and next gear's ratios
-        prev_gear = None
-        for a, next_gear in zip(gears, gears[1:]+[None]):
-            a.slider.slidermax = prev_gear.slider if prev_gear is not None else None
-            a.slider.slidermin = next_gear.slider if next_gear is not None else None
-            prev_gear = a
     
+    #Create a matplotlib.widgets.Button to reset the sliders to initial values.
+    def __init__resetbutton(self, fig, gears):
+        self.ax_reset = fig.add_axes(self.axes['reset'])
+        self.button = Button(self.ax_reset, 'Reset', hovercolor='0.975')
+        def reset(event):
+            self.final_gear_slider.reset()
+            self.rpmlimit_slider.reset()
+            for graph in gears:
+                graph.slider.reset()
+        self.button.on_clicked(reset)
+    
+    #create slider to limit rpm/torque graph to the defined rpm limit 
+    #(think redline limit for automatic transmission)
+    def __init__rpmlimitslider(self, fig, trace):
+        self.rpmlimit_ax = fig.add_axes(self.axes['rpmlimit'])
+        self.rpmlimit_slider = Slider(
+            ax=self.rpmlimit_ax,
+            label='RPM limit',
+            valmin=trace.rpm[0],
+            valmax=trace.rpm[-1],
+            valinit=trace.rpm[-1],
+         #   valstep = 50
+        )
+        
+    def __init__integralslider(self, fig, final_ratio, gears, trace, xmax, 
+                                                                    rpmperkmh):
+        #default to peak power in first and last gear
+        i = trace.power.argmax()
+        if len(gears) == 1:
+            self.lower = 1
+            self.upper = xmax/rpmperkmh
+        else:
+            self.lower = trace.rpm[i]/gears[0].ratio/final_ratio/rpmperkmh
+            self.upper = trace.rpm[i]/gears[-1].ratio/final_ratio/rpmperkmh
+        self.integral_ax = fig.add_axes(self.axes['integral'])
+        self.integral_slider = RangeSlider(
+            ax=self.integral_ax,
+            label='Integral\nlimits',
+            valmin=0,
+            valmax=xmax/rpmperkmh,
+            closedmin=False,
+            closedmax=True,
+            valinit=(self.lower, self.upper),
+            valstep=1,
+            valfmt = "%4.0f" #override default to avoid 1.001 as value
+        )
+        
     def final_ratio_onchanged(self, func):
         self.final_gear_slider.on_changed(func)    
         
@@ -849,15 +956,17 @@ class Sliders ():
     @classmethod
     def slider_limits(cls, final_ratio):
         if final_ratio == 1:
-            final_slider_settings = {'valmin': cls.FINALRATIO_MIN / cls.FINALRATIO_MAX,
-                                     'valmax': cls.FINALRATIO_MAX / cls.FINALRATIO_MIN}
-            gear_slider_settings = {'valmin': cls.FINALRATIO_MIN * cls.GEARRATIO_MIN,
-                                    'valmax': cls.FINALRATIO_MAX * cls.GEARRATIO_MAX}
+            final_slider_settings = {
+                            'valmin': cls.FINALRATIO_MIN / cls.FINALRATIO_MAX,
+                            'valmax': cls.FINALRATIO_MAX / cls.FINALRATIO_MIN }
+            gear_slider_settings = {
+                            'valmin': cls.FINALRATIO_MIN * cls.GEARRATIO_MIN,
+                            'valmax': cls.FINALRATIO_MAX * cls.GEARRATIO_MAX }
         else:
             final_slider_settings = {'valmin': cls.FINALRATIO_MIN,
-                                     'valmax': cls.FINALRATIO_MAX}
+                                     'valmax': cls.FINALRATIO_MAX }
             gear_slider_settings = {'valmin': cls.GEARRATIO_MIN,
-                                    'valmax': cls.GEARRATIO_MAX}
+                                    'valmax': cls.GEARRATIO_MAX }
 
         return (final_slider_settings, gear_slider_settings)
         
@@ -875,22 +984,18 @@ class ShiftRPM ():
         self.ax_graph = ax_graph
         self.gears = gears
         self.legend = legend
+        self.draw_func = draw_func
                 
         self.ax = fig.add_axes(Sliders.axes['checkbutton']) 
         self.ax.axis('off') #remove black border around axis
-        self.buttons = CheckButtons(self.ax, ["Display shift RPM lines"], actives=[ShiftRPM.DEFAULTSTATE])
+        self.buttons = CheckButtons(self.ax, ["Display shift RPM lines"], 
+                                    actives=[ShiftRPM.DEFAULTSTATE])
         self.buttons.on_clicked(self.set_visibility)
         
         _, self.ymax = self.ax_graph.get_ylim()
         intersections = self.get_intersections()
         self.vlines = [ax_graph.vlines(i, 0.0, self.ymax, linestyle=':') 
-                                   for i, g in zip(intersections, self.gears)]
-        
-        self.draw_func = draw_func
-        
-        # for i, g in zip(intersections, self.gears):
-        #     g.plot.set_label(f"Gear {g.gear+1}, shift at {i * g.final_ratio * g.ratio:5.0f} rpm")
-
+                                    for i, g in zip(intersections, self.gears)]
         self.set_visibility(None)
         
     def set_visibility(self, _):
@@ -909,21 +1014,22 @@ class ShiftRPM ():
         intersections = self.get_intersections()      
         
         for i, g, t in zip(intersections, self.gears, self.legend.get_texts()):
-            t.set_text(f"Gear {g.gear+1}, shift at {i * g.final_ratio * g.ratio:5.0f} rpm")
+            shiftrpm = i * g.final_ratio * g.ratio
+            t.set_text(f"Gear {g.gear+1}, shift at {shiftrpm:5.0f} rpm")
 
-        if not all(self.buttons.get_status()):#assumes single checkbutton
+        if not all(self.buttons.get_status()): #assumes single checkbutton
             return
 
         for x, vline in zip(intersections, self.vlines):
-            vline.set_segments( [np.array([[x, 0.0],[x, self.ymax]])])
+            vline.set_segments([np.array([[x, 0.0],[x, self.ymax]])])
         
     def get_intersections(self):
         X = 0 #axis
         data = [graph.get_points() for graph in self.gears]
-        intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
-        intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]
-    #    intersections = [i*g.ratio*g.final_ratio for i,g in zip(intersections, self.gears)]
-    #is there a bug in using i[0] here? it would mean the first intersection point instead of the last one
+        intersections = [intersect.intersection(x1, y1, x2, y2)[X] 
+                             for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
+        intersections = [i[-1] if len(i) > 0 else x[-1] 
+                                      for i, (x,y) in zip(intersections, data)]
         
         return intersections
 
@@ -959,24 +1065,28 @@ class DifferenceGraph():
     def get_difference(self):
         X = 0
         data = [graph.get_points() for graph in self.gears]
-        intersections = [intersect.intersection(x1, y1, x2, y2)[X] for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
-        intersections = [i[0] if len(i) > 0 else x[-1] for i, (x,y) in zip(intersections, data)]
+        intersections = [intersect.intersection(x1, y1, x2, y2)[X] 
+                             for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
+        intersections = [i[0] if len(i) > 0 else x[-1] 
+                                      for i, (x,y) in zip(intersections, data)]
         
         min_rpm = data[0][X][0] #initial rpm of first gear
         max_rpm = data[-1][X][-1] #final rpm of final gear
         intersections = [min_rpm] + intersections + [max_rpm]
         x_array, y_array = [], []
-        for start, end, (x,y) in zip(intersections[:-1], intersections[1:], data):
+        for start, end, (x,y) in zip(intersections[:-1], 
+                                     intersections[1:], data):
             x_array.extend([rpm for rpm in x if rpm >= start and rpm <= end])
             y_array.extend([torque - self.power_contour(rpm)
-                                for rpm, torque in zip(x,y) if rpm >= start and rpm <= end])
+                                for rpm, torque in zip(x,y) 
+                                if rpm >= start and rpm <= end])
         return (x_array, y_array)
 
     def redraw_difference(self):
         x_array, y_array = self.get_difference()
         
         #convert to percentage of optimal
-        y_array = [100*y/self.power_contour(x) for x,y in zip(x_array, y_array)]
+        y_array = [100*y/self.power_contour(x) for x,y in zip(x_array,y_array)]
         #y_array = sorted(y_array)
 
         if self.fillplot is not None:
