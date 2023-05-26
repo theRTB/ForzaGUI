@@ -5,6 +5,8 @@ Created on Tue May  2 20:00:13 2023
 @author: RTB
 """
 
+#TODO: make a proper tsv out of fh5_cars_kudosprime2.tsv
+
 import csv
 from os.path import exists
 
@@ -12,21 +14,24 @@ from os.path import exists
 NAMESTRING = lambda data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
 
 class CarData():
-    firstrow = []
-    data = []
-    filename = 'fh5_cars_kudosprime2.tsv'
+    FILENAME = 'fh5_cars_kudosprime2.tsv'
+    AS_INTEGER = ['car_ordinal', 'year', 'weight']
+    INDEX = 'car_ordinal'
     
-    if exists(filename):
-        with open(filename, encoding='ISO-8859-1') as rawcsv:
-            csvobject = csv.reader(rawcsv, delimiter='\t')
-            firstrow = next(csvobject)
-            for row in csvobject: #convert column 5 to integer from string
-                row[4] = int(row[4]) if row[4] != '' else row[4]
-                data.append(row)  
+    data = {}
+    if exists(FILENAME):
+        with open(FILENAME, encoding='ISO-8859-1') as rawcsv:
+            csvobject = csv.DictReader(rawcsv, delimiter='\t')
+            for row in csvobject:
+                if row[INDEX] == '':
+                    print(f'missing ordinal: {row}')
+                    continue
+                for k, v in row.items():
+                    row[k] = int(v) if (k in AS_INTEGER and v != '') else v
+                data[row[INDEX]] = row
+    else:
+        print(f'file {FILENAME} does not exist, no cardata available')
                 
     @classmethod
     def getinfo(cls, num):
-        for row in CarData.data:
-            if row[4] == num:
-                return dict(zip(CarData.firstrow, row))
-        return None
+        return cls.data.get(num, None)
