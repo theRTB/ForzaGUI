@@ -5,7 +5,6 @@ Created on Sat Jun  4 11:59:00 2022
 @author: RTB
 """
 
-#TODO: make a proper tsv out of fh5_cars_kudosprime2.tsv
 
 import tkinter
 import tkinter.ttk
@@ -16,23 +15,26 @@ import constants
 from interactivetransmission import InfoFrame
 
 class GUICarInfo(InfoFrame):
+    CARNAME_FONTSIZE = 16
+    TABLE_FONTSIZE = 12
+    
     def __init__(self, logger, root, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger = logger
         self.trace = None
         self.packet = None
-        self.CARNAME_FONTSIZE = 16
-        self.TABLE_FONTSIZE = 12
     
     def set_trace(self, trace):
         self.trace = trace
         self.carname_changed(packet=self.packet, trace=self.trace)
 
     def set_canvas(self, frame):
-        self.frame = tkinter.Frame(frame, border=0, bg=constants.background_color, relief="groove",
-                                            highlightthickness=True, highlightcolor=constants.text_color)
+        self.frame = tkinter.Frame(frame, border=0, 
+                                   bg=constants.background_color, 
+                                   relief="groove", highlightthickness=True, 
+                                   highlightcolor=constants.text_color)
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 
-                'font': ("Helvetica 11")}#, 'relief':tkinter.SUNKEN}
+                'font': ("Helvetica 11")} #, 'relief':tkinter.SUNKEN}
         super().set_canvas(self.frame, opts)
 
     def update(self, fdp):
@@ -54,5 +56,3 @@ class GUICarInfo(InfoFrame):
         self.trace = None
         self.packet = None
         self.reset_vars()
-        
-
