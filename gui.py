@@ -120,6 +120,9 @@ class MainWindow:
                'gearstats':GUIGearStats, 'laptimes':GUILaptimes, 'lateralg':GUILateralG,
                'launchtest':GUILaunchtest, 'ledbar':GUILed, 'map':GUIMap, 
                'suspension':GUISuspension, 'wheelsize':GUIWheelsize}
+    GRID_COLS, GRID_ROWS = [265, 675, 150], [700, 
+                                             325]
+    WIDTH, HEIGHT = sum(GRID_COLS), sum(GRID_ROWS)
     def __init__(self):
         """init
         """
@@ -156,18 +159,17 @@ class MainWindow:
         
         self.root.tk.call('tk', 'scaling', 1.4) #Spyder console fix for DPI too low
         # Configure the rows that are in use to have weight #
-        self.root.grid_rowconfigure(0, minsize=700, weight=700)
-        self.root.grid_rowconfigure(1, minsize=325, weight=325)
+        for i, val in enumerate(self.GRID_ROWS):
+            self.root.grid_rowconfigure(i, minsize=val, weight=val)
 
         # Configure the cols that are in use to have weight #
-        self.root.grid_columnconfigure(0, minsize=265, weight=265)
-        self.root.grid_columnconfigure(1, minsize=675, weight=675)
-        self.root.grid_columnconfigure(2, minsize=150, weight=150)
+        for i, val in enumerate(self.GRID_COLS):
+            self.root.grid_columnconfigure(i, minsize=val, weight=val)
 
         self.root.title("ForzaGUI")
-        self.root.geometry(f"1050x950+{config['window_offset_x']}+{config['window_offset_y']}")
-        self.root.minsize(1100, 1025)
-        self.root.maxsize(1100, 1025)
+        self.root.geometry(f"{self.WIDTH}x{self.HEIGHT}+{config['window_offset_x']}+{config['window_offset_y']}")
+        self.root.minsize(self.WIDTH, self.HEIGHT)
+        self.root.maxsize(self.WIDTH, self.HEIGHT)
         self.root["background"] = constants.background_color
     
     def __init__variables(self):           
