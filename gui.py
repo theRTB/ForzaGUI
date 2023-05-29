@@ -365,13 +365,13 @@ class MainWindow:
                                           highlightthickness=True, highlightcolor=constants.text_color)
 
         opts = {'bg':constants.background_color, 'fg':constants.text_color, 
-                'command':self.filelogging_toggled, 'onvalue':1, 'offvalue':0}
+                'onvalue':1, 'offvalue':0}
         tkinter.Checkbutton(self.button_frame, text='File logging', 
                             variable=self.filelogging_var, 
-                            command=self.filelogging_toggled, *opts).pack()
+                            command=self.filelogging_toggled, **opts).pack()
         
         tkinter.Checkbutton(self.button_frame, text='Draw torque graph', 
-                            variable=self.torquegraph_var, *opts).pack()
+                            variable=self.torquegraph_var, **opts).pack()
         
         extra_button_frame = tkinter.Frame(self.button_frame, bg=constants.background_color)
         button_names = [('Connect', self.collect_data_handler, constants.collect_data),
