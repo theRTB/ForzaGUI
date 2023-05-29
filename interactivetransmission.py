@@ -71,15 +71,9 @@ def main ():
 # cutoff = 5.00  # desired cutoff frequency of the filter, Hz
 
 class Window ():
-    width = 1550
-    height = 1030
-
-    graph_height = 1200
-    graph_width = 1000
-    
-    slider_height = 500
-    slider_width = 550
-    
+    width, height = 1550, 1030
+    graph_height, graph_width = 1200, 1000
+    slider_height, slider_width = 500, 550
     frameinfo_height = 400
     
     DEFAULT_CAR_ORDINAL = 2352 #Acura NSX 2017
@@ -151,10 +145,12 @@ class Window ():
         self.power_graph = PowerGraph(self.notebook)
         self.torque_deriv_graph = TorqueDerivative(self.notebook)
         self.slip_ratio = SlipRatio(self.notebook)
+        self.dragtorquegraph = DragTorqueGraph(self.notebook)
         self.notebook.add(self.frame_info, text="Statistics")
         self.notebook.add(self.power_graph.frame, text='Power')
         self.notebook.add(self.torque_deriv_graph.frame, text='Torque\'')
         self.notebook.add(self.slip_ratio.frame, text='Slip ratio')
+        self.notebook.add(self.dragtorquegraph.frame, text='Drag/Torque')
     
     def __init__widget_placement(self):
         self.root.grid_rowconfigure(1, minsize=self.slider_height, 
@@ -219,6 +215,7 @@ class Window ():
         self.power_graph.carname_changed(trace=trace)
         self.torque_deriv_graph.carname_changed(trace=self.drag)
         self.slip_ratio.carname_changed(trace=trace)
+        self.dragtorquegraph.carname_changed(drag=self.drag)
         
     #filename structure:
     def __init__carlist(self):
@@ -281,6 +278,11 @@ class TorqueDerivative(NotebookFrame):
         ymin = np.percentile(torque_deriv, 5)
         ymax = np.percentile(torque_deriv, 95)
         
+        if (np.isnan(ymin) or np.isnan(ymax) or 
+            np.isinf(ymin) or np.isinf(ymax)):
+            print("TorqueDerivative failed on ymin/ymax")
+            return
+        
         torque_deriv_filtered = torque_deriv[(torque_deriv > ymin) & 
                                              (torque_deriv < ymax)]
         ax.plot(torque_deriv_filtered)
@@ -341,12 +343,30 @@ class SlipRatio(NotebookFrame):
     #         #     radius > GUIWheelsize.WHEELSIZE_MAX):
     #         #     continue
     #         side.update(radius)
-    
+
+class DragTorqueGraph(NotebookFrame):
+    def carname_changed(self, drag):
+        self.fig.clf()
+        ax = self.fig.subplots(1)
+        
+        ax.plot([x*drag.torque_adj[drag.CUT]/drag.speed_gradient[drag.CUT] 
+                 for x in drag.speed_gradient], label='accel scaled to torque')
+        ax.plot(drag.torque_adj[1:-1], label='torque in collected gear')
+        xmin, xmax = ax.get_xlim()
+        ax.set_xlim(0, xmax)
+        ymin, ymax = ax.get_ylim()
+        ax.vlines(drag.CUT, 0, ymax, linestyle=':')
+        ax.set_xlabel('points')
+        ax.legend()
+        ax.grid()
+        
+        self.draw_idle()
+
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
     CARNAME_FONTSIZE = 7
     TABLE_FONTSIZE = 8
-    DRIVETRAINS = ['FWD', 'RWD', 'AWD']
+    DRIVETRAINS = ['FWD', 'RWD', 'AWD'] #TODO: to constants?
     
     def __init__(self, *args, **kwargs):        
         self.carname_var = tkinter.StringVar(value='')
@@ -718,8 +738,9 @@ class Gearing ():
               (self.trace.gears[self.trace.gear_collected-1]*self.final_ratio))
         valstep = Gearing.STEP_KMH*self.rpmperkmh
 
-        #if the x values are converted to speed, we seem to lose accuracy in drawing the power contour
-        #therefore, use rpm/ratio and hide the xtick true values
+        #if the x values are converted to speed, we seem to lose accuracy in 
+        #drawing the power contour. therefore, use rpm/ratio and hide the 
+        #xtick true values
         self.xmax = math.ceil(self.trace.rpm[-1]/
                               (self.gears[-1].ratio*self.final_ratio)
                               *valstep)/valstep
