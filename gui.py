@@ -364,13 +364,14 @@ class MainWindow:
         self.button_frame = tkinter.Frame(self.root, border=0, relief="groove", bg=constants.background_color,
                                           highlightthickness=True, highlightcolor=constants.text_color)
 
-        tkinter.Checkbutton(self.button_frame, text='File logging', variable=self.filelogging_var, 
-                            bg=constants.background_color, fg=constants.text_color, command=self.filelogging_toggled,
-                            onvalue=1, offvalue=0).pack()
+        opts = {'bg':constants.background_color, 'fg':constants.text_color, 
+                'command':self.filelogging_toggled, 'onvalue':1, 'offvalue':0}
+        tkinter.Checkbutton(self.button_frame, text='File logging', 
+                            variable=self.filelogging_var, 
+                            command=self.filelogging_toggled, *opts).pack()
         
-        tkinter.Checkbutton(self.button_frame, text='Draw torque graph', variable=self.torquegraph_var, 
-                            bg=constants.background_color, fg=constants.text_color,
-                            onvalue=1, offvalue=0).pack()
+        tkinter.Checkbutton(self.button_frame, text='Draw torque graph', 
+                            variable=self.torquegraph_var, *opts).pack()
         
         extra_button_frame = tkinter.Frame(self.button_frame, bg=constants.background_color)
         button_names = [('Connect', self.collect_data_handler, constants.collect_data),
@@ -385,8 +386,8 @@ class MainWindow:
             button.bind('<Button-1>', func)
             button.place(relx=0.5, rely=1 / len(button_names) * i + 1 / len(button_names) / 2, relwidth=0.8,
                          relheight=1 / len(button_names) * 0.9, anchor='center')
-
         extra_button_frame.pack(fill='both', expand=True)
+        
         self.button_frame.grid(row=1, column=2, sticky='news')
 
     def set_log_frame(self):
