@@ -12,6 +12,7 @@ from os.path import exists
 
 #maxlen model 46, maxlen maker 24, maxlen group 21 : 2023-04-32
 NAMESTRING = lambda data: "{maker} {model} ({year}) {group} PI:{car_performance_index} o{car_ordinal}".format(**data)
+NAMESTRING_MAXLEN = 112  #24+1+46+1+6+1+21+1+6+1+4
 
 class CarData():
     FILENAME = 'fh5_cars_kudosprime2.tsv'

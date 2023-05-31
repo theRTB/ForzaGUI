@@ -17,7 +17,7 @@ from matplotlib.widgets import Slider, RangeSlider, Button, CheckButtons
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from dragderivation import Trace, DragDerivation
-from cardata import CarData, NAMESTRING
+from cardata import CarData, NAMESTRING, NAMESTRING_MAXLEN
 
 import ctypes
 PROCESS_PER_MONITOR_DPI_AWARE = 2
@@ -77,7 +77,7 @@ class Window ():
     frameinfo_height = 400
     
     DEFAULT_CAR_ORDINAL = 2352 #Acura NSX 2017
-    DEFAULT_CAR_PI = 831
+    DEFAULT_CAR_PI = 831       #stock PI
     DEFAULTCARDATA =  CarData.getinfo(DEFAULT_CAR_ORDINAL)
     DEFAULTCARDATA.update({'car_performance_index':DEFAULT_CAR_PI})
     DEFAULTCAR = NAMESTRING(DEFAULTCARDATA)
@@ -105,10 +105,12 @@ class Window ():
         self.root.mainloop()
     
     def __init__combobox(self):
-        self.combobox = tkinter.ttk.Combobox(self.root, width=100,
+        self.combobox = tkinter.ttk.Combobox(self.root, 
+                                             width=NAMESTRING_MAXLEN,
                                              exportselection=False, 
                                              state='readonly',
-                                             values=sorted(self.carlist.keys()))
+                                             values=sorted(self.carlist.keys())
+                                             )
         index = sorted(self.carlist.keys()).index(self.DEFAULTCAR)
         self.combobox.current(index)
         self.combobox.bind('<<ComboboxSelected>>', self.carname_changed)
@@ -848,7 +850,6 @@ class Sliders ():
             'disclaimer':            [0.01, 0.01]
             }
 
-    #TODO: split __init__ up into sub functions
     def __init__(self, fig, final_ratio, gears, trace, xmax, rpmperkmh, 
                  separate_fig=False):
         if separate_fig:
@@ -910,8 +911,7 @@ class Sliders ():
         for a, b in zip(gears[:-1], gears[1:]):
             b.slider.slidermax = a.slider
             a.slider.slidermin = b.slider
-            
-    
+
     def __init__rel_ratios(self, fig, gears):
         self.rel_ratios_text = []
         for gear, next_gear in zip(gears[:-1], gears[1:]):
