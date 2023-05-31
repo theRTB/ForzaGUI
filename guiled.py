@@ -48,14 +48,15 @@ FILENAME_SETTINGS = 'settings_guiled.json'
 DEFAULTCONFIG = {"shiftlight_x": 960, "shiftlight_y": 540, #middle of a 1080p screen, safe enough
                  "illumination_interval": 60, #must be divisible by 4 and 5
                  "reaction_time": 6,  #frames within shift state until optimal shift rpm
-                 "reaction_time_tone": 12,  #frames within shift state until optimal shift rpm (audio cue)
+                 "reaction_time_tone": 6, #frames within shift state until optimal shift rpm (audio cue)
                  "distance_from_revlimit_ms": 5, #in frames
                  "distance_from_revlimit_pct": .99,   #99.0% of rev limit
                  "hysteresis_pct_revlimit": .05,  #drop state only after rpm drops x% of rev limit
                  # "state_dropdown_delay": 0, #dropping state only allowed after x frames
                  "led_height": 40, #in pixels
                  "led_width": 40,  #in pixels
-                 "sequence": 'linear'} #linear or sides
+                 "sequence": 'linear', #linear or sides
+                 "audiofile": "audiocheck.net_sin_1000Hz_-3dBFS_0.1s.wav"}
 
 config = DEFAULTCONFIG
 if exists(FILENAME_SETTINGS):
@@ -393,8 +394,10 @@ class GUILed:
             if fdp.current_engine_rpm > self.audio_cue_rpm[gear]:
                 self.beep_counter = 20
                 try:
-                    winsound.PlaySound("audiocheck.net_sin_2500Hz_-3dBFS_0.2s.wav", 
-                                       winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_NODEFAULT)
+                    winsound.PlaySound(config['audiofile'], 
+                                       (winsound.SND_FILENAME | 
+                                        winsound.SND_ASYNC | 
+                                        winsound.SND_NODEFAULT))
                 except:
                     self.logger.info("Sound failed to play")
             elif fdp.current_engine_rpm < math.ceil(0.75*self.audio_cue_rpm[gear]):
@@ -473,7 +476,6 @@ class GUILed:
         button.bind('<Button-1>', self.update_button)
         button.grid(row=row+1, column=1)
         
-     #   opts = {'bg':constants.background_color, 'fg':constants.text_color}
         tkinter.Checkbutton(self.frame_config, text='Lights', variable=self.display_lights_var, 
                             command=self.update_lights_visibility, **opts).grid(row=0, column=3)
         tkinter.Checkbutton(self.frame_config, text='Gear', variable=self.display_gearnr_var,
