@@ -542,7 +542,8 @@ class InfoFrame():
             self.shiftdelay_var.set(shift_delay)
 
         if (trace_v1plus and packet) or trace_v2:
-            if wheelsize not in ['N/A', 0]:
+            if (wheelsize not in ['N/A', 0] and 
+                self.weight_var.get() not in ['N/A', 0]):
                 efficiency = 1/statistics.median((drag.torque_adj - drag.C*drag.speed*drag.speed)/wheelsize/drag.accel/self.weight_var.get())
             else:
                 efficiency = 0
