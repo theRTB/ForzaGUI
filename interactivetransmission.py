@@ -94,7 +94,6 @@ class Window ():
         self.__init__combobox()
         self.__init__filter_button()        
         self.__init__main_frame()        
-        self.__init__toolbar() #must be after main_frame
         self.__init__notebook()                
         self.__init__widget_placement()
         
@@ -133,26 +132,25 @@ class Window ():
                                           self.slider_height*px), dpi=72)
         self.canvas_slider = FigureCanvasTkAgg(self.fig_slider, 
                                                master=self.root)
-    
-    def __init__toolbar(self):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self.root, 
                                             pack_toolbar=False)
-      #  self.toolbar.update()
     
     def __init__notebook(self):
-        self.notebook = tkinter.ttk.Notebook(self.root)#frame)
-        self.frame_info = tkinter.Frame(self.notebook)#frame)
+        self.notebook = tkinter.ttk.Notebook(self.root)
+        self.frame_info = tkinter.Frame(self.notebook)
         self.info = InfoFrame()
         self.info.set_canvas(self.frame_info)       
         self.power_graph = PowerGraph(self.notebook)
         self.torque_deriv_graph = TorqueDerivative(self.notebook)
         self.slip_ratio = SlipRatio(self.notebook)
         self.dragtorquegraph = DragTorqueGraph(self.notebook)
+        self.intersections = Intersections(self.notebook)
         self.notebook.add(self.frame_info, text="Statistics")
         self.notebook.add(self.power_graph.frame, text='Power')
         self.notebook.add(self.torque_deriv_graph.frame, text='Torque\'')
         self.notebook.add(self.slip_ratio.frame, text='Slip ratio')
         self.notebook.add(self.dragtorquegraph.frame, text='Drag/Torque')
+        self.notebook.add(self.intersections.frame, text='Shiftrpms')
     
     def __init__widget_placement(self):
         self.root.grid_rowconfigure(1, minsize=self.slider_height, 
@@ -218,6 +216,7 @@ class Window ():
         self.torque_deriv_graph.carname_changed(trace=self.drag)
         self.slip_ratio.carname_changed(trace=trace)
         self.dragtorquegraph.carname_changed(drag=self.drag)
+        self.intersections.carname_changed(drag=trace)
         
     #filename structure:
     def __init__carlist(self):
@@ -325,26 +324,9 @@ class SlipRatio(NotebookFrame):
             base_rotation_speed = p.speed / size
             rotation_speed = getattr(p, f'wheel_rotation_speed_{tire}')
             slip_ratio = getattr(p, f'tire_slip_ratio_{tire}')
-#            output.append((p.speed  / p.torque, slip_ratio))
             output.append((slip_ratio, rotation_speed / base_rotation_speed))
             
         return output
-    
-         #   val = [(self.wheelsize[tire] / (p.speed / getattr(p, f'wheel_rotation_speed_{tire}')) - 1) / getattr(p, f'tire_slip_ratio_{tire}') for p in data]
-            #val = butter_lowpass_filter(val, cutoff, fs, order)  
-          #  self.tiredata[tire] = statistics.median(val)
-    
-    # @staticmethod
-    # def wheelsizes_of(fdp):
-    #     for wheel, side in zip(TIRES, [self.front]*2 + [self.rear]*2):
-    #         rotation_speed = abs(getattr(fdp, f"wheel_rotation_speed_{wheel}"))
-    #         if rotation_speed == 0:
-    #             continue
-    #         radius = 100 * fdp.speed  / rotation_speed #convert to cm
-    #         # if (radius < GUIWheelsize.WHEELSIZE_MIN or 
-    #         #     radius > GUIWheelsize.WHEELSIZE_MAX):
-    #         #     continue
-    #         side.update(radius)
 
 class DragTorqueGraph(NotebookFrame):
     def carname_changed(self, drag):
@@ -363,6 +345,92 @@ class DragTorqueGraph(NotebookFrame):
         ax.grid()
         
         self.draw_idle()
+
+#from scipy.signal import savgol_filter
+from scipy import interpolate
+class Intersections(NotebookFrame):
+    DIVISOR = 2 #TODO: create variable divisors for x and y ticks
+    def carname_changed(self, drag):
+        self.carname_changed_intersections(drag)
+        self.carname_changed_graph()
+        
+    def carname_changed_intersections(self, drag):
+        self.rel_ratios = self.set_relratios(drag.gears)
+        self.rpm_limit = drag.rpm[-1]
+        
+        rpm = drag.rpm
+        power = drag.power
+        
+        ratios = np.flip(np.linspace(2, 1, 200, False))
+        ratios = ratios[ratios >= 1.01]
+        
+        shiftrpms = []
+        for ratio in ratios:
+            intersection = intersect.intersection(rpm, power, 
+                                                  rpm*ratio, power)[0]
+            if len(intersection):
+                shiftrpms.append(intersection[-1])
+            else:
+                shiftrpms.append(rpm[-1])
+                break
+        self.ratios = ratios[:len(shiftrpms)]
+        self.shiftrpms = shiftrpms
+        
+        # self.shiftrpms = interpolate.interp1d(ratios, shiftrpms, 
+        #                                       bounds_error=False, 
+        #                                       fill_value=(shiftrpms[0], 
+        #                                                   rpm[-1]))
+    def carname_changed_graph(self):
+        self.fig.clf()
+        ax = self.fig.subplots(1)
+        
+        ratios = self.ratios
+        shiftrpms = self.shiftrpms
+        
+        ax.plot(ratios, shiftrpms)
+    #    ax.plot(ratios, apply_savgol(shiftrpms))
+        # ax.set_xticks(np.linspace(1, 2, 50, False))    
+        ax.set_xlim(1.01, ratios[-1])
+        ax.set_xticks(ratios[0::2*self.DIVISOR])
+        
+        # ymin, ymax = shiftrpms[0], shiftrpms[-1]
+        ymin, ymax = min(shiftrpms), max(shiftrpms)
+        ymin = 25*int(ymin/25)
+        ymax = 25*math.ceil(ymax/25)
+        ax.set_ylim(ymin, ymax)
+        ycount = int((ymax - ymin) / 25)
+        ax.set_yticks(np.linspace(ymin, ymax, ycount+1, True)[::self.DIVISOR])    
+        ax.tick_params(axis='x', labelrotation = 270)
+   #     plt.xticks(rotation=270)
+        ax.grid()
+        for item in ([ax.title, ax.xaxis.label, ax.yaxis.label] +
+             ax.get_xticklabels() + ax.get_yticklabels()):
+            item.set_fontsize(7)
+        
+        self.draw_idle()
+    
+    def get(self):
+        shiftrpms = self.shiftrpms(self.rel_ratios)
+        return [min(rpm, self.rpm_limit) for rpm in shiftrpms]
+    
+    def set_rpmlimit(self, value):
+        self.rpm_limit = value
+    
+    def set_relratios(self, ratios):
+        self.rel_ratios = [x/y for x,y in zip(ratios[:-1], ratios[1:])]
+        
+        #apply savgol to shiftrpms?
+        #have other call that function
+    
+    #savitsky-golay
+    #Keep in mind that in order to have your Savitzky-Golay filter working properly, 
+    #you should always choose an odd number for the window size and the order of 
+    #the polynomial function should always be a number lower than the window size.
+    # @staticmethod
+    # def apply_savgol(array):
+    #     window_length = 13
+    #     polyorder = 2
+    #     return savgol_filter(array, window_length, polyorder)
 
 class InfoFrame():
     DEFAULT_CENTERDIFF = 70
@@ -676,6 +744,7 @@ class Gearing ():
             self.fig, (self.ax, ax2) = plt.subplots(2,1, 
                                           gridspec_kw={'height_ratios': [2,1]})
             self.fig.set_size_inches(16, 10)
+            self.fig.tight_layout() #changed to constrained layout when Figure is defined
         else:
             self.fig = fig
             self.ax, ax2 = self.fig.subplots(2,1,
@@ -690,12 +759,12 @@ class Gearing ():
         self.legend = self.ax.legend()  
         self.ax.add_artist(self.legend) 
         
-       # self.fig.tight_layout() #changed to constrained layout when Figure is defined
-        
+        #separate_fig refers to splitting the slider figure from the graph
         separate_fig = True
         if fig_slider == None:
             fig_slider = self.fig
-            separate_fig = False            
+            separate_fig = False        
+        
         self.sliders = Sliders(fig_slider, self.final_ratio, self.gears, 
                                self.trace, self.xmax, self.rpmperkmh, 
                                separate_fig)
@@ -1087,13 +1156,11 @@ class DifferenceGraph():
     def get_difference(self):
         X = 0
         data = [graph.get_points() for graph in self.gears]
-        intersections = [intersect.intersection(x1, y1, x2, y2)[X] 
-                             for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
-        intersections = [i[0] if len(i) > 0 else x[-1] 
-                                      for i, (x,y) in zip(intersections, data)]
+        intersections = self.get_intersections()   
         
         min_rpm = data[0][X][0] #initial rpm of first gear
         max_rpm = data[-1][X][-1] #final rpm of final gear
+        
         intersections = [min_rpm] + intersections + [max_rpm]
         x_array, y_array = [], []
         for start, end, (x,y) in zip(intersections[:-1], 
@@ -1104,6 +1171,15 @@ class DifferenceGraph():
                                 if rpm >= start and rpm <= end])
         return (x_array, y_array)
 
+    def get_intersections(self):
+        X = 0
+        data = [graph.get_points() for graph in self.gears]
+        intersections = [intersect.intersection(x1, y1, x2, y2)[X] 
+                             for (x1,y1), (x2, y2) in zip(data[:-1], data[1:])]
+        intersections = [i[0] if len(i) > 0 else x[-1] 
+                                      for i, (x,y) in zip(intersections, data)]
+        return intersections
+    
     def redraw_difference(self):
         x_array, y_array = self.get_difference()
         
