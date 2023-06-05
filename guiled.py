@@ -299,28 +299,35 @@ class GUILed:
                 self.run_shiftleds[gear] = False
                 continue
             self.run_shiftleds[gear] = True
-                        
+            
+            #scale graph to revlimit if gear cannot reach shift rpm
+            #because we can't make sensible guesses at that point
+            rpmtime = self.geardata[gear]['rpm']
+            if self.geardata[gear]['rpm'][-1] < rpm:
+                self.logger.info(f'gear {gear} at rpm {rpm} scaled because shift not in rpm range')
+                rpmtime *= self.revlimit/self.geardata[gear]['rpm'][-1]
+            
             #if at rev limit within x milliseconds, shift optimal shift point state to be x milliseconds away
             #scale graph to rev limit as to avoid issues with gears capping out below rev limit leading to a too low rpmlimit_ms
             adjusted_rpmlimit_ms = self.timeadjusted_rpm(V.distance_from_revlimit_ms.get(), 
                                                          self.revlimit, 
-                                                         self.geardata[gear]['rpm']*(self.revlimit/self.geardata[gear]['rpm'][-1])) 
+                                                         self.geardata[gear]['rpm']*self.revlimit/self.geardata[gear]['rpm'][-1]) 
             adjusted_rpmlimit_abs = int(self.revlimit*V.distance_from_revlimit_pct.get())
             self.logger.info(f"{gear}: {rpm} rpmlimit ms:{adjusted_rpmlimit_ms}, abs: {adjusted_rpmlimit_abs}")
             
             adjusted_rpm = min(rpm, adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)    
             overrev_rpm = self.timeadjusted_rpm(int(V.reaction_time.get() - V.illumination_interval.get()/5), #offset is negative
-                                                adjusted_rpm, self.geardata[gear]['rpm'])
+                                                adjusted_rpm, rpmtime)
             revlimit_rpm = min(adjusted_rpmlimit_ms, adjusted_rpmlimit_abs)
             
             gear_table = self.state_table[gear]
             gear_table[STATE_REVLIMIT].set(revlimit_rpm)
             gear_table[STATE_OVERREV].set(overrev_rpm if overrev_rpm < revlimit_rpm else revlimit_rpm) #unhappy state
-            gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), adjusted_rpm, self.geardata[gear]['rpm'])) #happy state
-            self.audio_cue_rpm[gear] = self.timeadjusted_rpm(V.reaction_time_tone.get(), adjusted_rpm, self.geardata[gear]['rpm']) #happy state
+            gear_table[STATE_SHIFT].set(self.timeadjusted_rpm(V.reaction_time.get(), adjusted_rpm, rpmtime)) #happy state
+            self.audio_cue_rpm[gear] = self.timeadjusted_rpm(V.reaction_time_tone.get(), adjusted_rpm, rpmtime) #happy state
             interval = int(V.illumination_interval.get()/(STATE_SHIFT-1)) #STATE_SHIFT-1 is the number of states for the ramp up
             for state in range(STATE_SHIFT-1, 0, -1):
-                gear_table[state].set(self.timeadjusted_rpm(interval, gear_table[state+1].get(), self.geardata[gear]['rpm']))
+                gear_table[state].set(self.timeadjusted_rpm(interval, gear_table[state+1].get(), rpmtime))
                 
         self.hysteresis_rpm = V.hysteresis_pct_revlimit.get()*self.revlimit
         if any(self.run_shiftleds):
