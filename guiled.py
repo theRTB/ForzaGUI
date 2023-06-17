@@ -25,6 +25,7 @@ from dragderivation import Trace, DragDerivation
 
 '''
 TODO:    
+    disable check on hiding window if brake is pressed
     derive expected time in gear shifting optimally
     
     add displayed difference of reaction time state vs actual shift
@@ -202,6 +203,8 @@ class GUILed:
         self.display_lights_var = tkinter.BooleanVar(value=True)
         self.display_gearnr_var = tkinter.BooleanVar(value=True)
         self.play_beep_var = tkinter.BooleanVar(value=True)
+        
+        self.idle_counter = 0
         
         self.deque = deque(maxlen=150)
         self.log_shifts_var = tkinter.BooleanVar(value=False)
@@ -445,9 +448,14 @@ class GUILed:
         user_toggle = self.display_lights_var.get()
         window_visible = (self.window.state() == 'normal')
         if window_visible and not(user_toggle and is_race_on):
-            self.window.withdraw()
+            if self.idle_counter == 30:
+                self.window.withdraw()
+                self.idle_counter = 0
+            else:
+                self.idle_counter += 1
         elif user_toggle and is_race_on:
             self.window.deiconify()
+            self.idle_counter = 0
         # if self.display_lights_var.get():
         #     self.window.deiconify()
         # else:
@@ -530,5 +538,6 @@ class GUILed:
         self.audio_cue_rpm = [0 for x in range(11)]
         self.rpmtable = [0 for x in range(11)]
         self.revlimit = 0
+        self.idle_counter = 0
         self.calculate_state_triggers()
         
