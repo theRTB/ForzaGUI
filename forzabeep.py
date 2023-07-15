@@ -337,7 +337,7 @@ class ForzaUIBase():
 
 class ForzaBeep(ForzaUIBase):
     TITLE = "ForzaBeep: it beeps, you shift"
-    WIDTH, HEIGHT = 740, 180
+    WIDTH, HEIGHT = 745, 205
 
     MAXGEARS = 10
 
@@ -493,7 +493,7 @@ class ForzaBeep(ForzaUIBase):
             #filter power
 
             for g1, g2 in zip(self.gears[1:-1], self.gears[2:]):
-                if g1.state == 'LOCKED' and g2.state == 'LOCKED':
+                if g1.state=='LOCKED' and g2.state in ['LOCKED', 'CALCULATED']:
                     shiftrpm = calculate_shiftrpm(rpm, power,
                                                  g1.ratio.get()/g2.ratio.get())
                     g1.set_shiftrpm(shiftrpm)
@@ -542,7 +542,7 @@ class ForzaBeep(ForzaUIBase):
 
     def loop_func(self, fdp):
         self.loop_car_ordinal(fdp) #reset if car ordinal changes
-                
+        
         rpm = fdp.current_engine_rpm
         self.rpm.set(int(rpm))
 
@@ -578,7 +578,7 @@ class ForzaBeep(ForzaUIBase):
 
     def torque_ratio_test(self, target_rpm, offset, fdp):
         torque_ratio = 1
-        if self.curve:
+        if self.curve and fdp.torque != 0:
             rpms = np.array([p.current_engine_rpm for p in self.curve])
             i = np.argmin(np.abs(rpms - target_rpm))
             target_torque = self.curve[i].torque
@@ -634,6 +634,8 @@ class Lookahead():
             return
         x, y = range(-len(self.deque)+1, 1), self.deque
         self.slope, self.intercept = statistics.linear_regression(x, y)
+        if self.slope == 0: #invalid slope
+            self.slope = -1
 
     #x is the frame distance to the most recently added point
     #this has the advantage that the slope is counted from the most recent point
@@ -645,6 +647,8 @@ class Lookahead():
         return distance
 
     def test(self, target_rpm, lookahead, slope_factor=1):
+        if len(self.deque) < 2:
+            return
         distance = (target_rpm - self.intercept) / (self.slope * slope_factor)
         return (len(self.deque) > self.minlen and self.slope > 0 and
                 0 <= distance <= lookahead)
