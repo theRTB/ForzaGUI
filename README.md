@@ -2,9 +2,9 @@
 
 ### GUI application for realtime display of telemetry and derived statistics and graphs for the Forza series
 
-Supports:
-Forza Motorsport
-Forza Horizon 5
+Supports:  
+Forza Motorsport  
+Forza Horizon 5  
 
 **Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), there are Python installations that conflict with FH5. Any tkinter/matplotlib usage can cause FH5 to crash. The as-user installation of Python Anaconda with version 3.10.9 seems to be fine. Compiling using pyinstaller bypasses this problem. It is likely that FH5 registers these Python installations as potential hacking tools and will crash on detecting those, which is a shame in this case.**
 
@@ -59,7 +59,7 @@ I'm aware of shortcomings around the non-linear ratio of engine rpm and speed du
 - Click the Sweep button
 - The data is saved. The GUI will automatically try to load the data file based on car ordinal and PI number on restarts.
 
-As the port is hardcoded to 12350, set remote telemetry in FH5 to 127.0.0.1 and port 12350.
+As the port is hardcoded to 12350, set Data Out in the Gameplay and HUD menu to 127.0.0.1 and port 12350.
 
 ![example GUI](images/example_AcuraNSX_stock_v0.20.png)
 ![example ingame ledbar](images/ingameledbar_AcuraNSX_stock.png)
