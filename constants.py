@@ -9,7 +9,7 @@ ip = '127.0.0.1'
 port = 12350
 
 # data format
-packet_format = 'fh4'
+packet_format = None
 
 # default car config
 example_car_ordinal = 'example'
