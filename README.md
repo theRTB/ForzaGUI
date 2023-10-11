@@ -1,6 +1,10 @@
 # ForzaGUI
 
-### GUI application for realtime display of telemetry and derived statistics and graphs for Forza Horizon 5
+### GUI application for realtime display of telemetry and derived statistics and graphs for the Forza series
+
+Supports:
+Forza Motorsport
+Forza Horizon 5
 
 **Since a recent patch of Forza Horizon 5 (the one that added DLSS and more), there are Python installations that conflict with FH5. Any tkinter/matplotlib usage can cause FH5 to crash. The as-user installation of Python Anaconda with version 3.10.9 seems to be fine. Compiling using pyinstaller bypasses this problem. It is likely that FH5 registers these Python installations as potential hacking tools and will crash on detecting those, which is a shame in this case.**
 
